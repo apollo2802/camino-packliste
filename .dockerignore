@@ -1,0 +1,12 @@
+.git
+.github
+.next
+.openai
+dist
+node_modules
+out
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store

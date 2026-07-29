@@ -1,0 +1,47 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      PORT: "3000"
+      ACCESS_CODE: ${ACCESS_CODE:?}
+      SESSION_SECRET: ${SESSION_SECRET:?}
+      PGHOST: database
+      PGPORT: "5432"
+      PGUSER: camino
+      PGPASSWORD: ${POSTGRES_PASSWORD:?}
+      PGDATABASE: camino
+    depends_on:
+      database:
+        condition: service_healthy
+    expose:
+      - "3000"
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - fetch('http://127.0.0.1:3000/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))
+      interval: 30s
+      timeout: 5s
+      retries: 5
+
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: camino
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: camino
+    volumes:
+      - camino_database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U camino -d camino"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  camino_database:
