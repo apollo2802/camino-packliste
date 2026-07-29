@@ -282,7 +282,7 @@ export default {
         if (!validState(body.state)) return json({ error: "Ungültiger Packlistenstand" }, 400);
         const payload = JSON.stringify(body.state);
         if (payload.length > 200000) return json({ error: "Daten zu groß" }, 413);
-        const updatedAt = Date.now();
+        const updatedAt = Math.floor(Date.now() / 1000);
         await env.DB.prepare("INSERT INTO camino_state (id, payload, updated_at) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET payload = excluded.payload, updated_at = excluded.updated_at")
           .bind(payload, updatedAt).run();
         return json({ ok: true, updatedAt });
