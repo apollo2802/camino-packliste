@@ -84,15 +84,24 @@ const pageMarkup = `
         </div>
 
         <div class="profile-tabs" role="tablist" aria-label="Packlisten auswählen" data-i18n-aria="profiles.label">
-          <button class="profile-tab active" data-profile="p1" role="tab" aria-selected="true">
-            <span class="avatar">1</span><span class="tab-copy"><b data-i18n="profiles.p1">Meine Liste</b><small id="p1-tab-meta">0 von 0</small></span>
-          </button>
-          <button class="profile-tab" data-profile="p2" role="tab" aria-selected="false">
-            <span class="avatar coral">2</span><span class="tab-copy"><b data-i18n="profiles.p2">Liste meiner Frau</b><small id="p2-tab-meta">0 von 0</small></span>
-          </button>
-          <button class="profile-tab" data-profile="shared" role="tab" aria-selected="false">
-            <span class="avatar gold">↔</span><span class="tab-copy"><b data-i18n="profiles.shared">Gemeinsam</b><small id="shared-tab-meta">0 von 0</small></span>
-          </button>
+          <div class="profile-tab-shell">
+            <button class="profile-tab active" data-profile="p1" role="tab" aria-selected="true">
+              <span class="avatar">1</span><span class="tab-copy"><b data-profile-name="p1">Meine Liste</b><small id="p1-tab-meta">0 von 0</small></span>
+            </button>
+            <button class="rename-button rename-profile" data-rename-profile="p1" type="button" aria-label="Meine Liste umbenennen">✎</button>
+          </div>
+          <div class="profile-tab-shell">
+            <button class="profile-tab" data-profile="p2" role="tab" aria-selected="false">
+              <span class="avatar coral">2</span><span class="tab-copy"><b data-profile-name="p2">Liste meiner Frau</b><small id="p2-tab-meta">0 von 0</small></span>
+            </button>
+            <button class="rename-button rename-profile" data-rename-profile="p2" type="button" aria-label="Liste meiner Frau umbenennen">✎</button>
+          </div>
+          <div class="profile-tab-shell">
+            <button class="profile-tab" data-profile="shared" role="tab" aria-selected="false">
+              <span class="avatar gold">↔</span><span class="tab-copy"><b data-profile-name="shared">Gemeinsam</b><small id="shared-tab-meta">0 von 0</small></span>
+            </button>
+            <button class="rename-button rename-profile" data-rename-profile="shared" type="button" aria-label="Gemeinsam umbenennen">✎</button>
+          </div>
         </div>
 
         <div class="toolbar">
