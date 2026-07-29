@@ -277,11 +277,16 @@ async function clearFailedLogins(request, env) {
 
 function validState(value) {
   if (!value || typeof value !== "object") return false;
-  return ["p1", "p2", "shared"].every((profile) =>
+  const baseIsValid = ["p1", "p2", "shared"].every((profile) =>
     value.checked && value.checked[profile] && typeof value.checked[profile] === "object" &&
     value.weights && value.weights[profile] && typeof value.weights[profile] === "object" &&
     value.custom && Array.isArray(value.custom[profile])
   );
+  if (!baseIsValid || value.labels === undefined) return baseIsValid;
+  return value.labels && typeof value.labels.profiles === "object" &&
+    ["p1", "p2", "shared"].every((profile) =>
+      value.labels.items && value.labels.items[profile] && typeof value.labels.items[profile] === "object"
+    );
 }
 
 export default {
