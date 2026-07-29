@@ -56,28 +56,90 @@ const loginHtml = `<!doctype html>
     :root{color-scheme:light;--ink:#17312f;--paper:#f5f0e5;--teal:#0d5f5a;--gold:#e3ae3b;--line:rgba(23,49,47,.16)}
     *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;color:var(--ink);background:radial-gradient(circle at 80% 10%,rgba(227,174,59,.22),transparent 24rem),linear-gradient(145deg,#083f3c,#0d5f5a 58%,#28766e);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     main{width:min(100%,460px);background:#fffdf8;border:1px solid rgba(255,255,255,.35);border-radius:28px;padding:clamp(26px,7vw,46px);box-shadow:0 30px 80px rgba(0,0,0,.22)}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:18px}.languages{display:inline-flex;padding:3px;border:1px solid var(--line);border-radius:999px;background:#f3f5f1}.languages button{width:auto;min-width:38px;margin:0;padding:8px 9px;border-radius:999px;color:#6b7975;background:transparent;font-size:12px}.languages button.active{color:white;background:var(--teal)}
     .mark{width:46px;height:46px;display:grid;place-items:center;border-radius:50%;background:#edf4f1;color:var(--teal);font-size:22px}
     .eyebrow{margin:28px 0 10px;color:var(--teal);font-size:12px;font-weight:800;letter-spacing:.17em;text-transform:uppercase}
     h1{margin:0;font:500 clamp(38px,10vw,58px)/.95 Georgia,serif;letter-spacing:-.045em}p{color:#61716d;line-height:1.6}
     label{display:block;margin:28px 0 8px;font-size:13px;font-weight:750}input{width:100%;border:1px solid var(--line);border-radius:13px;padding:14px 15px;font:inherit;outline:none}input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(13,95,90,.12)}
-    button{width:100%;margin-top:12px;border:0;border-radius:13px;padding:14px;background:var(--teal);color:white;font:750 16px inherit;cursor:pointer}button:hover{background:#084b47}
+    button{width:100%;margin-top:12px;border:0;border-radius:13px;padding:14px;background:var(--teal);color:white;font:750 16px inherit;cursor:pointer}button:hover{background:#084b47}.languages button:hover{color:white;background:#28766e}
     .error{padding:11px 13px;border-radius:12px;background:#fff0ec;color:#9a3f2f;font-size:13px}.note{margin-top:20px;font-size:12px;color:#7b8985}
   </style>
 </head>
 <body>
   <main>
-    <div class="mark" aria-hidden="true">✦</div>
-    <p class="eyebrow">Private Camino-Packliste</p>
+    <div class="top">
+      <div class="mark" aria-hidden="true">✦</div>
+      <div class="languages" role="group" aria-label="Sprache auswählen" data-login-aria="language">
+        <button type="button" data-login-language="de" aria-pressed="true">DE</button>
+        <button type="button" data-login-language="ru" aria-pressed="false">RU</button>
+      </div>
+    </div>
+    <p class="eyebrow" data-login-key="eyebrow">Private Camino-Packliste</p>
     <h1>Bom caminho.</h1>
-    <p>Gebt euren gemeinsamen Zugangscode ein. Danach werden Häkchen und Gewichte sicher zwischen euren Geräten synchronisiert.</p>
+    <p data-login-key="copy">Gebt euren gemeinsamen Zugangscode ein. Danach werden Häkchen und Gewichte sicher zwischen euren Geräten synchronisiert.</p>
     {{ERROR}}
     <form method="post" action="/login">
-      <label for="access-code">Gemeinsamer Zugangscode</label>
+      <input id="login-language" name="language" type="hidden" value="de">
+      <label for="access-code" data-login-key="label">Gemeinsamer Zugangscode</label>
       <input id="access-code" name="code" type="password" required autocomplete="current-password" autofocus>
-      <button type="submit">Packliste öffnen</button>
+      <button type="submit" data-login-key="submit">Packliste öffnen</button>
     </form>
-    <p class="note">Nur Personen mit dem Zugangscode können die Packliste sehen.</p>
+    <p class="note" data-login-key="note">Nur Personen mit dem Zugangscode können die Packliste sehen.</p>
   </main>
+  <script>
+    (function () {
+      var copy = {
+        de: {
+          title: "Anmelden · Unsere Camino-Packliste",
+          language: "Sprache auswählen",
+          eyebrow: "Private Camino-Packliste",
+          copy: "Gebt euren gemeinsamen Zugangscode ein. Danach werden Häkchen und Gewichte sicher zwischen euren Geräten synchronisiert.",
+          label: "Gemeinsamer Zugangscode",
+          submit: "Packliste öffnen",
+          note: "Nur Personen mit dem Zugangscode können die Packliste sehen."
+        },
+        ru: {
+          title: "Вход · Наш список вещей для Камино",
+          language: "Выбрать язык",
+          eyebrow: "Личный список вещей для Камино",
+          copy: "Введите ваш общий код доступа. После входа отметки и вес будут безопасно синхронизироваться между устройствами.",
+          label: "Общий код доступа",
+          submit: "Открыть список",
+          note: "Список увидят только те, у кого есть код доступа."
+        }
+      };
+      var stored = "";
+      try { stored = localStorage.getItem("camino-language-v1") || ""; } catch (_) {}
+      var language = stored === "ru" ? "ru" : "de";
+      function applyLanguage() {
+        var values = copy[language];
+        document.documentElement.lang = language;
+        document.title = values.title;
+        document.querySelectorAll("[data-login-key]").forEach(function (element) {
+          element.textContent = values[element.dataset.loginKey];
+        });
+        document.querySelectorAll("[data-login-aria]").forEach(function (element) {
+          element.setAttribute("aria-label", values[element.dataset.loginAria]);
+        });
+        document.querySelectorAll("[data-login-language]").forEach(function (button) {
+          var active = button.dataset.loginLanguage === language;
+          button.classList.toggle("active", active);
+          button.setAttribute("aria-pressed", String(active));
+        });
+        var error = document.querySelector("[data-login-error]");
+        if (error) error.textContent = error.getAttribute("data-" + language);
+        document.getElementById("login-language").value = language;
+      }
+      document.querySelectorAll("[data-login-language]").forEach(function (button) {
+        button.addEventListener("click", function () {
+          language = button.dataset.loginLanguage === "ru" ? "ru" : "de";
+          try { localStorage.setItem("camino-language-v1", language); } catch (_) {}
+          applyLanguage();
+        });
+      });
+      applyLanguage();
+    })();
+  </script>
 </body>
 </html>`;
 
@@ -123,7 +185,12 @@ function json(data, status = 200) {
 }
 
 function loginPage(message = "", status = 200) {
-  const error = message ? '<p class="error" role="alert">' + message + "</p>" : "";
+  const messages = {
+    attempts: ["Zu viele Versuche. Bitte wartet 15 Minuten.", "Слишком много попыток. Подождите 15 минут."],
+    code: ["Der Zugangscode ist nicht richtig.", "Неверный код доступа."],
+  };
+  const selected = messages[message];
+  const error = selected ? '<p class="error" role="alert" data-login-error data-de="' + selected[0] + '" data-ru="' + selected[1] + '"></p>' : "";
   return response(LOGIN_HTML.replace("{{ERROR}}", error), { status });
 }
 
@@ -231,12 +298,12 @@ export default {
     }
 
     if (url.pathname === "/login" && request.method === "POST") {
-      if (await failedTooOften(request, env)) return loginPage("Zu viele Versuche. Bitte wartet 15 Minuten.", 429);
+      if (await failedTooOften(request, env)) return loginPage("attempts", 429);
       const form = await request.formData();
       const submitted = String(form.get("code") || "");
       if (!(await secureEqual(submitted, accessCode))) {
         await recordFailedLogin(request, env);
-        return loginPage("Der Zugangscode ist nicht richtig.", 401);
+        return loginPage("code", 401);
       }
       await clearFailedLogins(request, env);
       const session = await createSession(sessionSecret);
