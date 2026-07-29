@@ -61,6 +61,10 @@
       "item.weightTitle": "Gewicht anpassen",
       "item.weightAria": "Gewicht von {name} in Gramm",
       "item.delete": "{name} löschen",
+      "rename.profileAria": "Liste „{name}“ umbenennen",
+      "rename.profilePrompt": "Neuer Name für diese Liste (leer lassen = Standardname):",
+      "rename.itemAria": "„{name}“ umbenennen",
+      "rename.itemPrompt": "Neuer Name für diesen Gegenstand (leer lassen = Standardname):",
       "custom.category": "Eigene Ergänzungen",
       "custom.title": "Eigenen Gegenstand ergänzen",
       "custom.copy": "Wird gemeinsam gespeichert und im Gesamtgewicht berücksichtigt.",
@@ -148,6 +152,10 @@
       "item.weightTitle": "Изменить вес",
       "item.weightAria": "Вес «{name}» в граммах",
       "item.delete": "Удалить «{name}»",
+      "rename.profileAria": "Переименовать список «{name}»",
+      "rename.profilePrompt": "Новое название списка (пусто = вернуть стандартное):",
+      "rename.itemAria": "Переименовать «{name}»",
+      "rename.itemPrompt": "Новое название вещи (пусто = вернуть стандартное):",
       "custom.category": "Свои дополнения",
       "custom.title": "Добавить свою вещь",
       "custom.copy": "Она сохранится для всех и войдёт в общий вес.",
@@ -346,7 +354,11 @@
   const freshState = () => ({
     checked: { p1: {}, p2: {}, shared: {} },
     weights: { p1: {}, p2: {}, shared: {} },
-    custom: { p1: [], p2: [], shared: [] }
+    custom: { p1: [], p2: [], shared: [] },
+    labels: {
+      profiles: {},
+      items: { p1: {}, p2: {}, shared: {} }
+    }
   });
 
   let activeLanguage = loadLanguage();
@@ -392,13 +404,27 @@
     );
   }
 
-  function localizedItem(item) {
+  function profileName(profile, detailed = false) {
+    const saved = state.labels.profiles[profile];
+    if (typeof saved === "string" && saved.trim()) return saved.trim();
+    if (profile === "shared" && detailed) return t("profiles.sharedTitle");
+    return t(`profiles.${profile}`);
+  }
+
+  function localizedItem(profile, item) {
+    let localized;
     if (item.custom === true) {
-      return { ...item, category: t("custom.category"), note: t("item.custom") };
+      localized = { ...item, category: t("custom.category"), note: t("item.custom") };
+    } else if (activeLanguage === "ru" && russianItems[item.id]) {
+      const [category, name, note] = russianItems[item.id];
+      localized = { ...item, category, name, note };
+    } else {
+      localized = item;
     }
-    if (activeLanguage !== "ru" || !russianItems[item.id]) return item;
-    const [category, name, note] = russianItems[item.id];
-    return { ...item, category, name, note };
+    const savedName = state.labels.items[profile][item.id];
+    return typeof savedName === "string" && savedName.trim()
+      ? { ...localized, name: savedName.trim() }
+      : localized;
   }
 
   function applyStaticTranslations() {
@@ -453,7 +479,13 @@
       if (Array.isArray(value.custom?.[profile])) {
         normalized.custom[profile] = value.custom[profile];
       }
+      if (value.labels?.items?.[profile] && typeof value.labels.items[profile] === "object") {
+        normalized.labels.items[profile] = value.labels.items[profile];
+      }
     });
+    if (value.labels?.profiles && typeof value.labels.profiles === "object") {
+      normalized.labels.profiles = value.labels.profiles;
+    }
     return normalized;
   }
 
@@ -562,9 +594,8 @@
     renderTabs();
     renderOverview();
 
-    const names = { p1: t("profiles.p1"), p2: t("profiles.p2"), shared: t("profiles.sharedTitle") };
     const stats = profileStats(activeProfile);
-    els.profileTitle.textContent = names[activeProfile];
+    els.profileTitle.textContent = profileName(activeProfile, true);
     els.profileSummary.textContent = t("profiles.summary", {
       done: stats.done,
       total: stats.total,
@@ -573,7 +604,7 @@
     els.profileRing.style.setProperty("--progress", `${stats.percent * 3.6}deg`);
     els.profileRing.querySelector("span").textContent = `${stats.percent}%`;
 
-    const filtered = getItems(activeProfile).map(localizedItem).filter((item) => {
+    const filtered = getItems(activeProfile).map((item) => localizedItem(activeProfile, item)).filter((item) => {
       const filterMatch = activeFilter === "all" || item.priority === activeFilter;
       const locale = activeLanguage === "ru" ? "ru-RU" : "de-DE";
       const haystack = `${item.name} ${item.note} ${item.category}`.toLocaleLowerCase(locale);
@@ -613,6 +644,7 @@
         <div class="item-copy">
           <div class="item-title-row">
             <strong>${escapeHTML(item.name)}</strong>
+            <button class="rename-button rename-item" type="button" data-rename-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("rename.itemAria", { name: item.name }))}">✎</button>
             <span class="priority ${item.priority}">${escapeHTML(t(`priority.${item.priority}`))}</span>
           </div>
           <p>${escapeHTML(item.note || t("item.custom"))}</p>
@@ -637,7 +669,18 @@
     });
     ["p1", "p2", "shared"].forEach((profile) => {
       const stats = profileStats(profile);
+      const name = profileName(profile);
+      const nameElement = document.querySelector(`[data-profile-name="${profile}"]`);
+      const renameButton = document.querySelector(`[data-rename-profile="${profile}"]`);
+      if (nameElement) nameElement.textContent = name;
+      if (renameButton) {
+        const label = t("rename.profileAria", { name });
+        renameButton.setAttribute("aria-label", label);
+        renameButton.setAttribute("title", label);
+      }
       document.getElementById(`${profile}-tab-meta`).textContent = t("profiles.meta", { done: stats.done, total: stats.total });
+      const customOption = els.customProfile?.querySelector(`option[value="${profile}"]`);
+      if (customOption) customOption.textContent = name;
     });
   }
 
@@ -659,6 +702,20 @@
     tab.addEventListener("click", () => {
       activeProfile = tab.dataset.profile;
       if (els.customProfile) els.customProfile.value = activeProfile;
+      render();
+    });
+  });
+
+  document.querySelectorAll("[data-rename-profile]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const profile = button.dataset.renameProfile;
+      const currentName = profileName(profile);
+      const entered = window.prompt(t("rename.profilePrompt"), currentName);
+      if (entered === null) return;
+      const nextName = entered.trim().slice(0, 60);
+      if (nextName) state.labels.profiles[profile] = nextName;
+      else delete state.labels.profiles[profile];
+      saveState();
       render();
     });
   });
@@ -706,11 +763,26 @@
   });
 
   els.list.addEventListener("click", (event) => {
+    const renameId = event.target.dataset.renameId;
+    if (renameId) {
+      const item = getItems(activeProfile).find((entry) => entry.id === renameId);
+      if (!item) return;
+      const currentName = localizedItem(activeProfile, item).name;
+      const entered = window.prompt(t("rename.itemPrompt"), currentName);
+      if (entered === null) return;
+      const nextName = entered.trim().slice(0, 60);
+      if (nextName) state.labels.items[activeProfile][renameId] = nextName;
+      else delete state.labels.items[activeProfile][renameId];
+      saveState();
+      render();
+      return;
+    }
     const id = event.target.dataset.deleteId;
     if (!id) return;
     state.custom[activeProfile] = state.custom[activeProfile].filter((item) => item.id !== id);
     delete state.checked[activeProfile][id];
     delete state.weights[activeProfile][id];
+    delete state.labels.items[activeProfile][id];
     saveState();
     render();
   });
