@@ -7,6 +7,10 @@ Interaktive Packliste für zwei Personen auf dem Camino Portugués. Die Anwendun
 - automatische Berechnung von Fortschritt und Rucksackgewicht
 - gemeinsame Speicherung auf mehreren Geräten
 - eine vorgeschaltete Loginmaske mit gemeinsamem Zugangscode
+- vollständige Bedienung auf Deutsch und Russisch
+- umbenennbare Listen und Gegenstände
+
+Die bisherige Entwicklung ist im [Changelog](CHANGELOG.md) dokumentiert.
 
 ## In Coolify bereitstellen
 
