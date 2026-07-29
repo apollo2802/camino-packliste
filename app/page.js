@@ -76,7 +76,7 @@ const pageMarkup = `
             <p class="section-label">Interaktive Liste</p>
             <h2 id="checklist-title">Packen ohne Doppeltes</h2>
           </div>
-          <p>Die Häkchen und eure Gewichte bleiben auf diesem Gerät gespeichert.</p>
+          <p>Die Häkchen, Gewichte und eigenen Gegenstände werden zwischen euren Geräten synchronisiert.</p>
         </div>
 
         <div class="profile-tabs" role="tablist" aria-label="Packlisten auswählen">
