@@ -2,8 +2,257 @@
   "use strict";
 
   const STORAGE_KEY = "camino-packliste-2026-v1";
-  const priorityLabels = { must: "Pflicht", recommended: "Sinnvoll", optional: "Optional" };
-  const modeLabels = { pack: "Rucksack", worn: "getragen", consumable: "Verbrauch" };
+  const LANGUAGE_KEY = "camino-language-v1";
+  const translations = {
+    de: {
+      "page.title": "Unsere Camino-Packliste",
+      "nav.main": "Hauptnavigation",
+      "nav.home": "Camino-Packliste Startseite",
+      "nav.print": "Drucken",
+      "nav.reset": "Zurücksetzen",
+      "nav.logout": "Abmelden",
+      "language.label": "Sprache auswählen",
+      "hero.title1": "Leicht packen.",
+      "hero.title2": "Weit gehen.",
+      "hero.copy": "Eure gemeinsame Packliste für 12–13 Tage zwischen Atlantik, Albergues und dem Ziel vor der Kathedrale.",
+      "route.label": "Reiseverlauf",
+      "route.summer": "Spätsommer",
+      "route.coast": "Küstenweg",
+      "route.central": "Zentralroute",
+      "route.days": "12–13 Tage",
+      "weight.label": "Gewichtsziel",
+      "weight.target": "Ziel pro Rucksack",
+      "weight.base": "Grundgewicht – ohne Wasser, Essen und getragene Kleidung.",
+      "weight.note": "Am Morgen etwa 6,8–8,2 kg. Möglichst unter 10 % des Körpergewichts bleiben.",
+      "overview.label": "Euer Fortschritt",
+      "overview.title": "Was schon im Rucksack ist",
+      "overview.important": "Pflicht & sinnvoll",
+      "overview.weight": "Aktuelles Gewicht",
+      "overview.weightDetail": "Abgehakte Rucksackgegenstände",
+      "overview.profile": "Reiseprofil",
+      "overview.profileDetail": "Personen × maximale Wandertage",
+      "overview.none": "Noch nichts abgehakt",
+      "overview.detail": "{done} von {total} wichtigen Dingen abgehakt",
+      "checklist.label": "Interaktive Liste",
+      "checklist.title": "Packen ohne Doppeltes",
+      "checklist.copy": "Die Häkchen, Gewichte und eigenen Gegenstände werden zwischen euren Geräten synchronisiert.",
+      "profiles.label": "Packlisten auswählen",
+      "profiles.p1": "Meine Liste",
+      "profiles.p2": "Liste meiner Frau",
+      "profiles.shared": "Gemeinsam",
+      "profiles.sharedTitle": "Gemeinsam getragen",
+      "profiles.meta": "{done} von {total}",
+      "profiles.summary": "{done} von {total} wichtigen Dingen · {weight} eingepackt",
+      "search.label": "Gegenstände suchen",
+      "search.placeholder": "Gegenstand suchen …",
+      "filters.label": "Priorität filtern",
+      "filters.all": "Alle",
+      "priority.must": "Pflicht",
+      "priority.recommended": "Sinnvoll",
+      "priority.optional": "Optional",
+      "mode.pack": "Rucksack",
+      "mode.worn": "getragen",
+      "mode.consumable": "Verbrauch",
+      "empty.title": "Nichts gefunden",
+      "empty.copy": "Versucht einen anderen Suchbegriff oder Filter.",
+      "item.uncheck": "Aus Packliste entfernen",
+      "item.check": "Als eingepackt markieren",
+      "item.custom": "Eigener Gegenstand",
+      "item.weightTitle": "Gewicht anpassen",
+      "item.weightAria": "Gewicht von {name} in Gramm",
+      "item.delete": "{name} löschen",
+      "custom.category": "Eigene Ergänzungen",
+      "custom.title": "Eigenen Gegenstand ergänzen",
+      "custom.copy": "Wird gemeinsam gespeichert und im Gesamtgewicht berücksichtigt.",
+      "custom.selectList": "Liste auswählen",
+      "custom.name": "Bezeichnung",
+      "custom.namePlaceholder": "z. B. Kniebandage",
+      "custom.gramsLabel": "Gewicht in Gramm",
+      "custom.grams": "Gramm",
+      "custom.priority": "Priorität",
+      "custom.add": "Hinzufügen",
+      "guide.label": "Das kleine System",
+      "guide.title": "Drei Regeln für leichte Schritte",
+      "guide.oneTitle": "Waschen statt schleppen",
+      "guide.oneCopy": "Zwei Wander-Shirts, zwei Hosen und drei Paar Socken reichen mit regelmäßigem Waschen.",
+      "guide.twoTitle": "Kritisches doppelt",
+      "guide.twoCopy": "Dokumente, Medikamente, Regenzeug und Schlafsack trägt jede Person selbst.",
+      "guide.threeTitle": "Komfort nur einmal",
+      "guide.threeCopy": "Powerbank, Ladegerät, Apotheke und Waschset werden fair auf beide Rucksäcke verteilt.",
+      "note.label": "Nicht vergessen",
+      "note.title": "Zwei Credenciales, zwei Stempel täglich",
+      "note.copy": "Auf den letzten 100 Kilometern sammelt jede Person mindestens zwei Stempel pro Tag – für die Compostela und als Erinnerung an euren Weg.",
+      "footer.route": "Porto · Küste · Zentralroute · Santiago",
+      "footer.copy": "Für eure Pilgerwanderung im Spätsommer 2026.",
+      "sync.loading": "Gemeinsamer Speicher wird geladen …",
+      "sync.saving": "Speichert …",
+      "sync.saved": "Gemeinsam gespeichert",
+      "sync.local": "Nur lokal gespeichert",
+      "sync.offline": "Offline – Änderungen bleiben lokal",
+      "reset.confirm": "Alle gemeinsamen Häkchen, Gewichte und eigenen Gegenstände löschen?"
+    },
+    ru: {
+      "page.title": "Наш список вещей для Камино",
+      "nav.main": "Главная навигация",
+      "nav.home": "На главную списка вещей",
+      "nav.print": "Печать",
+      "nav.reset": "Сбросить",
+      "nav.logout": "Выйти",
+      "language.label": "Выбрать язык",
+      "hero.title1": "Легче рюкзак.",
+      "hero.title2": "Дальше путь.",
+      "hero.copy": "Ваш общий список вещей на 12–13 дней между Атлантикой, альберге и финишем у собора.",
+      "route.label": "Маршрут путешествия",
+      "route.summer": "Конец лета",
+      "route.coast": "Прибрежный путь",
+      "route.central": "Центральный путь",
+      "route.days": "12–13 дней",
+      "weight.label": "Целевой вес",
+      "weight.target": "Цель на один рюкзак",
+      "weight.base": "Базовый вес — без воды, еды и одежды на себе.",
+      "weight.note": "Утром около 6,8–8,2 кг. По возможности не превышать 10 % массы тела.",
+      "overview.label": "Ваш прогресс",
+      "overview.title": "Что уже в рюкзаке",
+      "overview.important": "Обязательное и полезное",
+      "overview.weight": "Текущий вес",
+      "overview.weightDetail": "Отмеченные вещи в рюкзаках",
+      "overview.profile": "Профиль поездки",
+      "overview.profileDetail": "человека × максимум дней пути",
+      "overview.none": "Пока ничего не отмечено",
+      "overview.detail": "Отмечено важных вещей: {done} из {total}",
+      "checklist.label": "Интерактивный список",
+      "checklist.title": "Собраться без повторов",
+      "checklist.copy": "Отметки, вес и ваши вещи синхронизируются между устройствами.",
+      "profiles.label": "Выбрать список вещей",
+      "profiles.p1": "Мой список",
+      "profiles.p2": "Список жены",
+      "profiles.shared": "Общее",
+      "profiles.sharedTitle": "Общие вещи",
+      "profiles.meta": "{done} из {total}",
+      "profiles.summary": "Важных вещей: {done} из {total} · упаковано {weight}",
+      "search.label": "Искать вещи",
+      "search.placeholder": "Найти вещь …",
+      "filters.label": "Фильтр по важности",
+      "filters.all": "Все",
+      "priority.must": "Обязательно",
+      "priority.recommended": "Полезно",
+      "priority.optional": "По желанию",
+      "mode.pack": "в рюкзаке",
+      "mode.worn": "на себе",
+      "mode.consumable": "расходник",
+      "empty.title": "Ничего не найдено",
+      "empty.copy": "Попробуйте другой запрос или фильтр.",
+      "item.uncheck": "Убрать отметку",
+      "item.check": "Отметить как упакованное",
+      "item.custom": "Своя вещь",
+      "item.weightTitle": "Изменить вес",
+      "item.weightAria": "Вес «{name}» в граммах",
+      "item.delete": "Удалить «{name}»",
+      "custom.category": "Свои дополнения",
+      "custom.title": "Добавить свою вещь",
+      "custom.copy": "Она сохранится для всех и войдёт в общий вес.",
+      "custom.selectList": "Выбрать список",
+      "custom.name": "Название",
+      "custom.namePlaceholder": "например, наколенник",
+      "custom.gramsLabel": "Вес в граммах",
+      "custom.grams": "Граммы",
+      "custom.priority": "Важность",
+      "custom.add": "Добавить",
+      "guide.label": "Простая система",
+      "guide.title": "Три правила лёгкого пути",
+      "guide.oneTitle": "Стирать, а не нести",
+      "guide.oneCopy": "При регулярной стирке хватит двух футболок, двух пар брюк и трёх пар носков.",
+      "guide.twoTitle": "Критически важное — каждому",
+      "guide.twoCopy": "Документы, лекарства, дождевик и спальник каждый несёт сам.",
+      "guide.threeTitle": "Общее — в одном экземпляре",
+      "guide.threeCopy": "Пауэрбанк, зарядку, аптечку и набор для стирки поровну распределите между рюкзаками.",
+      "note.label": "Не забудьте",
+      "note.title": "Два креденсиаля, две печати в день",
+      "note.copy": "На последних 100 километрах каждый собирает не менее двух печатей в день — для Компостелы и на память о вашем пути.",
+      "footer.route": "Порту · Побережье · Центральный путь · Сантьяго",
+      "footer.copy": "Для вашего паломничества в конце лета 2026 года.",
+      "sync.loading": "Загружаем общий список …",
+      "sync.saving": "Сохраняем …",
+      "sync.saved": "Общий список сохранён",
+      "sync.local": "Сохранено только на устройстве",
+      "sync.offline": "Нет связи — изменения останутся на устройстве",
+      "reset.confirm": "Удалить все общие отметки, веса и добавленные вещи?"
+    }
+  };
+
+  const russianItems = {
+    backpack: ["Рюкзак и порядок", "Рюкзак 32–38 л с поясным ремнём", "Заранее испытать с полным весом"],
+    liner: ["Рюкзак и порядок", "Водонепроницаемый вкладыш в рюкзак", "Важнее обычного чехла от дождя"],
+    packsacks: ["Рюкзак и порядок", "2 лёгких гермомешка / зип-пакета", "Разделить чистое и мокрое"],
+    valuables: ["Рюкзак и порядок", "Небольшая сумка для ценностей", "Держать под рукой и ночью"],
+    shoes: ["Обувь и стопы", "Разношенные трейловые или походные ботинки", "Не брать новую обувь прямо перед стартом"],
+    sandals: ["Обувь и стопы", "Лёгкие сандалии для душа", "Для альберге и вечера"],
+    socks: ["Обувь и стопы", "3 пары проверенных походных носков", "1 пара на себе, 2 в рюкзаке"],
+    insoles: ["Обувь и стопы", "Проверенные стельки", "Только если вы уже ими пользуетесь"],
+    shirts: ["Одежда", "2 лёгкие походные футболки", "1 на себе, 1 в рюкзаке"],
+    "sleep-shirt": ["Одежда", "Лёгкая футболка для сна и вечера", "Сухая одежда для спальни"],
+    pants: ["Одежда", "2 пары походных брюк", "Шорты плюс лёгкие длинные или брюки-трансформеры"],
+    underwear: ["Одежда", "3 пары нижнего белья", "Быстросохнущее"],
+    sportsbras: ["Одежда", "2 спортивных бюстгальтера, если нужны", "Заранее проверить, не натирают ли"],
+    "sleep-shorts": ["Одежда", "Очень лёгкие шорты для сна", "Не нужны, если хватает походных брюк"],
+    fleece: ["Одежда", "Тонкий флис / средний слой", "Для прохладных галисийских утр"],
+    hat: ["Одежда", "Кепка или панама", "На побережье местами мало тени"],
+    buff: ["Одежда", "Бафф / многофункциональная повязка", "От солнца, ветра и утренней прохлады"],
+    "rain-jacket": ["Дождь и ветер", "Водонепроницаемая куртка", "С хорошо сидящим капюшоном"],
+    "rain-bottom": ["Дождь и ветер", "Дождевые брюки или юбка", "Лёгкие и быстро надеваются"],
+    sleepingbag: ["Сон", "Лёгкий спальный мешок", "Комфортная температура около 10–15 °C"],
+    earplugs: ["Сон", "Беруши", "Несколько запасных пар"],
+    sleepmask: ["Сон", "Маска для сна", "Для общих спален"],
+    headlamp: ["Сон", "Небольшой налобный фонарь", "Красный свет не мешает соседям"],
+    tooth: ["Гигиена", "Зубная щётка и маленькая паста", "Дорожный формат"],
+    deodorant: ["Гигиена", "Небольшой дезодорант", "Не брать большую упаковку"],
+    soap: ["Гигиена", "Небольшое твёрдое мыло", "В проветриваемой коробочке или сетке"],
+    towel: ["Гигиена", "Полотенце из микрофибры", "Примерно 40 × 80 см"],
+    lipbalm: ["Гигиена", "Бальзам для губ с SPF", "От солнца и прибрежного ветра"],
+    "personal-hygiene": ["Гигиена", "Личные средства гигиены", "Только реалистичный объём"],
+    sanitizer: ["Гигиена", "Маленький антисептик для рук", "Дорожный формат"],
+    tissues: ["Гигиена", "Салфетки / запас бумаги", "Небольшое количество"],
+    id: ["Документы и деньги", "Удостоверение личности или паспорт", "Всегда при себе или надёжно убран"],
+    credential: ["Документы и деньги", "Официальный креденсиаль пилигрима", "На последних 100 км: 2 печати в день"],
+    ehic: ["Документы и деньги", "Европейская карта медицинского страхования", "Плюс подтверждение страховки"],
+    cards: ["Документы и деньги", "Банковская карта и отдельная запасная", "Разложить по двум рюкзакам"],
+    cash: ["Документы и деньги", "50–100 € наличными", "Мелкими купюрами"],
+    emergency: ["Документы и деньги", "Контакты на экстренный случай на бумаге", "Также цифровые копии документов"],
+    phone: ["Техника", "Смартфон с офлайн-картой", "В защитном чехле"],
+    cable: ["Техника", "Короткий кабель для зарядки", "Подходящий к общей зарядке"],
+    "watch-cable": ["Техника", "Кабель для часов или устройства", "Только действительно нужные кабели"],
+    bottles: ["Вода и дорога", "Ёмкости для 1–1,5 л воды", "Подбирать объём под дневной этап"],
+    electrolytes: ["Вода и дорога", "2–4 порции электролитов", "Небольшой запас на жару"],
+    foodbag: ["Вода и дорога", "Лёгкий пакет для еды на день", "Не нести еду на несколько дней"],
+    poles: ["По желанию", "2 треккинговые палки", "Только после тренировки; проверить правила перелёта"],
+    sunglasses: ["По желанию", "Солнцезащитные очки", "С надёжным футляром или шнурком"],
+    swimwear: ["По желанию", "Купальная одежда", "Не нужна, если в походных шортах можно купаться"],
+    shell: ["По желанию", "Ракушка пилигрима", "Знак пилигрима и память о пути"],
+    charger: ["Зарядка", "USB-зарядка на 2 разъёма", "Достаточно 30–45 Вт"],
+    powerbank: ["Зарядка", "Пауэрбанк 10 000 мА·ч", "Один на двоих"],
+    sunscreen: ["Уход", "Солнцезащитный крем SPF 50", "Начать со 100–150 мл, затем докупить"],
+    antichafe: ["Уход", "Стик от натирания / бальзам для стоп", "Заранее наносить на проблемные места"],
+    repellent: ["Уход", "Небольшой репеллент", "Если вы чувствительны к укусам"],
+    blister: ["Мини-аптечка", "Пластыри от мозолей разных размеров", "Гидроколлоидные"],
+    tape: ["Мини-аптечка", "Проверенный спортивный тейп", "Для профилактики натирания"],
+    dressings: ["Мини-аптечка", "Пластыри и стерильные салфетки", "Небольшой набор"],
+    disinfectant: ["Мини-аптечка", "Антисептик для ран", "Дорожный формат"],
+    tweezers: ["Мини-аптечка", "Пинцет", "Маленький и лёгкий"],
+    bandage: ["Мини-аптечка", "Небольшой эластичный бинт", "Один на двоих"],
+    "known-meds": ["Мини-аптечка", "Немного проверенных обычных лекарств", "Только то, что вы переносите; личные лекарства отдельно"],
+    rehydration: ["Мини-аптечка", "2 порции раствора для регидратации", "На случай жары или проблем с желудком"],
+    nailclipper: ["Мини-аптечка", "Книпсер / маленькая пилочка", "Удобнее для перелёта, чем ножницы"],
+    laundrysoap: ["Стирка и ремонт", "Небольшое мыло или средство для стирки", "Для регулярной стирки"],
+    pegs: ["Стирка и ремонт", "4–6 маленьких прищепок", "Или английские булавки"],
+    line: ["Стирка и ремонт", "3–4 м тонкой бельевой верёвки", "Одна на двоих"],
+    sewing: ["Стирка и ремонт", "Мини-набор для шитья", "Игла, нитка, 2 английские булавки"],
+    "tape-repair": ["Стирка и ремонт", "Немного армированного скотча", "Намотать на старую карту"],
+    zips: ["Стирка и ремонт", "Дополнительные зип-пакеты", "Для мокрых вещей, мусора и электроники"],
+    tote: ["Полезные мелочи", "Лёгкая тканевая сумка", "Для покупок в конце этапа"],
+    lock: ["Полезные мелочи", "Маленький навесной замок", "Если есть шкафчик"],
+    pen: ["Полезные мелочи", "Шариковая ручка", "Для креденсиаля и анкет"],
+    sporks: ["Полезные мелочи", "2 лёгкие ложки / спорка", "В кухнях муниципальных альберге часто нет посуды"]
+  };
 
   const personalItems = [
     { id: "backpack", category: "Rucksack & Ordnung", name: "Rucksack 32–38 l mit Hüftgurt", note: "Vorher mit vollem Gewicht testen", weight: 1000, priority: "must", mode: "pack" },
@@ -100,12 +349,14 @@
     custom: { p1: [], p2: [], shared: [] }
   });
 
+  let activeLanguage = loadLanguage();
   let state = loadState();
   let activeProfile = "p1";
   let activeFilter = "all";
   let searchTerm = "";
   let serverReady = false;
   let syncTimer = null;
+  let currentSyncStatus = { key: "sync.loading", isError: false };
 
   const els = {
     list: document.getElementById("checklist"),
@@ -123,6 +374,62 @@
     customPriority: document.getElementById("custom-priority"),
     syncStatus: document.getElementById("sync-status")
   };
+
+  function loadLanguage() {
+    try {
+      return localStorage.getItem(LANGUAGE_KEY) === "ru" ? "ru" : "de";
+    } catch (_) {
+      return "de";
+    }
+  }
+
+  function t(key, values = {}) {
+    const dictionary = translations[activeLanguage] || translations.de;
+    const template = dictionary[key] || translations.de[key] || key;
+    return Object.entries(values).reduce(
+      (result, [name, value]) => result.replaceAll(`{${name}}`, String(value)),
+      template
+    );
+  }
+
+  function localizedItem(item) {
+    if (item.custom === true) {
+      return { ...item, category: t("custom.category"), note: t("item.custom") };
+    }
+    if (activeLanguage !== "ru" || !russianItems[item.id]) return item;
+    const [category, name, note] = russianItems[item.id];
+    return { ...item, category, name, note };
+  }
+
+  function applyStaticTranslations() {
+    document.documentElement.lang = activeLanguage;
+    document.title = t("page.title");
+    document.querySelectorAll("[data-i18n]").forEach((element) => {
+      element.textContent = t(element.dataset.i18n);
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach((element) => {
+      element.setAttribute("aria-label", t(element.dataset.i18nAria));
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach((element) => {
+      element.setAttribute("placeholder", t(element.dataset.i18nPlaceholder));
+    });
+    document.querySelectorAll("[data-language]").forEach((button) => {
+      const active = button.dataset.language === activeLanguage;
+      button.classList.toggle("active", active);
+      button.setAttribute("aria-pressed", String(active));
+    });
+    setSyncStatus(currentSyncStatus.key, currentSyncStatus.isError);
+  }
+
+  function setLanguage(language) {
+    activeLanguage = language === "ru" ? "ru" : "de";
+    try {
+      localStorage.setItem(LANGUAGE_KEY, activeLanguage);
+    } catch (_) {}
+    searchTerm = els.search.value.trim().toLocaleLowerCase(activeLanguage === "ru" ? "ru-RU" : "de-DE");
+    applyStaticTranslations();
+    render();
+  }
 
   function loadState() {
     try {
@@ -154,15 +461,16 @@
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
-  function setSyncStatus(message, isError = false) {
+  function setSyncStatus(key, isError = false) {
     if (!els.syncStatus) return;
-    els.syncStatus.textContent = message;
+    currentSyncStatus = { key, isError };
+    els.syncStatus.textContent = t(key);
     els.syncStatus.classList.toggle("error", isError);
   }
 
   async function pushState() {
     if (!serverReady) return;
-    setSyncStatus("Speichert …");
+    setSyncStatus("sync.saving");
     try {
       const response = await fetch("/api/state", {
         method: "PUT",
@@ -174,10 +482,10 @@
         window.location.assign("/");
         return;
       }
-      if (!response.ok) throw new Error("Speichern fehlgeschlagen");
-      setSyncStatus("Gemeinsam gespeichert");
+      if (!response.ok) throw new Error("Save failed");
+      setSyncStatus("sync.saved");
     } catch (_) {
-      setSyncStatus("Nur lokal gespeichert", true);
+      setSyncStatus("sync.local", true);
     }
   }
 
@@ -189,26 +497,26 @@
   }
 
   async function loadSharedState() {
-    setSyncStatus("Gemeinsamen Speicher laden …");
+    setSyncStatus("sync.loading");
     try {
       const response = await fetch("/api/state", { credentials: "same-origin" });
       if (response.status === 401) {
         window.location.assign("/");
         return;
       }
-      if (!response.ok) throw new Error("Laden fehlgeschlagen");
+      if (!response.ok) throw new Error("Load failed");
       const data = await response.json();
       serverReady = true;
       if (data.state && data.state.checked && data.state.weights && data.state.custom) {
         state = normalizeState(data.state);
         writeLocalState();
         render();
-        setSyncStatus("Gemeinsam gespeichert");
+        setSyncStatus("sync.saved");
       } else {
         await pushState();
       }
     } catch (_) {
-      setSyncStatus("Offline – Änderungen bleiben lokal", true);
+      setSyncStatus("sync.offline", true);
     }
   }
 
@@ -242,7 +550,8 @@
   }
 
   function formatWeight(grams) {
-    return `${(grams / 1000).toLocaleString("de-DE", { minimumFractionDigits: 1, maximumFractionDigits: 2 })} kg`;
+    const locale = activeLanguage === "ru" ? "ru-RU" : "de-DE";
+    return `${(grams / 1000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} kg`;
   }
 
   function escapeHTML(value) {
@@ -253,16 +562,21 @@
     renderTabs();
     renderOverview();
 
-    const names = { p1: "Meine Liste", p2: "Liste meiner Frau", shared: "Gemeinsam getragen" };
+    const names = { p1: t("profiles.p1"), p2: t("profiles.p2"), shared: t("profiles.sharedTitle") };
     const stats = profileStats(activeProfile);
     els.profileTitle.textContent = names[activeProfile];
-    els.profileSummary.textContent = `${stats.done} von ${stats.total} wichtigen Dingen · ${formatWeight(stats.packedWeight)} eingepackt`;
+    els.profileSummary.textContent = t("profiles.summary", {
+      done: stats.done,
+      total: stats.total,
+      weight: formatWeight(stats.packedWeight)
+    });
     els.profileRing.style.setProperty("--progress", `${stats.percent * 3.6}deg`);
     els.profileRing.querySelector("span").textContent = `${stats.percent}%`;
 
-    const filtered = getItems(activeProfile).filter((item) => {
+    const filtered = getItems(activeProfile).map(localizedItem).filter((item) => {
       const filterMatch = activeFilter === "all" || item.priority === activeFilter;
-      const haystack = `${item.name} ${item.note} ${item.category}`.toLocaleLowerCase("de-DE");
+      const locale = activeLanguage === "ru" ? "ru-RU" : "de-DE";
+      const haystack = `${item.name} ${item.note} ${item.category}`.toLocaleLowerCase(locale);
       return filterMatch && haystack.includes(searchTerm);
     });
 
@@ -272,7 +586,7 @@
     }, {});
 
     if (!filtered.length) {
-      els.list.innerHTML = `<div class="empty-state"><strong>Nichts gefunden</strong><p>Versucht einen anderen Suchbegriff oder Filter.</p></div>`;
+      els.list.innerHTML = `<div class="empty-state"><strong>${escapeHTML(t("empty.title"))}</strong><p>${escapeHTML(t("empty.copy"))}</p></div>`;
       return;
     }
 
@@ -294,23 +608,23 @@
         <label class="check-control">
           <input type="checkbox" data-check-id="${escapeHTML(item.id)}" ${checked ? "checked" : ""}>
           <span aria-hidden="true">✓</span>
-          <span class="sr-only">${checked ? "Aus Packliste entfernen" : "Als eingepackt markieren"}: ${escapeHTML(item.name)}</span>
+          <span class="sr-only">${escapeHTML(t(checked ? "item.uncheck" : "item.check"))}: ${escapeHTML(item.name)}</span>
         </label>
         <div class="item-copy">
           <div class="item-title-row">
             <strong>${escapeHTML(item.name)}</strong>
-            <span class="priority ${item.priority}">${priorityLabels[item.priority]}</span>
+            <span class="priority ${item.priority}">${escapeHTML(t(`priority.${item.priority}`))}</span>
           </div>
-          <p>${escapeHTML(item.note || "Eigener Gegenstand")}</p>
+          <p>${escapeHTML(item.note || t("item.custom"))}</p>
         </div>
         <div class="item-meta">
-          <label class="weight-input" title="Gewicht anpassen">
-            <input type="number" min="0" max="10000" step="1" value="${weightOf(activeProfile, item)}" data-weight-id="${escapeHTML(item.id)}" aria-label="Gewicht von ${escapeHTML(item.name)} in Gramm">
+          <label class="weight-input" title="${escapeHTML(t("item.weightTitle"))}">
+            <input type="number" min="0" max="10000" step="1" value="${weightOf(activeProfile, item)}" data-weight-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.weightAria", { name: item.name }))}">
             <span>g</span>
           </label>
-          <small>${modeLabels[item.mode] || "Rucksack"}</small>
+          <small>${escapeHTML(t(`mode.${item.mode || "pack"}`))}</small>
         </div>
-        ${isCustom ? `<button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(item.name)} löschen">×</button>` : ""}
+        ${isCustom ? `<button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.delete", { name: item.name }))}">×</button>` : ""}
       </article>
     `;
   }
@@ -323,7 +637,7 @@
     });
     ["p1", "p2", "shared"].forEach((profile) => {
       const stats = profileStats(profile);
-      document.getElementById(`${profile}-tab-meta`).textContent = `${stats.done} von ${stats.total}`;
+      document.getElementById(`${profile}-tab-meta`).textContent = t("profiles.meta", { done: stats.done, total: stats.total });
     });
   }
 
@@ -335,7 +649,9 @@
     const weight = stats.reduce((sum, entry) => sum + entry.packedWeight, 0);
     const percent = total ? Math.round(done / total * 100) : 0;
     els.overallProgress.textContent = `${percent} %`;
-    els.overallDetail.textContent = `${done} von ${total} wichtigen Dingen abgehakt`;
+    els.overallDetail.textContent = done
+      ? t("overview.detail", { done, total })
+      : t("overview.none");
     els.currentWeight.textContent = formatWeight(weight);
   }
 
@@ -347,6 +663,10 @@
     });
   });
 
+  document.querySelectorAll("[data-language]").forEach((button) => {
+    button.addEventListener("click", () => setLanguage(button.dataset.language));
+  });
+
   document.querySelectorAll(".filter-pill").forEach((button) => {
     button.addEventListener("click", () => {
       activeFilter = button.dataset.filter;
@@ -356,7 +676,7 @@
   });
 
   els.search.addEventListener("input", (event) => {
-    searchTerm = event.target.value.trim().toLocaleLowerCase("de-DE");
+    searchTerm = event.target.value.trim().toLocaleLowerCase(activeLanguage === "ru" ? "ru-RU" : "de-DE");
     render();
   });
 
@@ -377,7 +697,11 @@
       saveState();
       renderOverview();
       const stats = profileStats(activeProfile);
-      els.profileSummary.textContent = `${stats.done} von ${stats.total} wichtigen Dingen · ${formatWeight(stats.packedWeight)} eingepackt`;
+      els.profileSummary.textContent = t("profiles.summary", {
+        done: stats.done,
+        total: stats.total,
+        weight: formatWeight(stats.packedWeight)
+      });
     }
   });
 
@@ -418,12 +742,13 @@
 
   document.getElementById("print-button").addEventListener("click", () => window.print());
   document.getElementById("reset-button").addEventListener("click", () => {
-    if (!window.confirm("Alle gemeinsamen Häkchen, Gewichte und eigenen Gegenstände löschen?")) return;
+    if (!window.confirm(t("reset.confirm"))) return;
     state = freshState();
     saveState();
     render();
   });
 
+  applyStaticTranslations();
   render();
   loadSharedState();
 })();
