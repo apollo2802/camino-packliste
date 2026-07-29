@@ -11,7 +11,6 @@ RUN pnpm install --frozen-lockfile
 COPY app ./app
 COPY public ./public
 COPY scripts ./scripts
-COPY drizzle ./drizzle
 COPY next.config.mjs ./
 
 RUN pnpm build
