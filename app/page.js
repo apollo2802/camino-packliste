@@ -146,6 +146,80 @@ const pageMarkup = `
         </form>
       </section>
 
+      <section class="packing-film" id="packing-film" aria-labelledby="packing-film-title">
+        <div class="packing-film__intro">
+          <div>
+            <p class="section-label" data-i18n="film.label">Animierte Packanleitung</p>
+            <h2 id="packing-film-title" data-i18n="film.title">So sitzt alles richtig im Rucksack</h2>
+          </div>
+          <p data-i18n="film.intro">Scrollt durch Vorder- und Seitenansicht. Die wichtigsten Packzonen werden genau dann erklärt, wenn sie sichtbar werden.</p>
+        </div>
+
+        <div class="film-sequence" id="packing-sequence">
+          <div class="film-stage" id="packing-stage">
+            <canvas id="packing-canvas" role="img" aria-label="Animierte Vorder- und Seitenansicht eines richtig gepackten Wanderrucksacks" data-i18n-aria="film.canvas"></canvas>
+            <div class="film-scrim" aria-hidden="true"></div>
+            <div class="film-grid" aria-hidden="true"></div>
+
+            <div class="film-loader" id="packing-loader" role="status" aria-live="polite">
+              <span class="film-loader__label" id="packing-loader-label" data-i18n="film.loading">Packansicht wird vorbereitet …</span>
+              <span class="film-loader__track" aria-hidden="true"><i id="packing-loader-fill"></i></span>
+              <span id="packing-loader-count">0 %</span>
+            </div>
+
+            <div class="film-chapters">
+              <article class="film-chapter film-chapter--hero" data-center="0.04" data-window="0.075" data-label-key="film.chapter1Label">
+                <div class="film-chapter__copy">
+                  <p class="film-kicker"><span>01</span><span data-i18n="film.chapter1Label">Die Orientierung</span></p>
+                  <h3 data-i18n="film.chapter1Title">Vorne sehen. Seitlich verstehen.</h3>
+                  <p data-i18n="film.chapter1Copy">Beim Scrollen öffnet und dreht sich der Rucksack – ohne Ton und in eurem Tempo.</p>
+                </div>
+              </article>
+
+              <article class="film-chapter" data-center="0.25" data-window="0.07" data-label-key="film.chapter2Label">
+                <div class="film-chapter__copy">
+                  <p class="film-kicker"><span>02</span><span data-i18n="film.chapter2Label">Untere Zone</span></p>
+                  <h3 data-i18n="film.chapter2Title">Leicht nach unten.</h3>
+                  <p data-i18n="film.chapter2Copy">Schlafsachen und leichte Kleidung füllen den Boden und geben dem Rucksack eine stabile Basis.</p>
+                </div>
+              </article>
+
+              <article class="film-chapter film-chapter--right" data-center="0.48" data-window="0.072" data-label-key="film.chapter3Label">
+                <div class="film-chapter__copy">
+                  <p class="film-kicker"><span>03</span><span data-i18n="film.chapter3Label">Schwerpunkt</span></p>
+                  <h3 data-i18n="film.chapter3Title">Schwer nah an den Rücken.</h3>
+                  <p data-i18n="film.chapter3Copy">Wasser, Elektronik und dichte Packstücke gehören körpernah in die Mitte – nicht weit nach außen.</p>
+                </div>
+              </article>
+
+              <article class="film-chapter" data-center="0.71" data-window="0.072" data-label-key="film.chapter4Label">
+                <div class="film-chapter__copy">
+                  <p class="film-kicker"><span>04</span><span data-i18n="film.chapter4Label">Schneller Zugriff</span></p>
+                  <h3 data-i18n="film.chapter4Title">Wichtiges nach oben und außen.</h3>
+                  <p data-i18n="film.chapter4Copy">Regenjacke, Sonnenschutz, Snacks und das Tages-Set bleiben erreichbar, ohne alles auszupacken.</p>
+                </div>
+              </article>
+
+              <article class="film-chapter film-chapter--right film-chapter--final" data-center="0.93" data-window="0.078" data-label-key="film.chapter5Label">
+                <div class="film-chapter__copy">
+                  <p class="film-kicker"><span>05</span><span data-i18n="film.chapter5Label">Der Abschluss</span></p>
+                  <h3 data-i18n="film.chapter5Title">Seitlich prüfen. Dann festziehen.</h3>
+                  <p data-i18n="film.chapter5Copy">Der Schwerpunkt bleibt dicht am Körper, beide Seiten sind ausgeglichen und nichts baumelt außen.</p>
+                  <div class="film-target"><strong>5,5–6,5 kg</strong><span data-i18n="film.target">Grundgewicht pro Person</span></div>
+                </div>
+              </article>
+            </div>
+
+            <div class="film-telemetry" aria-hidden="true">
+              <span id="packing-chapter-label">Die Orientierung</span>
+              <span class="film-telemetry__track"><i id="packing-progress"></i></span>
+              <span id="packing-frame-label">001 / 100</span>
+              <span class="film-scroll-cue" data-i18n="film.scroll">Scrollen</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section class="quick-guide" aria-labelledby="guide-title">
         <div>
           <p class="section-label light" data-i18n="guide.label">Das kleine System</p>

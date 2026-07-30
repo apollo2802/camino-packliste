@@ -1,4 +1,6 @@
 import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { resolve } from "node:path";
 import { Pool } from "pg";
 import app from "../dist/server/index.js";
 
@@ -12,6 +14,7 @@ const databaseConfigured = databaseUrl || (
   process.env.PGPASSWORD &&
   process.env.PGDATABASE
 );
+const sequenceRoot = resolve("dist/client/packing-sequence");
 
 if (accessCode.length < 10 || sessionSecret.length < 32 || !databaseConfigured) {
   console.error("Zugangscode, Sitzungsschlüssel und Datenbankverbindung müssen gesetzt sein.");
@@ -102,6 +105,20 @@ const server = createServer(async (request, response) => {
       await pool.query("SELECT 1");
       response.writeHead(200, { "content-type": "text/plain; charset=utf-8" });
       response.end("ok");
+      return;
+    }
+
+    const assetPath = new URL(requestUrl(request)).pathname;
+    const assetMatch = assetPath.match(/^\/packing-sequence\/(desktop|mobile)\/(frame-\d{4}\.webp)$/);
+    if (assetMatch && ["GET", "HEAD"].includes(request.method)) {
+      const file = resolve(sequenceRoot, assetMatch[1], assetMatch[2]);
+      response.writeHead(200, {
+        "content-type": "image/webp",
+        "cache-control": "public, max-age=31536000, immutable",
+        "x-content-type-options": "nosniff",
+      });
+      if (request.method === "HEAD") response.end();
+      else createReadStream(file).on("error", () => response.destroy()).pipe(response);
       return;
     }
 

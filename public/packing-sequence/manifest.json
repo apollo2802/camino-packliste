@@ -1,0 +1,17 @@
+{
+  "frames": 100,
+  "format": "webp",
+  "duration_seconds": 10.01,
+  "desktop": {
+    "source": "Create_an_–_second_premium.mp4",
+    "resolution": "1280x720",
+    "quality": 72,
+    "total_mb": 1.53
+  },
+  "mobile": {
+    "source": "und_jetzt_in_diesem_Format_Cr.mp4",
+    "resolution": "720x1280",
+    "quality": 68,
+    "total_mb": 2.8
+  }
+}

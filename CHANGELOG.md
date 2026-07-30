@@ -13,6 +13,13 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Hinzugefügt
 
+- Scrollgesteuerte Rucksack-Packanleitung mit Vorder- und Seitenansicht.
+- Je 100 optimierte Einzelbilder für Desktop und Mobilgeräte.
+- Fünf animierte Kapitel zu Orientierung, unterer Packzone, Schwerpunkt,
+  Schnellzugriff und Abschlussprüfung.
+- Deutsche und russische Texte für die vollständige Packanleitung.
+- Statische, vollständig lesbare Darstellung bei aktivierter Einstellung
+  „Bewegung reduzieren“.
 - Standardpositionen und eigene Gegenstände können aus jeder der drei Listen
   gelöscht werden.
 - Vor dem Löschen erscheint eine Bestätigung mit Gegenstands- und Listenname.
@@ -21,6 +28,10 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Geändert
 
+- Die Animation lädt nur wichtige Startbilder sofort und die übrigen Bilder
+  anschließend in kleinen Paketen nach.
+- Desktop und Mobilgeräte erhalten jeweils den passend zugeschnittenen
+  Originalclip ohne automatische Tonwiedergabe.
 - „Alles zurücksetzen“ stellt auch gelöschte Standardpositionen wieder her und
   erklärt vollständig, welche gemeinsamen Anpassungen entfernt werden.
 

@@ -164,7 +164,7 @@ const encoder = new TextEncoder();
 
 const SECURITY_HEADERS = {
   "cache-control": "private, no-store",
-  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   "cross-origin-opener-policy": "same-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
   "referrer-policy": "no-referrer",
@@ -372,6 +372,9 @@ mkdirSync("dist/server", { recursive: true });
 mkdirSync("dist/client", { recursive: true });
 mkdirSync("dist/.openai", { recursive: true });
 writeFileSync("dist/server/index.js", worker);
+if (existsSync("public/packing-sequence")) {
+  cpSync("public/packing-sequence", "dist/client/packing-sequence", { recursive: true });
+}
 if (existsSync(".openai/hosting.json")) {
   copyFileSync(".openai/hosting.json", "dist/.openai/hosting.json");
 }

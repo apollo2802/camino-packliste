@@ -76,6 +76,29 @@
       "custom.grams": "Gramm",
       "custom.priority": "Priorität",
       "custom.add": "Hinzufügen",
+      "film.label": "Animierte Packanleitung",
+      "film.title": "So sitzt alles richtig im Rucksack",
+      "film.intro": "Scrollt durch Vorder- und Seitenansicht. Die wichtigsten Packzonen werden genau dann erklärt, wenn sie sichtbar werden.",
+      "film.canvas": "Animierte Vorder- und Seitenansicht eines richtig gepackten Wanderrucksacks",
+      "film.loading": "Packansicht wird vorbereitet …",
+      "film.error": "Die Packansicht konnte nicht geladen werden.",
+      "film.scroll": "Scrollen",
+      "film.chapter1Label": "Die Orientierung",
+      "film.chapter1Title": "Vorne sehen. Seitlich verstehen.",
+      "film.chapter1Copy": "Beim Scrollen öffnet und dreht sich der Rucksack – ohne Ton und in eurem Tempo.",
+      "film.chapter2Label": "Untere Zone",
+      "film.chapter2Title": "Leicht nach unten.",
+      "film.chapter2Copy": "Schlafsachen und leichte Kleidung füllen den Boden und geben dem Rucksack eine stabile Basis.",
+      "film.chapter3Label": "Schwerpunkt",
+      "film.chapter3Title": "Schwer nah an den Rücken.",
+      "film.chapter3Copy": "Wasser, Elektronik und dichte Packstücke gehören körpernah in die Mitte – nicht weit nach außen.",
+      "film.chapter4Label": "Schneller Zugriff",
+      "film.chapter4Title": "Wichtiges nach oben und außen.",
+      "film.chapter4Copy": "Regenjacke, Sonnenschutz, Snacks und das Tages-Set bleiben erreichbar, ohne alles auszupacken.",
+      "film.chapter5Label": "Der Abschluss",
+      "film.chapter5Title": "Seitlich prüfen. Dann festziehen.",
+      "film.chapter5Copy": "Der Schwerpunkt bleibt dicht am Körper, beide Seiten sind ausgeglichen und nichts baumelt außen.",
+      "film.target": "Grundgewicht pro Person",
       "guide.label": "Das kleine System",
       "guide.title": "Drei Regeln für leichte Schritte",
       "guide.oneTitle": "Waschen statt schleppen",
@@ -168,6 +191,29 @@
       "custom.grams": "Граммы",
       "custom.priority": "Важность",
       "custom.add": "Добавить",
+      "film.label": "Анимированная инструкция",
+      "film.title": "Как правильно уложить рюкзак",
+      "film.intro": "Прокручивайте страницу и изучайте рюкзак спереди и сбоку. Каждая зона объясняется именно тогда, когда появляется на экране.",
+      "film.canvas": "Анимированный вид правильно уложенного туристического рюкзака спереди и сбоку",
+      "film.loading": "Готовим схему укладки …",
+      "film.error": "Не удалось загрузить схему укладки.",
+      "film.scroll": "Листайте",
+      "film.chapter1Label": "Ориентация",
+      "film.chapter1Title": "Спереди видно. Сбоку понятно.",
+      "film.chapter1Copy": "При прокрутке рюкзак открывается и поворачивается — без звука и в вашем темпе.",
+      "film.chapter2Label": "Нижняя зона",
+      "film.chapter2Title": "Лёгкое — вниз.",
+      "film.chapter2Copy": "Спальные принадлежности и лёгкая одежда заполняют дно и создают устойчивую основу.",
+      "film.chapter3Label": "Центр тяжести",
+      "film.chapter3Title": "Тяжёлое — ближе к спине.",
+      "film.chapter3Copy": "Воду, электронику и плотные вещи кладите ближе к телу в середину, а не к внешней стенке.",
+      "film.chapter4Label": "Быстрый доступ",
+      "film.chapter4Title": "Нужное — наверх и наружу.",
+      "film.chapter4Copy": "Дождевик, защита от солнца, перекус и дневной набор доступны без полной распаковки.",
+      "film.chapter5Label": "Финальная проверка",
+      "film.chapter5Title": "Проверьте сбоку. Затем затяните.",
+      "film.chapter5Copy": "Центр тяжести остаётся у тела, обе стороны сбалансированы, а снаружи ничего не болтается.",
+      "film.target": "Базовый вес на человека",
       "guide.label": "Простая система",
       "guide.title": "Три правила лёгкого пути",
       "guide.oneTitle": "Стирать, а не нести",
@@ -837,7 +883,334 @@
     render();
   });
 
+  function initPackingFilm() {
+    const sequence = document.getElementById("packing-sequence");
+    const stage = document.getElementById("packing-stage");
+    const canvas = document.getElementById("packing-canvas");
+    if (!sequence || !stage || !canvas) return;
+
+    const FRAME_COUNT = 100;
+    const FRAME_PAD = 4;
+    const LERP_FACTOR = 0.115;
+    const DWELL_WIDTH = 0.042;
+    const DWELL_PEAK = 2.55;
+    const LUT_SIZE = 2000;
+    const DWELL_CENTERS = [0.04, 0.25, 0.48, 0.71, 0.93];
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const mobileMedia = window.matchMedia("(max-width: 680px)");
+    const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
+    const loader = document.getElementById("packing-loader");
+    const loaderFill = document.getElementById("packing-loader-fill");
+    const loaderCount = document.getElementById("packing-loader-count");
+    const loaderLabel = document.getElementById("packing-loader-label");
+    const chapterLabel = document.getElementById("packing-chapter-label");
+    const frameLabel = document.getElementById("packing-frame-label");
+    const progressBar = document.getElementById("packing-progress");
+    const chapters = Array.from(stage.querySelectorAll(".film-chapter"));
+    const chapterVisibility = new WeakMap();
+    const stores = {
+      desktop: createStore("desktop"),
+      mobile: createStore("mobile")
+    };
+
+    let useMobile = mobileMedia.matches;
+    let activeStore = useMobile ? stores.mobile : stores.desktop;
+    let currentFrame = 0;
+    let targetFrame = 0;
+    let lastDrawn = -1;
+    let sequenceTop = 0;
+    let sequenceDistance = 1;
+    let animationFrame = 0;
+    let pageVisible = !document.hidden;
+    let sequenceVisible = false;
+
+    function createStore(directory) {
+      return {
+        directory,
+        images: new Array(FRAME_COUNT),
+        loaded: new Uint8Array(FRAME_COUNT),
+        promises: new Array(FRAME_COUNT)
+      };
+    }
+
+    function frameUrl(index, store = activeStore) {
+      return `/packing-sequence/${store.directory}/frame-${String(index + 1).padStart(FRAME_PAD, "0")}.webp`;
+    }
+
+    function setLoaderProgress(ratio) {
+      const safe = Math.max(0, Math.min(1, ratio));
+      loaderFill.style.transform = `scaleX(${safe})`;
+      loaderCount.textContent = `${Math.round(safe * 100)} %`;
+    }
+
+    function loadFrame(index, store = activeStore, retries = 1) {
+      if (store.loaded[index]) return Promise.resolve(store.images[index]);
+      if (store.promises[index]) return store.promises[index];
+      store.promises[index] = new Promise((resolve) => {
+        const attempt = (remaining) => {
+          const image = new Image();
+          store.images[index] = image;
+          image.decoding = "async";
+          image.onload = () => {
+            store.loaded[index] = 1;
+            resolve(image);
+          };
+          image.onerror = () => {
+            if (remaining > 0) {
+              window.setTimeout(() => attempt(remaining - 1), 160);
+            } else {
+              store.images[index] = null;
+              store.promises[index] = null;
+              resolve(null);
+            }
+          };
+          image.src = frameUrl(index, store);
+        };
+        attempt(retries);
+      });
+      return store.promises[index];
+    }
+
+    async function loadInBatches(indices, size = 8, store = activeStore) {
+      for (let start = 0; start < indices.length; start += size) {
+        await Promise.all(indices.slice(start, start + size).map((index) => loadFrame(index, store)));
+      }
+    }
+
+    function nearestLoaded(index, store = activeStore) {
+      if (store.loaded[index]) return index;
+      for (let distance = 1; distance < FRAME_COUNT; distance += 1) {
+        const before = index - distance;
+        const after = index + distance;
+        if (before >= 0 && store.loaded[before]) return before;
+        if (after < FRAME_COUNT && store.loaded[after]) return after;
+      }
+      return -1;
+    }
+
+    function resizeCanvas() {
+      const bounds = reducedMotion ? canvas.getBoundingClientRect() : stage.getBoundingClientRect();
+      const ratio = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.round(bounds.width * ratio));
+      const height = Math.max(1, Math.round(bounds.height * ratio));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        lastDrawn = -1;
+      }
+    }
+
+    function drawFrame(index) {
+      const resolved = nearestLoaded(Math.max(0, Math.min(FRAME_COUNT - 1, index)));
+      if (resolved < 0 || resolved === lastDrawn) return;
+      const image = activeStore.images[resolved];
+      if (!image?.naturalWidth) return;
+      const width = canvas.width;
+      const height = canvas.height;
+      const scale = Math.max(width / image.naturalWidth, height / image.naturalHeight);
+      const drawWidth = image.naturalWidth * scale;
+      const drawHeight = image.naturalHeight * scale;
+      context.fillStyle = "#062f2d";
+      context.fillRect(0, 0, width, height);
+      context.drawImage(image, (width - drawWidth) / 2, (height - drawHeight) / 2, drawWidth, drawHeight);
+      lastDrawn = resolved;
+    }
+
+    function updateMetrics() {
+      const bounds = sequence.getBoundingClientRect();
+      sequenceTop = window.scrollY + bounds.top;
+      sequenceDistance = Math.max(1, bounds.height - window.innerHeight);
+    }
+
+    const rawAtEffective = new Float64Array(LUT_SIZE + 1);
+
+    function buildDwellLookup() {
+      let total = 0;
+      const density = new Float64Array(LUT_SIZE + 1);
+      for (let index = 0; index <= LUT_SIZE; index += 1) {
+        const effective = index / LUT_SIZE;
+        let value = 1;
+        for (const center of DWELL_CENTERS) {
+          const delta = (effective - center) / DWELL_WIDTH;
+          value += DWELL_PEAK * Math.exp(-0.5 * delta * delta);
+        }
+        density[index] = value;
+        if (index > 0) total += (density[index - 1] + value) * 0.5;
+        rawAtEffective[index] = total;
+      }
+      for (let index = 0; index <= LUT_SIZE; index += 1) rawAtEffective[index] /= total;
+    }
+
+    function remapProgress(raw) {
+      let low = 0;
+      let high = LUT_SIZE;
+      while (low < high) {
+        const middle = (low + high) >> 1;
+        if (rawAtEffective[middle] < raw) low = middle + 1;
+        else high = middle;
+      }
+      const index = Math.max(1, low);
+      const left = rawAtEffective[index - 1];
+      const right = rawAtEffective[index];
+      const mix = (raw - left) / (right - left || 1);
+      return Math.max(0, Math.min(1, (index - 1 + mix) / LUT_SIZE));
+    }
+
+    function rawProgress() {
+      return Math.max(0, Math.min(1, (window.scrollY - sequenceTop) / sequenceDistance));
+    }
+
+    function updateChapters(effective) {
+      let active = chapters[0];
+      let nearest = Infinity;
+      for (const chapter of chapters) {
+        const center = Number(chapter.dataset.center);
+        const windowSize = Number(chapter.dataset.window);
+        const distance = Math.abs(effective - center);
+        const visible = distance <= windowSize;
+        if (chapterVisibility.get(chapter) !== visible) {
+          chapterVisibility.set(chapter, visible);
+          chapter.classList.toggle("is-visible", visible);
+          chapter.setAttribute("aria-hidden", String(!visible));
+        }
+        if (distance < nearest) {
+          nearest = distance;
+          active = chapter;
+        }
+      }
+      chapterLabel.textContent = t(active.dataset.labelKey);
+    }
+
+    function updateInterface(raw, effective, frame) {
+      progressBar.style.transform = `scaleX(${raw.toFixed(4)})`;
+      frameLabel.textContent = `${String(frame + 1).padStart(3, "0")} / ${FRAME_COUNT}`;
+      const edge = Math.min(effective, 1 - effective) / 0.08;
+      stage.style.setProperty("--film-scrim", String(Math.min(0.82, 0.58 + edge * 0.16)));
+    }
+
+    function tick() {
+      if (!pageVisible || !sequenceVisible || reducedMotion) return;
+      const raw = rawProgress();
+      const effective = remapProgress(raw);
+      targetFrame = Math.round(effective * (FRAME_COUNT - 1));
+      currentFrame += (targetFrame - currentFrame) * LERP_FACTOR;
+      const frame = Math.round(currentFrame);
+      drawFrame(frame);
+      updateChapters(effective);
+      updateInterface(raw, effective, frame);
+      animationFrame = requestAnimationFrame(tick);
+    }
+
+    function startTick() {
+      if (!pageVisible || !sequenceVisible || reducedMotion) return;
+      cancelAnimationFrame(animationFrame);
+      tick();
+    }
+
+    function dismissLoader() {
+      setLoaderProgress(1);
+      loader.classList.add("is-done");
+      window.setTimeout(() => loader.remove(), 650);
+    }
+
+    function showLoadError() {
+      loaderLabel.textContent = t("film.error");
+      loaderCount.textContent = "!";
+    }
+
+    async function swapFrames(event) {
+      useMobile = event.matches;
+      activeStore = useMobile ? stores.mobile : stores.desktop;
+      lastDrawn = -1;
+      resizeCanvas();
+      updateMetrics();
+      const frame = Math.max(0, Math.min(FRAME_COUNT - 1, Math.round(currentFrame)));
+      if (!(await loadFrame(frame, activeStore))) return;
+      drawFrame(frame);
+      const byDistance = Array.from({ length: FRAME_COUNT }, (_, index) => index)
+        .sort((left, right) => Math.abs(left - frame) - Math.abs(right - frame));
+      loadInBatches(byDistance, 8, activeStore);
+    }
+
+    async function init() {
+      buildDwellLookup();
+      resizeCanvas();
+      updateMetrics();
+      setLoaderProgress(0.06);
+
+      if (reducedMotion) {
+        const posterFrame = 48;
+        if (!(await loadFrame(posterFrame))) {
+          showLoadError();
+          return;
+        }
+        drawFrame(posterFrame);
+        dismissLoader();
+        chapters.forEach((chapter) => chapter.removeAttribute("aria-hidden"));
+        return;
+      }
+
+      const critical = Array.from(new Set([
+        0,
+        ...DWELL_CENTERS.map((center) => Math.round(center * (FRAME_COUNT - 1))),
+        FRAME_COUNT - 1
+      ])).sort((left, right) => left - right);
+
+      if (await loadFrame(0)) {
+        drawFrame(0);
+        setLoaderProgress(0.25);
+      }
+
+      let prepared = 0;
+      await Promise.all(critical.filter((index) => index !== 0).map(async (index) => {
+        const image = await loadFrame(index);
+        prepared += 1;
+        setLoaderProgress(0.25 + 0.7 * prepared / (critical.length - 1));
+        return image;
+      }));
+
+      if (nearestLoaded(0) < 0) {
+        showLoadError();
+        return;
+      }
+
+      drawFrame(0);
+      updateChapters(0);
+      updateInterface(0, 0, 0);
+      dismissLoader();
+      startTick();
+      const remaining = Array.from({ length: FRAME_COUNT }, (_, index) => index)
+        .filter((index) => !critical.includes(index));
+      loadInBatches(remaining);
+    }
+
+    window.addEventListener("resize", () => {
+      resizeCanvas();
+      updateMetrics();
+      drawFrame(Math.round(currentFrame));
+    }, { passive: true });
+    mobileMedia.addEventListener("change", swapFrames);
+    document.addEventListener("visibilitychange", () => {
+      pageVisible = !document.hidden;
+      if (pageVisible) startTick();
+      else cancelAnimationFrame(animationFrame);
+    });
+
+    if ("IntersectionObserver" in window) {
+      new IntersectionObserver(([entry]) => {
+        sequenceVisible = entry.isIntersecting;
+        if (sequenceVisible) startTick();
+        else cancelAnimationFrame(animationFrame);
+      }, { rootMargin: "100% 0px" }).observe(sequence);
+    } else {
+      sequenceVisible = true;
+    }
+
+    init();
+  }
+
   applyStaticTranslations();
   render();
+  initPackingFilm();
   loadSharedState();
 })();

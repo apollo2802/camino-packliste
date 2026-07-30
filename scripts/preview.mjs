@@ -1,7 +1,10 @@
 import { createServer } from "node:http";
+import { createReadStream } from "node:fs";
+import { resolve } from "node:path";
 import app from "../dist/server/index.js";
 
 const port = Number(process.env.PORT || 3000);
+const sequenceRoot = resolve("dist/client/packing-sequence");
 const state = { value: null, updatedAt: null };
 const attempts = new Map();
 
@@ -52,6 +55,19 @@ const env = {
 
 createServer(async (request, response) => {
   const url = `http://${request.headers.host || `localhost:${port}`}${request.url}`;
+  const assetPath = new URL(url).pathname;
+  const assetMatch = assetPath.match(/^\/packing-sequence\/(desktop|mobile)\/(frame-\d{4}\.webp)$/);
+  if (assetMatch && ["GET", "HEAD"].includes(request.method)) {
+    const file = resolve(sequenceRoot, assetMatch[1], assetMatch[2]);
+    response.writeHead(200, {
+      "content-type": "image/webp",
+      "cache-control": "public, max-age=31536000, immutable",
+      "x-content-type-options": "nosniff",
+    });
+    if (request.method === "HEAD") response.end();
+    else createReadStream(file).on("error", () => response.destroy()).pipe(response);
+    return;
+  }
   const init = { method: request.method, headers: request.headers };
   if (!["GET", "HEAD"].includes(request.method)) {
     init.body = request;
