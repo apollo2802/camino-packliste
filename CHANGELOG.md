@@ -11,7 +11,18 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ## Noch nicht veröffentlicht
 
-Derzeit sind keine unveröffentlichten Änderungen vorhanden.
+### Hinzugefügt
+
+- Standardpositionen und eigene Gegenstände können aus jeder der drei Listen
+  gelöscht werden.
+- Vor dem Löschen erscheint eine Bestätigung mit Gegenstands- und Listenname.
+- Gelöschte Standardpositionen werden im gemeinsamen Speicher gesichert und
+  auf allen angemeldeten Geräten ausgeblendet.
+
+### Geändert
+
+- „Alles zurücksetzen“ stellt auch gelöschte Standardpositionen wieder her und
+  erklärt vollständig, welche gemeinsamen Anpassungen entfernt werden.
 
 ## 0.4.0 – 29. Juli 2026
 

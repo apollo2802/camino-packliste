@@ -61,6 +61,7 @@
       "item.weightTitle": "Gewicht anpassen",
       "item.weightAria": "Gewicht von {name} in Gramm",
       "item.delete": "{name} löschen",
+      "item.deleteConfirm": "„{name}“ wirklich aus „{list}“ löschen?",
       "rename.profileAria": "Liste „{name}“ umbenennen",
       "rename.profilePrompt": "Neuer Name für diese Liste (leer lassen = Standardname):",
       "rename.itemAria": "„{name}“ umbenennen",
@@ -93,7 +94,7 @@
       "sync.saved": "Gemeinsam gespeichert",
       "sync.local": "Nur lokal gespeichert",
       "sync.offline": "Offline – Änderungen bleiben lokal",
-      "reset.confirm": "Alle gemeinsamen Häkchen, Gewichte und eigenen Gegenstände löschen?"
+      "reset.confirm": "Die gesamte Packliste auf den Standard zurücksetzen? Dabei werden Häkchen, angepasste Gewichte, eigene Gegenstände, Löschungen und Umbenennungen entfernt."
     },
     ru: {
       "page.title": "Наш список вещей для Камино",
@@ -152,6 +153,7 @@
       "item.weightTitle": "Изменить вес",
       "item.weightAria": "Вес «{name}» в граммах",
       "item.delete": "Удалить «{name}»",
+      "item.deleteConfirm": "Удалить «{name}» из списка «{list}»?",
       "rename.profileAria": "Переименовать список «{name}»",
       "rename.profilePrompt": "Новое название списка (пусто = вернуть стандартное):",
       "rename.itemAria": "Переименовать «{name}»",
@@ -184,7 +186,7 @@
       "sync.saved": "Общий список сохранён",
       "sync.local": "Сохранено только на устройстве",
       "sync.offline": "Нет связи — изменения останутся на устройстве",
-      "reset.confirm": "Удалить все общие отметки, веса и добавленные вещи?"
+      "reset.confirm": "Вернуть весь список к исходному состоянию? Отметки, изменённый вес, свои вещи, удаления и переименования будут удалены."
     }
   };
 
@@ -355,6 +357,7 @@
     checked: { p1: {}, p2: {}, shared: {} },
     weights: { p1: {}, p2: {}, shared: {} },
     custom: { p1: [], p2: [], shared: [] },
+    deleted: { p1: {}, p2: {}, shared: {} },
     labels: {
       profiles: {},
       items: { p1: {}, p2: {}, shared: {} }
@@ -479,6 +482,9 @@
       if (Array.isArray(value.custom?.[profile])) {
         normalized.custom[profile] = value.custom[profile];
       }
+      if (value.deleted?.[profile] && typeof value.deleted[profile] === "object") {
+        normalized.deleted[profile] = value.deleted[profile];
+      }
       if (value.labels?.items?.[profile] && typeof value.labels.items[profile] === "object") {
         normalized.labels.items[profile] = value.labels.items[profile];
       }
@@ -554,7 +560,8 @@
 
   function getItems(profile) {
     const base = profile === "shared" ? sharedItems : personalItems;
-    return [...base, ...(state.custom[profile] || [])];
+    return [...base, ...(state.custom[profile] || [])]
+      .filter((item) => !state.deleted[profile][item.id]);
   }
 
   function weightOf(profile, item) {
@@ -633,7 +640,6 @@
 
   function itemMarkup(item) {
     const checked = isChecked(activeProfile, item.id);
-    const isCustom = item.custom === true;
     return `
       <article class="pack-item ${checked ? "checked" : ""}">
         <label class="check-control">
@@ -656,7 +662,7 @@
           </label>
           <small>${escapeHTML(t(`mode.${item.mode || "pack"}`))}</small>
         </div>
-        ${isCustom ? `<button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.delete", { name: item.name }))}">×</button>` : ""}
+        <button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.delete", { name: item.name }))}">×</button>
       </article>
     `;
   }
@@ -779,7 +785,18 @@
     }
     const id = event.target.dataset.deleteId;
     if (!id) return;
-    state.custom[activeProfile] = state.custom[activeProfile].filter((item) => item.id !== id);
+    const item = getItems(activeProfile).find((entry) => entry.id === id);
+    if (!item) return;
+    const name = localizedItem(activeProfile, item).name;
+    if (!window.confirm(t("item.deleteConfirm", {
+      name,
+      list: profileName(activeProfile)
+    }))) return;
+    if (item.custom === true) {
+      state.custom[activeProfile] = state.custom[activeProfile].filter((entry) => entry.id !== id);
+    } else {
+      state.deleted[activeProfile][id] = true;
+    }
     delete state.checked[activeProfile][id];
     delete state.weights[activeProfile][id];
     delete state.labels.items[activeProfile][id];
