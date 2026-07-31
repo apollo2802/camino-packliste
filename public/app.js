@@ -119,6 +119,121 @@
       "sync.offline": "Offline – Änderungen bleiben lokal",
       "reset.confirm": "Die gesamte Packliste auf den Standard zurücksetzen? Dabei werden Häkchen, angepasste Gewichte, eigene Gegenstände, Löschungen und Umbenennungen entfernt."
     },
+    en: {
+      "page.title": "Our Camino Packing List",
+      "nav.main": "Main navigation",
+      "nav.home": "Camino packing list home",
+      "nav.print": "Print",
+      "nav.reset": "Reset",
+      "nav.logout": "Sign out",
+      "language.label": "Choose language",
+      "hero.title1": "Pack light.",
+      "hero.title2": "Walk far.",
+      "hero.copy": "Your shared packing list for 12–13 days between the Atlantic, albergues and the finish in front of the cathedral.",
+      "route.label": "Travel route",
+      "route.summer": "Late summer",
+      "route.coast": "Coastal Route",
+      "route.central": "Central Route",
+      "route.days": "12–13 days",
+      "weight.label": "Weight target",
+      "weight.target": "Target per backpack",
+      "weight.base": "Base weight — excluding water, food and worn clothing.",
+      "weight.note": "Around 6.8–8.2 kg in the morning. Aim to stay below 10% of body weight.",
+      "overview.label": "Your progress",
+      "overview.title": "What is already in the backpack",
+      "overview.important": "Essential & useful",
+      "overview.weight": "Current weight",
+      "overview.weightDetail": "Checked backpack items",
+      "overview.profile": "Trip profile",
+      "overview.profileDetail": "people × maximum walking days",
+      "overview.none": "Nothing checked yet",
+      "overview.detail": "{done} of {total} important items checked",
+      "checklist.label": "Interactive list",
+      "checklist.title": "Pack without duplicates",
+      "checklist.copy": "Checkmarks, weights and custom items are synchronised across your devices.",
+      "profiles.label": "Choose packing list",
+      "profiles.p1": "My list",
+      "profiles.p2": "My wife's list",
+      "profiles.shared": "Shared",
+      "profiles.sharedTitle": "Shared gear",
+      "profiles.meta": "{done} of {total}",
+      "profiles.summary": "{done} of {total} important items · {weight} packed",
+      "search.label": "Search items",
+      "search.placeholder": "Search for an item …",
+      "filters.label": "Filter by priority",
+      "filters.all": "All",
+      "priority.must": "Essential",
+      "priority.recommended": "Useful",
+      "priority.optional": "Optional",
+      "mode.pack": "backpack",
+      "mode.worn": "worn",
+      "mode.consumable": "consumable",
+      "empty.title": "Nothing found",
+      "empty.copy": "Try a different search term or filter.",
+      "item.uncheck": "Remove packed mark",
+      "item.check": "Mark as packed",
+      "item.custom": "Custom item",
+      "item.weightTitle": "Adjust weight",
+      "item.weightAria": "Weight of {name} in grams",
+      "item.delete": "Delete {name}",
+      "item.deleteConfirm": "Really delete “{name}” from “{list}”?",
+      "rename.profileAria": "Rename list “{name}”",
+      "rename.profilePrompt": "New name for this list (leave blank for the default):",
+      "rename.itemAria": "Rename “{name}”",
+      "rename.itemPrompt": "New name for this item (leave blank for the default):",
+      "custom.category": "Custom additions",
+      "custom.title": "Add your own item",
+      "custom.copy": "Saved for both of you and included in the total weight.",
+      "custom.selectList": "Choose list",
+      "custom.name": "Name",
+      "custom.namePlaceholder": "e.g. knee support",
+      "custom.gramsLabel": "Weight in grams",
+      "custom.grams": "Grams",
+      "custom.priority": "Priority",
+      "custom.add": "Add",
+      "film.label": "Animated packing guide",
+      "film.title": "How to pack your backpack properly",
+      "film.intro": "Scroll through the front and side views. Each key packing zone is explained exactly when it appears.",
+      "film.canvas": "Animated front and side view of a properly packed hiking backpack",
+      "film.loading": "Preparing the packing view …",
+      "film.error": "The packing view could not be loaded.",
+      "film.scroll": "Scroll",
+      "film.chapter1Label": "Orientation",
+      "film.chapter1Title": "See the front. Understand the side.",
+      "film.chapter1Copy": "As you scroll, the backpack opens and turns — silently and at your pace.",
+      "film.chapter2Label": "Lower zone",
+      "film.chapter2Title": "Light items go low.",
+      "film.chapter2Copy": "Sleep gear and light clothing fill the bottom and create a stable base.",
+      "film.chapter3Label": "Centre of gravity",
+      "film.chapter3Title": "Keep heavy items close to your back.",
+      "film.chapter3Copy": "Water, electronics and dense items belong close to your body in the middle — not near the outer wall.",
+      "film.chapter4Label": "Quick access",
+      "film.chapter4Title": "Keep essentials high and outside.",
+      "film.chapter4Copy": "Rain jacket, sun protection, snacks and your daytime kit stay accessible without unpacking everything.",
+      "film.chapter5Label": "Final check",
+      "film.chapter5Title": "Check the side. Then tighten.",
+      "film.chapter5Copy": "The centre of gravity stays close to your body, both sides are balanced and nothing dangles outside.",
+      "film.target": "Base weight per person",
+      "guide.label": "The simple system",
+      "guide.title": "Three rules for lighter steps",
+      "guide.oneTitle": "Wash instead of carry",
+      "guide.oneCopy": "Two hiking shirts, two pairs of trousers and three pairs of socks are enough with regular washing.",
+      "guide.twoTitle": "Critical gear for each person",
+      "guide.twoCopy": "Documents, medication, rain gear and a sleeping bag are carried by each person.",
+      "guide.threeTitle": "Comfort gear only once",
+      "guide.threeCopy": "Share the power bank, charger, first-aid kit and laundry set fairly between both backpacks.",
+      "note.label": "Do not forget",
+      "note.title": "Two credenciales, two stamps per day",
+      "note.copy": "During the final 100 kilometres, each person collects at least two stamps per day — for the Compostela and as a memory of your journey.",
+      "footer.route": "Porto · Coast · Central Route · Santiago",
+      "footer.copy": "For your late-summer pilgrimage in 2026.",
+      "sync.loading": "Loading shared storage …",
+      "sync.saving": "Saving …",
+      "sync.saved": "Saved for both of you",
+      "sync.local": "Saved on this device only",
+      "sync.offline": "Offline — changes remain on this device",
+      "reset.confirm": "Reset the entire packing list to its defaults? Checkmarks, adjusted weights, custom items, deletions and renamed entries will be removed."
+    },
     ru: {
       "page.title": "Наш список вещей для Камино",
       "nav.main": "Главная навигация",
@@ -310,6 +425,80 @@
     sporks: ["Полезные мелочи", "2 лёгкие ложки / спорка", "В кухнях муниципальных альберге часто нет посуды"]
   };
 
+  const englishItems = {
+    backpack: ["Backpack & organisation", "32–38 l backpack with hip belt", "Test it beforehand with the full load"],
+    liner: ["Backpack & organisation", "Waterproof backpack liner", "More important than a simple rain cover"],
+    packsacks: ["Backpack & organisation", "2 lightweight dry bags / zip bags", "Keep clean and wet items separate"],
+    valuables: ["Backpack & organisation", "Small valuables pouch", "Keep it within reach, including at night"],
+    shoes: ["Footwear & feet", "Broken-in trail or hiking shoes", "Do not start in brand-new shoes"],
+    sandals: ["Footwear & feet", "Lightweight shower sandals", "For albergues and evenings"],
+    socks: ["Footwear & feet", "3 pairs of tested hiking socks", "1 pair worn, 2 in the backpack"],
+    insoles: ["Footwear & feet", "Tested insoles", "Only if you already use them"],
+    shirts: ["Clothing", "2 lightweight hiking shirts", "1 worn, 1 in the backpack"],
+    "sleep-shirt": ["Clothing", "Light sleep / evening shirt", "Dry clothing for the dormitory"],
+    pants: ["Clothing", "2 pairs of hiking trousers", "Shorts plus light long trousers or zip-offs"],
+    underwear: ["Clothing", "3 pairs of underwear", "Quick-drying"],
+    sportsbras: ["Clothing", "2 sports bras, if needed", "Test for chafing beforehand"],
+    "sleep-shorts": ["Clothing", "Very light sleep shorts", "Skip them if hiking trousers are enough"],
+    fleece: ["Clothing", "Thin fleece / mid-layer", "For cool Galician mornings"],
+    hat: ["Clothing", "Cap or sun hat", "Some coastal stretches offer little shade"],
+    buff: ["Clothing", "Buff / multifunctional neckwear", "For sun, wind and cool mornings"],
+    "rain-jacket": ["Rain & wind", "Waterproof rain jacket", "With a well-fitting hood"],
+    "rain-bottom": ["Rain & wind", "Rain trousers or rain skirt", "Lightweight and quick to put on"],
+    sleepingbag: ["Sleeping", "Lightweight sleeping bag", "Comfort range around 10–15 °C"],
+    earplugs: ["Sleeping", "Earplugs", "Bring several spare pairs"],
+    sleepmask: ["Sleeping", "Sleep mask", "For shared dormitories"],
+    headlamp: ["Sleeping", "Small headlamp", "Red light is considerate to other sleepers"],
+    tooth: ["Hygiene", "Toothbrush and small toothpaste", "Travel size"],
+    deodorant: ["Hygiene", "Small deodorant", "No full-size container"],
+    soap: ["Hygiene", "Small solid wash bar", "In a ventilated case or mesh bag"],
+    towel: ["Hygiene", "Microfibre towel", "About 40 × 80 cm"],
+    lipbalm: ["Hygiene", "Lip balm with SPF", "For sun and coastal wind"],
+    "personal-hygiene": ["Hygiene", "Personal hygiene items", "Pack only a realistic amount"],
+    sanitizer: ["Hygiene", "Small hand sanitiser", "Travel size"],
+    tissues: ["Hygiene", "Tissues / emergency paper", "A small amount"],
+    id: ["Documents & money", "ID card or passport", "Keep on your person or securely stored"],
+    credential: ["Documents & money", "Official pilgrim credencial", "Final 100 km: 2 stamps per day"],
+    ehic: ["Documents & money", "European Health Insurance Card", "Plus proof of insurance"],
+    cards: ["Documents & money", "Bank card plus separate backup card", "Split them between both backpacks"],
+    cash: ["Documents & money", "€50–100 in cash", "Use small notes"],
+    emergency: ["Documents & money", "Emergency contacts on paper", "Plus digital copies of documents"],
+    phone: ["Technology", "Smartphone with offline map", "In a protective case"],
+    cable: ["Technology", "Short charging cable", "Compatible with the shared charger"],
+    "watch-cable": ["Technology", "Watch / device cable as needed", "Only bring cables you actually need"],
+    bottles: ["Water & on the way", "Bottles for 1–1.5 l of water", "Adjust capacity to the day's stage"],
+    electrolytes: ["Water & on the way", "2–4 servings of electrolytes", "A small reserve for hot days"],
+    foodbag: ["Water & on the way", "Light bag for daytime food", "Do not carry several days of food"],
+    poles: ["Optional", "2 trekking poles", "Only if trained with them; check flight rules"],
+    sunglasses: ["Optional", "Sunglasses", "With a secure case or strap"],
+    swimwear: ["Optional", "Swimwear", "Skip it if your hiking shorts work for swimming"],
+    shell: ["Optional", "Pilgrim shell", "Pilgrim symbol and keepsake"],
+    charger: ["Charging", "Dual-port USB charger", "30–45 W is enough"],
+    powerbank: ["Charging", "10,000 mAh power bank", "One for both of you"],
+    sunscreen: ["Care", "SPF 50 sunscreen", "Start with 100–150 ml and buy more en route"],
+    antichafe: ["Care", "Anti-chafe stick / foot balm", "Use early on known friction points"],
+    repellent: ["Care", "Small insect repellent", "If you react strongly to bites"],
+    blister: ["Mini first-aid kit", "Blister plasters in several sizes", "Hydrocolloid"],
+    tape: ["Mini first-aid kit", "Tested sports tape", "Use preventively on friction points"],
+    dressings: ["Mini first-aid kit", "Plasters and sterile dressings", "A small selection"],
+    disinfectant: ["Mini first-aid kit", "Small wound disinfectant", "Travel size"],
+    tweezers: ["Mini first-aid kit", "Tweezers", "Small and light"],
+    bandage: ["Mini first-aid kit", "Small elastic bandage", "One shared between you"],
+    "known-meds": ["Mini first-aid kit", "A few familiar standard medicines", "Only what you tolerate; keep personal medication separate"],
+    rehydration: ["Mini first-aid kit", "2 servings of oral rehydration solution", "For heat or stomach problems"],
+    nailclipper: ["Mini first-aid kit", "Nail clippers / small file", "More flight-friendly than scissors"],
+    laundrysoap: ["Laundry & repairs", "Small laundry soap / travel detergent", "For regular washing"],
+    pegs: ["Laundry & repairs", "4–6 small clothes pegs", "Or safety pins"],
+    line: ["Laundry & repairs", "3–4 m thin clothesline", "One for both of you"],
+    sewing: ["Laundry & repairs", "Mini sewing kit", "Needle, thread and 2 safety pins"],
+    "tape-repair": ["Laundry & repairs", "A little duct tape", "Wrapped around an old card"],
+    zips: ["Laundry & repairs", "Extra zip bags", "For wet items, rubbish and electronics"],
+    tote: ["Everyday helpers", "Lightweight tote bag", "For shopping at the end of a stage"],
+    lock: ["Everyday helpers", "Small padlock", "If a locker is available"],
+    pen: ["Everyday helpers", "Ballpoint pen", "For the credencial and forms"],
+    sporks: ["Everyday helpers", "2 lightweight spoons / sporks", "Municipal albergue kitchens often have no utensils"]
+  };
+
   const personalItems = [
     { id: "backpack", category: "Rucksack & Ordnung", name: "Rucksack 32–38 l mit Hüftgurt", note: "Vorher mit vollem Gewicht testen", weight: 1000, priority: "must", mode: "pack" },
     { id: "liner", category: "Rucksack & Ordnung", name: "Wasserdichter Rucksackliner", note: "Wichtiger als eine reine Regenhülle", weight: 70, priority: "must", mode: "pack" },
@@ -438,7 +627,8 @@
 
   function loadLanguage() {
     try {
-      return localStorage.getItem(LANGUAGE_KEY) === "ru" ? "ru" : "de";
+      const stored = localStorage.getItem(LANGUAGE_KEY);
+      return ["de", "en", "ru"].includes(stored) ? stored : "de";
     } catch (_) {
       return "de";
     }
@@ -464,6 +654,9 @@
     let localized;
     if (item.custom === true) {
       localized = { ...item, category: t("custom.category"), note: t("item.custom") };
+    } else if (activeLanguage === "en" && englishItems[item.id]) {
+      const [category, name, note] = englishItems[item.id];
+      localized = { ...item, category, name, note };
     } else if (activeLanguage === "ru" && russianItems[item.id]) {
       const [category, name, note] = russianItems[item.id];
       localized = { ...item, category, name, note };
@@ -497,11 +690,11 @@
   }
 
   function setLanguage(language) {
-    activeLanguage = language === "ru" ? "ru" : "de";
+    activeLanguage = ["en", "ru"].includes(language) ? language : "de";
     try {
       localStorage.setItem(LANGUAGE_KEY, activeLanguage);
     } catch (_) {}
-    searchTerm = els.search.value.trim().toLocaleLowerCase(activeLanguage === "ru" ? "ru-RU" : "de-DE");
+    searchTerm = els.search.value.trim().toLocaleLowerCase(languageLocale());
     applyStaticTranslations();
     render();
   }
@@ -635,8 +828,13 @@
   }
 
   function formatWeight(grams) {
-    const locale = activeLanguage === "ru" ? "ru-RU" : "de-DE";
-    return `${(grams / 1000).toLocaleString(locale, { minimumFractionDigits: 1, maximumFractionDigits: 2 })} kg`;
+    return `${(grams / 1000).toLocaleString(languageLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 2 })} kg`;
+  }
+
+  function languageLocale() {
+    if (activeLanguage === "ru") return "ru-RU";
+    if (activeLanguage === "en") return "en-GB";
+    return "de-DE";
   }
 
   function escapeHTML(value) {
@@ -659,8 +857,7 @@
 
     const filtered = getItems(activeProfile).map((item) => localizedItem(activeProfile, item)).filter((item) => {
       const filterMatch = activeFilter === "all" || item.priority === activeFilter;
-      const locale = activeLanguage === "ru" ? "ru-RU" : "de-DE";
-      const haystack = `${item.name} ${item.note} ${item.category}`.toLocaleLowerCase(locale);
+      const haystack = `${item.name} ${item.note} ${item.category}`.toLocaleLowerCase(languageLocale());
       return filterMatch && haystack.includes(searchTerm);
     });
 
@@ -785,7 +982,7 @@
   });
 
   els.search.addEventListener("input", (event) => {
-    searchTerm = event.target.value.trim().toLocaleLowerCase(activeLanguage === "ru" ? "ru-RU" : "de-DE");
+    searchTerm = event.target.value.trim().toLocaleLowerCase(languageLocale());
     render();
   });
 

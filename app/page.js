@@ -12,6 +12,7 @@ const pageMarkup = `
           <span class="sync-status" id="sync-status" role="status">Gemeinsamer Speicher wird geladen …</span>
           <div class="language-switch" role="group" aria-label="Sprache auswählen" data-i18n-aria="language.label">
             <button class="language-button active" type="button" data-language="de" aria-pressed="true">DE</button>
+            <button class="language-button" type="button" data-language="en" aria-pressed="false">EN</button>
             <button class="language-button" type="button" data-language="ru" aria-pressed="false">RU</button>
           </div>
           <button class="ghost-button" id="print-button" type="button" data-i18n="nav.print">Drucken</button>

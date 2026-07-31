@@ -71,6 +71,7 @@ const loginHtml = `<!doctype html>
       <div class="mark" aria-hidden="true">✦</div>
       <div class="languages" role="group" aria-label="Sprache auswählen" data-login-aria="language">
         <button type="button" data-login-language="de" aria-pressed="true">DE</button>
+        <button type="button" data-login-language="en" aria-pressed="false">EN</button>
         <button type="button" data-login-language="ru" aria-pressed="false">RU</button>
       </div>
     </div>
@@ -98,6 +99,15 @@ const loginHtml = `<!doctype html>
           submit: "Packliste öffnen",
           note: "Nur Personen mit dem Zugangscode können die Packliste sehen."
         },
+        en: {
+          title: "Sign in · Our Camino packing list",
+          language: "Choose language",
+          eyebrow: "Private Camino packing list",
+          copy: "Enter your shared access code. After signing in, checkmarks and weights will be securely synchronised across your devices.",
+          label: "Shared access code",
+          submit: "Open packing list",
+          note: "Only people with the access code can view the packing list."
+        },
         ru: {
           title: "Вход · Наш список вещей для Камино",
           language: "Выбрать язык",
@@ -110,7 +120,7 @@ const loginHtml = `<!doctype html>
       };
       var stored = "";
       try { stored = localStorage.getItem("camino-language-v1") || ""; } catch (_) {}
-      var language = stored === "ru" ? "ru" : "de";
+      var language = ["de", "en", "ru"].includes(stored) ? stored : "de";
       function applyLanguage() {
         var values = copy[language];
         document.documentElement.lang = language;
@@ -132,7 +142,7 @@ const loginHtml = `<!doctype html>
       }
       document.querySelectorAll("[data-login-language]").forEach(function (button) {
         button.addEventListener("click", function () {
-          language = button.dataset.loginLanguage === "ru" ? "ru" : "de";
+          language = ["en", "ru"].includes(button.dataset.loginLanguage) ? button.dataset.loginLanguage : "de";
           try { localStorage.setItem("camino-language-v1", language); } catch (_) {}
           applyLanguage();
         });
@@ -186,11 +196,11 @@ function json(data, status = 200) {
 
 function loginPage(message = "", status = 200) {
   const messages = {
-    attempts: ["Zu viele Versuche. Bitte wartet 15 Minuten.", "Слишком много попыток. Подождите 15 минут."],
-    code: ["Der Zugangscode ist nicht richtig.", "Неверный код доступа."],
+    attempts: ["Zu viele Versuche. Bitte wartet 15 Minuten.", "Слишком много попыток. Подождите 15 минут.", "Too many attempts. Please wait 15 minutes."],
+    code: ["Der Zugangscode ist nicht richtig.", "Неверный код доступа.", "The access code is incorrect."],
   };
   const selected = messages[message];
-  const error = selected ? '<p class="error" role="alert" data-login-error data-de="' + selected[0] + '" data-ru="' + selected[1] + '"></p>' : "";
+  const error = selected ? '<p class="error" role="alert" data-login-error data-de="' + selected[0] + '" data-ru="' + selected[1] + '" data-en="' + selected[2] + '"></p>' : "";
   return response(LOGIN_HTML.replace("{{ERROR}}", error), { status });
 }
 

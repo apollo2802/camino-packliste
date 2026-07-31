@@ -13,6 +13,8 @@ Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1
 
 ### Hinzugefügt
 
+- Englischer Sprachmodus für Anmeldung, Packlisten-Oberfläche, alle
+  Standardgegenstände und die animierte Packanleitung.
 - Scrollgesteuerte Rucksack-Packanleitung mit Vorder- und Seitenansicht.
 - Je 100 optimierte Einzelbilder für Desktop und Mobilgeräte.
 - Fünf animierte Kapitel zu Orientierung, unterer Packzone, Schwerpunkt,
