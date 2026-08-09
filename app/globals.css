@@ -226,7 +226,13 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-route-casing { fill: none; stroke: #302815; stroke-width: 12; stroke-linecap: round; stroke-linejoin: round; opacity: .9; }
 .diary-route-line { fill: none; stroke: #ffca35; stroke-width: 7; stroke-linecap: round; stroke-linejoin: round; }
 .diary-tour { position: relative; z-index: 1; min-height: 300px; }
-.diary-route-canvas { display: block; width: 100%; height: 300px; }
+.diary-route-canvas { display: block; width: 100%; height: 300px; cursor: grab; touch-action: none; }
+.diary-route-canvas:active { cursor: grabbing; }
+.diary-map-loading { position: absolute; z-index: 4; inset: 0; display: grid; place-items: center; padding: 2rem; color: #20313a; background: linear-gradient(145deg,#dcebf2,#b9d3be); font-size: .8rem; font-weight: 800; letter-spacing: .05em; text-align: center; }
+.diary-map-loading[hidden] { display: none; }
+.diary-map-loading.error { color: #8b352b; background: #f8eae5; }
+.diary-tour-hint { position: absolute; z-index: 3; top: 1rem; right: 1rem; padding: .4rem .55rem; border: 1px solid rgba(255,255,255,.55); border-radius: 999px; color: white; background: rgba(12,43,38,.64); backdrop-filter: blur(8px); font-size: .65rem; font-weight: 850; letter-spacing: .08em; }
+.diary-map-attribution { position: absolute; z-index: 3; right: 1rem; bottom: 4.8rem; padding: .25rem .4rem; border-radius: 6px; color: rgba(255,255,255,.86); background: rgba(12,43,38,.58); font-size: .52rem; }
 .diary-tour-controls { position: absolute; z-index: 3; right: 1rem; bottom: 1rem; left: 1rem; display: flex; align-items: center; gap: .7rem; padding: .55rem; border: 1px solid rgba(255,255,255,.44); border-radius: 999px; background: rgba(12,43,38,.78); box-shadow: 0 9px 25px rgba(5,30,29,.22); backdrop-filter: blur(12px); }
 .diary-tour-controls button { flex: 0 0 auto; min-width: 150px; border: 0; border-radius: 999px; padding: .6rem .8rem; color: #20313a; background: #ffcd30; cursor: pointer; font-size: .72rem; font-weight: 850; }
 .diary-tour-controls button.playing { color: white; background: #e84a2a; }

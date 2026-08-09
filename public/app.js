@@ -105,6 +105,9 @@
       "diary.pause": "Animation pausieren",
       "diary.replay": "Noch einmal wandern",
       "diary.animation": "Animierte 3D-Höhenkarte der Etappe",
+      "diary.mapLoading": "3D-Topokarte wird aufgebaut …",
+      "diary.mapError": "Die 3D-Karte konnte nicht geladen werden. Bitte Internetverbindung prüfen.",
+      "diary.attribution": "© OpenStreetMap / OpenTopoMap · Höhen: Mapzen",
       "diary.distance": "Kilometer",
       "diary.ascent": "Aufstieg",
       "diary.descent": "Abstieg",
@@ -255,6 +258,9 @@
       "diary.pause": "Pause animation",
       "diary.replay": "Walk again",
       "diary.animation": "Animated 3D elevation map of the stage",
+      "diary.mapLoading": "Building 3D topographic map …",
+      "diary.mapError": "The 3D map could not be loaded. Please check your internet connection.",
+      "diary.attribution": "© OpenStreetMap / OpenTopoMap · elevation: Mapzen",
       "diary.distance": "Kilometres",
       "diary.ascent": "Ascent",
       "diary.descent": "Descent",
@@ -405,6 +411,9 @@
       "diary.pause": "Приостановить анимацию",
       "diary.replay": "Пройти ещё раз",
       "diary.animation": "Анимированная 3D-карта высот этапа",
+      "diary.mapLoading": "Создаётся 3D-топографическая карта …",
+      "diary.mapError": "Не удалось загрузить 3D-карту. Проверьте подключение к интернету.",
+      "diary.attribution": "© OpenStreetMap / OpenTopoMap · высоты: Mapzen",
       "diary.distance": "Километры",
       "diary.ascent": "Набор",
       "diary.descent": "Спуск",
@@ -714,6 +723,7 @@
   let syncTimer = null;
   let pendingGpx = null;
   let diaryAnimationStops = [];
+  let diaryAnimationGeneration = 0;
   let currentSyncStatus = { key: "sync.loading", isError: false };
 
   const els = {
@@ -1008,7 +1018,7 @@
     return `M0,${height} L${points.join(" L")} L${width},${height} Z`;
   }
 
-  function initDiaryAnimations() {
+  function initDiaryCanvasAnimations() {
     diaryAnimationStops.forEach((stop) => stop());
     diaryAnimationStops = [];
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -1238,6 +1248,35 @@
     });
   }
 
+  function initDiaryAnimations() {
+    diaryAnimationStops.forEach((stop) => stop());
+    diaryAnimationStops = [];
+    const generation = ++diaryAnimationGeneration;
+    const tours = [...els.diaryFeed.querySelectorAll("[data-diary-tour]")];
+    if (!tours.length) return;
+    import("/diary-3d.js?v=3").then(({ mountDiaryTour }) => {
+      if (generation !== diaryAnimationGeneration) return;
+      tours.forEach((tour) => {
+        const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
+        if (!entry || entry.track.length < 2) return;
+        diaryAnimationStops.push(mountDiaryTour(tour, entry, {
+          play: t("diary.play"),
+          pause: t("diary.pause"),
+          replay: t("diary.replay"),
+          error: t("diary.mapError")
+        }));
+      });
+    }).catch(() => {
+      tours.forEach((tour) => {
+        const loading = tour.querySelector("[data-tour-loading]");
+        if (loading) {
+          loading.textContent = t("diary.mapError");
+          loading.classList.add("error");
+        }
+      });
+    });
+  }
+
   function renderDiary() {
     if (!els.diaryFeed) return;
     const entries = [...state.diary].sort((left, right) => String(right.date).localeCompare(String(left.date)));
@@ -1249,7 +1288,7 @@
       const stats = entry.stats;
       const polyline = routePolyline(entry.track);
       const map = polyline
-        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><input type="range" min="0" max="100" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
+        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><div class="diary-tour-hint" aria-hidden="true">↻ 3D</div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const statMarkup = stats ? `<div class="diary-stats">

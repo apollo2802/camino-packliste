@@ -38,6 +38,7 @@ const appScript = readFileSync("public/app.js", "utf8").replace(
   /<\/script/gi,
   "<\\/script",
 );
+const diary3dScript = readFileSync("public/diary-3d.js", "utf8");
 
 html = html
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -166,6 +167,7 @@ const attemptsSchemaSql = `CREATE TABLE IF NOT EXISTS login_attempts (
 
 const worker = `const INDEX_HTML = ${JSON.stringify(html)};
 const LOGIN_HTML = ${JSON.stringify(loginHtml)};
+const DIARY_3D_JS = ${JSON.stringify(diary3dScript)};
 const STATE_SCHEMA_SQL = ${JSON.stringify(stateSchemaSql)};
 const ATTEMPTS_SCHEMA_SQL = ${JSON.stringify(attemptsSchemaSql)};
 const SESSION_COOKIE = "camino_session";
@@ -174,7 +176,7 @@ const encoder = new TextEncoder();
 
 const SECURITY_HEADERS = {
   "cache-control": "private, no-store",
-  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; img-src 'self' data: https://a.tile.opentopomap.org https://s3.amazonaws.com; connect-src 'self' https://esm.sh; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   "cross-origin-opener-policy": "same-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=()",
   "referrer-policy": "no-referrer",
@@ -340,6 +342,13 @@ export default {
           location: "/",
           "set-cookie": SESSION_COOKIE + "=; Path=/; HttpOnly" + secure + "; SameSite=Strict; Max-Age=0",
         },
+      });
+    }
+
+    if (url.pathname === "/diary-3d.js" && request.method === "GET") {
+      return response(DIARY_3D_JS, {
+        contentType: "text/javascript; charset=utf-8",
+        headers: { "cache-control": "public, max-age=3600" },
       });
     }
 
