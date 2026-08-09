@@ -96,6 +96,7 @@ function makeWalker() {
   const backpack = new THREE.MeshStandardMaterial({ color: 0xb83b3b, roughness: .8 });
   const skin = new THREE.MeshStandardMaterial({ color: 0xc98c6b, roughness: .8 });
   const hat = new THREE.MeshStandardMaterial({ color: 0x2d5b4c, roughness: .82 });
+  const poleMaterial = new THREE.MeshStandardMaterial({ color: 0x5b4635, roughness: .88 });
   const white = new THREE.MeshBasicMaterial({ color: 0xfff7e8, transparent: true, opacity: .92 });
 
   const body = new THREE.Mesh(new THREE.CapsuleGeometry(.13, .26, 4, 8), jacket);
@@ -118,12 +119,30 @@ function makeWalker() {
   leftLeg.position.set(-.065, .19, 0);
   rightLeg.position.set(.065, .19, 0);
   group.add(leftLeg, rightLeg);
+  const leftArm = new THREE.Mesh(new THREE.CapsuleGeometry(.027, .22, 3, 6), jacket);
+  const rightArm = leftArm.clone();
+  leftArm.position.set(-.16, .49, 0);
+  rightArm.position.set(.16, .49, -.015);
+  leftArm.rotation.z = -.42;
+  rightArm.rotation.z = .58;
+  rightArm.rotation.x = -.36;
+  group.add(leftArm, rightArm);
+  const trekkingPole = new THREE.Mesh(new THREE.CylinderGeometry(.013, .019, .78, 8), poleMaterial);
+  trekkingPole.position.set(.29, .31, -.12);
+  trekkingPole.rotation.z = -.14;
+  trekkingPole.rotation.x = -.2;
+  group.add(trekkingPole);
+  const poleGrip = new THREE.Mesh(new THREE.CylinderGeometry(.026, .026, .12, 8), hat);
+  poleGrip.position.set(.235, .69, -.04);
+  poleGrip.rotation.z = -.14;
+  poleGrip.rotation.x = -.2;
+  group.add(poleGrip);
   const ring = new THREE.Mesh(new THREE.RingGeometry(.22, .31, 24), white);
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = .025;
   group.add(ring);
-  group.scale.setScalar(.72);
-  group.userData = { leftLeg, rightLeg };
+  group.scale.setScalar(1.16);
+  group.userData = { leftLeg, rightLeg, leftArm, rightArm, trekkingPole };
   return group;
 }
 
@@ -215,11 +234,22 @@ export function mountDiaryTour(root, entry, translations) {
       scene.add(terrain);
 
       const curve = routeCurve(entry.track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale);
+      const routeBounds = new THREE.Box3().setFromPoints(curve.getPoints(160));
+      const routeCenter = routeBounds.getCenter(new THREE.Vector3());
+      const routeSize = routeBounds.getSize(new THREE.Vector3());
+      const routeSpan = Math.max(6, routeSize.x, routeSize.z);
+      controls.target.copy(routeCenter);
+      camera.position.set(
+        routeCenter.x + routeSpan * .82,
+        routeCenter.y + routeSpan * .78,
+        routeCenter.z + routeSpan * .96
+      );
+      controls.update();
       const segments = Math.max(280, entry.track.length * 4);
-      const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .105, 7, false), new THREE.MeshStandardMaterial({ color: 0xfff7e8, roughness: .7, depthTest: false }));
+      const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .105, 7, false), new THREE.MeshStandardMaterial({ color: 0xfff7e8, roughness: .7, depthTest: true }));
       casing.renderOrder = 3;
       scene.add(casing);
-      const route = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .067, 7, false), new THREE.MeshStandardMaterial({ color: 0xffcd30, emissive: 0xd69816, emissiveIntensity: .08, roughness: .58, depthTest: false }));
+      const route = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .067, 7, false), new THREE.MeshStandardMaterial({ color: 0xffcd30, emissive: 0xd69816, emissiveIntensity: .08, roughness: .58, depthTest: true }));
       route.renderOrder = 4;
       scene.add(route);
       const walker = makeWalker();
@@ -245,11 +275,25 @@ export function mountDiaryTour(root, entry, translations) {
         const point = curve.getPointAt(fraction);
         const ahead = curve.getPointAt(Math.min(1, fraction + .003));
         walker.position.copy(point);
+        walker.position.y += .09;
         walker.lookAt(ahead.x, point.y, ahead.z);
         const stride = Math.sin(time / 105) * .55;
         walker.userData.leftLeg.rotation.x = stride;
         walker.userData.rightLeg.rotation.x = -stride;
+        walker.userData.leftArm.rotation.x = -stride * .58;
+        walker.userData.rightArm.rotation.x = -.36 + stride * .34;
+        walker.userData.trekkingPole.rotation.x = -.2 + stride * .08;
         walker.position.y += Math.abs(Math.sin(time / 105)) * .025;
+        if (playing) {
+          const direction = ahead.clone().sub(point).normalize();
+          const cameraTarget = point.clone();
+          cameraTarget.y += .48;
+          const desiredCamera = cameraTarget.clone()
+            .addScaledVector(direction, -4.25)
+            .add(new THREE.Vector3(1.45, 3.35, 0));
+          camera.position.lerp(desiredCamera, .055);
+          controls.target.lerp(cameraTarget, .075);
+        }
         controls.update();
         renderer.render(scene, camera);
         if (playing && fraction >= 1) {
