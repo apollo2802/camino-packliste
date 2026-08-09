@@ -101,6 +101,10 @@
       "diary.emptyCopy": "Nach jeder Etappe könnt ihr hier die Komoot-GPX und eure Erinnerungen gemeinsam festhalten.",
       "diary.noRoute": "Etappe ohne GPX-Aufzeichnung",
       "diary.route": "GPX-Route",
+      "diary.play": "3D-Wanderung starten",
+      "diary.pause": "Animation pausieren",
+      "diary.replay": "Noch einmal wandern",
+      "diary.animation": "Animierte 3D-Höhenkarte der Etappe",
       "diary.distance": "Kilometer",
       "diary.ascent": "Aufstieg",
       "diary.descent": "Abstieg",
@@ -247,6 +251,10 @@
       "diary.emptyCopy": "After each stage, add your Komoot GPX and shared memories here.",
       "diary.noRoute": "Stage without GPX recording",
       "diary.route": "GPX route",
+      "diary.play": "Start 3D walk",
+      "diary.pause": "Pause animation",
+      "diary.replay": "Walk again",
+      "diary.animation": "Animated 3D elevation map of the stage",
       "diary.distance": "Kilometres",
       "diary.ascent": "Ascent",
       "diary.descent": "Descent",
@@ -393,6 +401,10 @@
       "diary.emptyCopy": "После каждого этапа добавляйте сюда GPX из Komoot и ваши общие воспоминания.",
       "diary.noRoute": "Этап без GPX-записи",
       "diary.route": "GPX-маршрут",
+      "diary.play": "Начать 3D-прогулку",
+      "diary.pause": "Приостановить анимацию",
+      "diary.replay": "Пройти ещё раз",
+      "diary.animation": "Анимированная 3D-карта высот этапа",
       "diary.distance": "Километры",
       "diary.ascent": "Набор",
       "diary.descent": "Спуск",
@@ -701,6 +713,7 @@
   let serverReady = false;
   let syncTimer = null;
   let pendingGpx = null;
+  let diaryAnimationStops = [];
   let currentSyncStatus = { key: "sync.loading", isError: false };
 
   const els = {
@@ -995,6 +1008,236 @@
     return `M0,${height} L${points.join(" L")} L${width},${height} Z`;
   }
 
+  function initDiaryAnimations() {
+    diaryAnimationStops.forEach((stop) => stop());
+    diaryAnimationStops = [];
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    els.diaryFeed.querySelectorAll("[data-diary-tour]").forEach((tour) => {
+      const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
+      const canvas = tour.querySelector("canvas");
+      const button = tour.querySelector("[data-tour-play]");
+      const progress = tour.querySelector("[data-tour-progress]");
+      if (!entry || entry.track.length < 2 || !canvas || !button || !progress) return;
+
+      const context = canvas.getContext("2d");
+      let fraction = 0;
+      let playing = false;
+      let frame = 0;
+      let startedAt = 0;
+      let startFraction = 0;
+      let stopped = false;
+
+      function geometry(width, height) {
+        const lats = entry.track.map((point) => point[0]);
+        const lons = entry.track.map((point) => point[1]);
+        const elevations = entry.track.map((point) => point[2]);
+        const minLat = Math.min(...lats);
+        const maxLat = Math.max(...lats);
+        const minLon = Math.min(...lons);
+        const maxLon = Math.max(...lons);
+        const minEle = Math.min(...elevations);
+        const maxEle = Math.max(...elevations);
+        const lonSpan = Math.max(.00001, maxLon - minLon);
+        const latSpan = Math.max(.00001, maxLat - minLat);
+        const elevationSpan = Math.max(1, maxEle - minEle);
+        const normalized = entry.track.map((point) => ({
+          x: (point[1] - minLon) / lonSpan - .5,
+          z: (maxLat - point[0]) / latSpan - .5,
+          e: (point[2] - minEle) / elevationSpan
+        }));
+        const angle = -.44;
+        const rotated = normalized.map((point) => ({
+          x: point.x * Math.cos(angle) - point.z * Math.sin(angle),
+          z: point.x * Math.sin(angle) + point.z * Math.cos(angle),
+          e: point.e
+        }));
+        const xs = rotated.map((point) => point.x);
+        const zs = rotated.map((point) => point.z);
+        const minX = Math.min(...xs);
+        const maxX = Math.max(...xs);
+        const minZ = Math.min(...zs);
+        const maxZ = Math.max(...zs);
+        const scale = Math.min((width - 92) / Math.max(.01, maxX - minX), (height - 96) / Math.max(.01, maxZ - minZ));
+        return rotated.map((point) => ({
+          x: width / 2 + (point.x - (minX + maxX) / 2) * scale,
+          y: Math.max(42, Math.min(height - 64, height / 2 + (point.z - (minZ + maxZ) / 2) * scale * .62 - point.e * Math.min(58, height * .18))),
+          e: point.e
+        }));
+      }
+
+      function pointAt(points, value) {
+        const scaled = Math.max(0, Math.min(1, value)) * (points.length - 1);
+        const index = Math.min(points.length - 2, Math.floor(scaled));
+        const mix = scaled - index;
+        const left = points[index];
+        const right = points[index + 1];
+        return { x: left.x + (right.x - left.x) * mix, y: left.y + (right.y - left.y) * mix };
+      }
+
+      function strokeTrack(points, end, color, width) {
+        context.beginPath();
+        context.moveTo(points[0].x, points[0].y);
+        const scaled = Math.max(0, Math.min(1, end)) * (points.length - 1);
+        const last = Math.floor(scaled);
+        for (let index = 1; index <= last; index += 1) context.lineTo(points[index].x, points[index].y);
+        if (last < points.length - 1) {
+          const partial = pointAt(points, end);
+          context.lineTo(partial.x, partial.y);
+        }
+        context.strokeStyle = color;
+        context.lineWidth = width;
+        context.lineCap = "round";
+        context.lineJoin = "round";
+        context.stroke();
+      }
+
+      function drawWalker(point, time) {
+        const bob = Math.sin(time / 95) * 1.5;
+        const swing = Math.sin(time / 80) * 3.2;
+        context.save();
+        context.translate(point.x, point.y - 10 + bob);
+        context.shadowColor = "rgba(5,30,29,.34)";
+        context.shadowBlur = 7;
+        context.beginPath();
+        context.ellipse(0, 12 - bob, 10, 3.5, 0, 0, Math.PI * 2);
+        context.fillStyle = "rgba(255,255,255,.82)";
+        context.fill();
+        context.shadowBlur = 0;
+        context.lineWidth = 4;
+        context.lineCap = "round";
+        context.strokeStyle = "#243746";
+        context.beginPath();
+        context.moveTo(-2, 4); context.lineTo(-4 + swing, 13);
+        context.moveTo(2, 4); context.lineTo(5 - swing, 13);
+        context.stroke();
+        context.fillStyle = "#b83b3b";
+        context.fillRect(-7, -7, 5, 10);
+        context.fillStyle = "#f2b134";
+        context.beginPath(); context.roundRect(-4, -8, 9, 13, 3); context.fill();
+        context.strokeStyle = "#c98c6b";
+        context.lineWidth = 3;
+        context.beginPath();
+        context.moveTo(-2, -4); context.lineTo(-7 - swing * .55, 3);
+        context.moveTo(3, -4); context.lineTo(8 + swing * .55, 2);
+        context.stroke();
+        context.fillStyle = "#c98c6b";
+        context.beginPath(); context.arc(1, -13, 4.5, 0, Math.PI * 2); context.fill();
+        context.fillStyle = "#2d5b4c";
+        context.fillRect(-5, -18, 12, 3);
+        context.beginPath(); context.arc(1, -17, 5, Math.PI, 0); context.fill();
+        context.restore();
+      }
+
+      function draw(time = 0) {
+        const rect = canvas.getBoundingClientRect();
+        const ratio = Math.min(2, window.devicePixelRatio || 1);
+        const width = Math.max(280, Math.round(rect.width));
+        const height = Math.max(230, Math.round(rect.height));
+        if (canvas.width !== width * ratio || canvas.height !== height * ratio) {
+          canvas.width = width * ratio;
+          canvas.height = height * ratio;
+        }
+        context.setTransform(ratio, 0, 0, ratio, 0, 0);
+        context.clearRect(0, 0, width, height);
+        const points = geometry(width, height);
+        const gradient = context.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, "#dcebf2");
+        gradient.addColorStop(.48, "#b9d3be");
+        gradient.addColorStop(1, "#6f9075");
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, width, height);
+
+        context.save();
+        context.globalAlpha = .28;
+        for (let band = 0; band < 9; band += 1) {
+          context.beginPath();
+          const baseY = height * (.24 + band * .075);
+          context.moveTo(-20, baseY);
+          for (let x = -20; x <= width + 20; x += 16) {
+            const wave = Math.sin(x * .018 + band * .9) * (8 + band * .7) + Math.sin(x * .047 - band) * 4;
+            context.lineTo(x, baseY + wave);
+          }
+          context.strokeStyle = band % 3 === 0 ? "#f7f3ea" : "#355f50";
+          context.lineWidth = band % 3 === 0 ? 1.6 : 1;
+          context.stroke();
+        }
+        context.restore();
+
+        for (let layer = 12; layer >= 1; layer -= 1) strokeTrack(points.map((point) => ({ x: point.x, y: point.y + layer * 1.5 })), 1, `rgba(31,57,47,${.025 + layer * .008})`, 15);
+        strokeTrack(points, 1, "rgba(255,247,232,.96)", 12);
+        strokeTrack(points, 1, "rgba(117,96,49,.52)", 7);
+        strokeTrack(points, fraction, "#ffcd30", 7);
+        const walkerPoint = pointAt(points, fraction);
+        drawWalker(walkerPoint, playing ? time : 0);
+
+        const start = points[0];
+        const end = points.at(-1);
+        [[start, entry.from], [end, entry.to]].forEach(([point, label], index) => {
+          context.beginPath(); context.arc(point.x, point.y, 5, 0, Math.PI * 2); context.fillStyle = index ? "#e84a2a" : "#fff7e8"; context.fill();
+          if (label) {
+            context.font = "600 12px Inter, sans-serif";
+            context.lineWidth = 4; context.strokeStyle = "rgba(255,255,255,.9)"; context.strokeText(label, point.x + 9, point.y - 8);
+            context.fillStyle = "#20313a"; context.fillText(label, point.x + 9, point.y - 8);
+          }
+        });
+      }
+
+      function tick(time) {
+        if (stopped || !playing) return;
+        if (!startedAt) startedAt = time;
+        fraction = Math.min(1, startFraction + (time - startedAt) / 16000);
+        progress.value = String(Math.round(fraction * 100));
+        draw(time);
+        if (fraction >= 1) {
+          playing = false;
+          button.textContent = t("diary.replay");
+          button.classList.remove("playing");
+          return;
+        }
+        frame = requestAnimationFrame(tick);
+      }
+
+      function toggle() {
+        if (playing) {
+          playing = false;
+          cancelAnimationFrame(frame);
+          button.textContent = t("diary.play");
+          button.classList.remove("playing");
+          return;
+        }
+        if (fraction >= 1) fraction = 0;
+        playing = true;
+        startFraction = fraction;
+        startedAt = 0;
+        button.textContent = t("diary.pause");
+        button.classList.add("playing");
+        frame = requestAnimationFrame(tick);
+      }
+
+      button.addEventListener("click", toggle);
+      progress.addEventListener("input", () => {
+        fraction = Number(progress.value) / 100;
+        startFraction = fraction;
+        startedAt = 0;
+        draw(performance.now());
+      });
+      let resizeFrame = 0;
+      const resize = () => {
+        cancelAnimationFrame(resizeFrame);
+        resizeFrame = requestAnimationFrame(() => draw(performance.now()));
+      };
+      window.addEventListener("resize", resize, { passive: true });
+      draw();
+      diaryAnimationStops.push(() => {
+        stopped = true;
+        cancelAnimationFrame(frame);
+        cancelAnimationFrame(resizeFrame);
+        window.removeEventListener("resize", resize);
+      });
+    });
+  }
+
   function renderDiary() {
     if (!els.diaryFeed) return;
     const entries = [...state.diary].sort((left, right) => String(right.date).localeCompare(String(left.date)));
@@ -1006,7 +1249,7 @@
       const stats = entry.stats;
       const polyline = routePolyline(entry.track);
       const map = polyline
-        ? `<svg class="diary-route-svg" viewBox="0 0 640 300" role="img" aria-label="${escapeHTML(t("diary.route"))}"><polyline class="diary-route-casing" points="${polyline}"></polyline><polyline class="diary-route-line" points="${polyline}"></polyline></svg>`
+        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><input type="range" min="0" max="100" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const statMarkup = stats ? `<div class="diary-stats">
@@ -1025,6 +1268,7 @@
         </div>
       </article>`;
     }).join("");
+    initDiaryAnimations();
   }
 
   function haversine(left, right) {
