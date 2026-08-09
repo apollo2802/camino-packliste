@@ -16,6 +16,7 @@ const pageMarkup = `
             <button class="language-button" type="button" data-language="ru" aria-pressed="false">RU</button>
           </div>
           <button class="ghost-button" id="print-button" type="button" data-i18n="nav.print">Drucken</button>
+          <a class="ghost-button diary-link" href="#tagebuch" data-i18n="nav.diary">Tagebuch</a>
           <button class="ghost-button danger-subtle" id="reset-button" type="button" data-i18n="nav.reset">Zurücksetzen</button>
           <a class="ghost-button" href="/logout" data-i18n="nav.logout">Abmelden</a>
         </div>
@@ -218,6 +219,41 @@ const pageMarkup = `
               <span class="film-scroll-cue" data-i18n="film.scroll">Scrollen</span>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section class="diary-section" id="tagebuch" aria-labelledby="diary-title">
+        <div class="section-heading diary-heading">
+          <div>
+            <p class="section-label" data-i18n="diary.label">Unterwegs</p>
+            <h2 id="diary-title" data-i18n="diary.title">Unser Camino-Tagebuch</h2>
+          </div>
+          <p data-i18n="diary.copy">Jeden Wandertag mit Gedanken, Höhenmetern und der aufgezeichneten GPX-Route festhalten.</p>
+        </div>
+
+        <div class="diary-layout">
+          <div class="diary-feed" id="diary-feed" aria-live="polite"></div>
+          <form class="diary-form" id="diary-form">
+            <div class="diary-form-intro">
+              <span class="diary-day-mark" aria-hidden="true">✦</span>
+              <div><p class="section-label" data-i18n="diary.formLabel">Neue Etappe</p><h3 data-i18n="diary.formTitle">Was bleibt von heute?</h3></div>
+            </div>
+            <label class="diary-field"><span data-i18n="diary.date">Datum</span><input id="diary-date" type="date" required></label>
+            <label class="diary-field diary-field-wide"><span data-i18n="diary.entryTitle">Überschrift</span><input id="diary-entry-title" maxlength="80" required placeholder="z. B. Der erste Blick auf den Atlantik" data-i18n-placeholder="diary.titlePlaceholder"></label>
+            <div class="diary-place-row">
+              <label class="diary-field"><span data-i18n="diary.from">Von</span><input id="diary-from" maxlength="60" placeholder="Porto" data-i18n-placeholder="diary.fromPlaceholder"></label>
+              <span aria-hidden="true">→</span>
+              <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-to" maxlength="60" placeholder="Vila do Conde" data-i18n-placeholder="diary.toPlaceholder"></label>
+            </div>
+            <label class="diary-field diary-field-wide"><span data-i18n="diary.note">Tagesnotiz</span><textarea id="diary-note" rows="5" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
+            <label class="gpx-drop" for="diary-gpx">
+              <span class="gpx-icon" aria-hidden="true">⌁</span>
+              <span><strong data-i18n="diary.gpxTitle">Komoot-GPX auswählen</strong><small data-i18n="diary.gpxCopy">Die Route wird im Browser ausgewertet und mit dem Eintrag gespeichert.</small></span>
+              <input id="diary-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+            </label>
+            <p class="gpx-readout" id="gpx-readout" role="status" data-i18n="diary.gpxEmpty">Noch keine GPX ausgewählt.</p>
+            <button class="diary-submit" type="submit" data-i18n="diary.save">Etappe speichern</button>
+          </form>
         </div>
       </section>
 

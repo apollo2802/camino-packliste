@@ -9,6 +9,7 @@
       "nav.main": "Hauptnavigation",
       "nav.home": "Camino-Packliste Startseite",
       "nav.print": "Drucken",
+      "nav.diary": "Tagebuch",
       "nav.reset": "Zurücksetzen",
       "nav.logout": "Abmelden",
       "language.label": "Sprache auswählen",
@@ -76,6 +77,36 @@
       "custom.grams": "Gramm",
       "custom.priority": "Priorität",
       "custom.add": "Hinzufügen",
+      "diary.label": "Unterwegs",
+      "diary.title": "Unser Camino-Tagebuch",
+      "diary.copy": "Jeden Wandertag mit Gedanken, Höhenmetern und der aufgezeichneten GPX-Route festhalten.",
+      "diary.formLabel": "Neue Etappe",
+      "diary.formTitle": "Was bleibt von heute?",
+      "diary.date": "Datum",
+      "diary.entryTitle": "Überschrift",
+      "diary.titlePlaceholder": "z. B. Der erste Blick auf den Atlantik",
+      "diary.from": "Von",
+      "diary.to": "Nach",
+      "diary.fromPlaceholder": "Porto",
+      "diary.toPlaceholder": "Vila do Conde",
+      "diary.note": "Tagesnotiz",
+      "diary.notePlaceholder": "Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …",
+      "diary.gpxTitle": "Komoot-GPX auswählen",
+      "diary.gpxCopy": "Die Route wird im Browser ausgewertet und mit dem Eintrag gespeichert.",
+      "diary.gpxEmpty": "Noch keine GPX ausgewählt.",
+      "diary.gpxReady": "{name} · {distance} km · {ascent} m Aufstieg",
+      "diary.gpxError": "Die GPX-Datei konnte nicht gelesen werden.",
+      "diary.save": "Etappe speichern",
+      "diary.emptyTitle": "Der Weg wartet auf seinen ersten Eintrag.",
+      "diary.emptyCopy": "Nach jeder Etappe könnt ihr hier die Komoot-GPX und eure Erinnerungen gemeinsam festhalten.",
+      "diary.noRoute": "Etappe ohne GPX-Aufzeichnung",
+      "diary.route": "GPX-Route",
+      "diary.distance": "Kilometer",
+      "diary.ascent": "Aufstieg",
+      "diary.descent": "Abstieg",
+      "diary.elevation": "Höhe",
+      "diary.delete": "Tagebucheintrag löschen",
+      "diary.deleteConfirm": "Diesen Tagebucheintrag wirklich löschen?",
       "film.label": "Animierte Packanleitung",
       "film.title": "So sitzt alles richtig im Rucksack",
       "film.intro": "Scrollt durch Vorder- und Seitenansicht. Die wichtigsten Packzonen werden genau dann erklärt, wenn sie sichtbar werden.",
@@ -124,6 +155,7 @@
       "nav.main": "Main navigation",
       "nav.home": "Camino packing list home",
       "nav.print": "Print",
+      "nav.diary": "Diary",
       "nav.reset": "Reset",
       "nav.logout": "Sign out",
       "language.label": "Choose language",
@@ -191,6 +223,36 @@
       "custom.grams": "Grams",
       "custom.priority": "Priority",
       "custom.add": "Add",
+      "diary.label": "On the way",
+      "diary.title": "Our Camino diary",
+      "diary.copy": "Keep every walking day together with thoughts, elevation and the recorded GPX route.",
+      "diary.formLabel": "New stage",
+      "diary.formTitle": "What will stay from today?",
+      "diary.date": "Date",
+      "diary.entryTitle": "Title",
+      "diary.titlePlaceholder": "e.g. Our first view of the Atlantic",
+      "diary.from": "From",
+      "diary.to": "To",
+      "diary.fromPlaceholder": "Porto",
+      "diary.toPlaceholder": "Vila do Conde",
+      "diary.note": "Day note",
+      "diary.notePlaceholder": "Weather, encounters, thoughts and the small moments of the day …",
+      "diary.gpxTitle": "Choose Komoot GPX",
+      "diary.gpxCopy": "The route is analysed in your browser and saved with the entry.",
+      "diary.gpxEmpty": "No GPX selected yet.",
+      "diary.gpxReady": "{name} · {distance} km · {ascent} m ascent",
+      "diary.gpxError": "The GPX file could not be read.",
+      "diary.save": "Save stage",
+      "diary.emptyTitle": "The road is waiting for its first entry.",
+      "diary.emptyCopy": "After each stage, add your Komoot GPX and shared memories here.",
+      "diary.noRoute": "Stage without GPX recording",
+      "diary.route": "GPX route",
+      "diary.distance": "Kilometres",
+      "diary.ascent": "Ascent",
+      "diary.descent": "Descent",
+      "diary.elevation": "Elevation",
+      "diary.delete": "Delete diary entry",
+      "diary.deleteConfirm": "Delete this diary entry?",
       "film.label": "Animated packing guide",
       "film.title": "How to pack your backpack properly",
       "film.intro": "Scroll through the front and side views. Each key packing zone is explained exactly when it appears.",
@@ -239,6 +301,7 @@
       "nav.main": "Главная навигация",
       "nav.home": "На главную списка вещей",
       "nav.print": "Печать",
+      "nav.diary": "Дневник",
       "nav.reset": "Сбросить",
       "nav.logout": "Выйти",
       "language.label": "Выбрать язык",
@@ -306,6 +369,36 @@
       "custom.grams": "Граммы",
       "custom.priority": "Важность",
       "custom.add": "Добавить",
+      "diary.label": "В пути",
+      "diary.title": "Наш дневник Камино",
+      "diary.copy": "Сохраняйте каждый день пути: мысли, набор высоты и записанный GPX-маршрут.",
+      "diary.formLabel": "Новый этап",
+      "diary.formTitle": "Что останется от сегодняшнего дня?",
+      "diary.date": "Дата",
+      "diary.entryTitle": "Заголовок",
+      "diary.titlePlaceholder": "например, первый взгляд на Атлантику",
+      "diary.from": "Откуда",
+      "diary.to": "Куда",
+      "diary.fromPlaceholder": "Порту",
+      "diary.toPlaceholder": "Вила-ду-Конди",
+      "diary.note": "Заметка дня",
+      "diary.notePlaceholder": "Погода, встречи, мысли и маленькие моменты дня …",
+      "diary.gpxTitle": "Выбрать GPX из Komoot",
+      "diary.gpxCopy": "Маршрут будет обработан в браузере и сохранён вместе с записью.",
+      "diary.gpxEmpty": "GPX ещё не выбран.",
+      "diary.gpxReady": "{name} · {distance} км · набор {ascent} м",
+      "diary.gpxError": "Не удалось прочитать GPX-файл.",
+      "diary.save": "Сохранить этап",
+      "diary.emptyTitle": "Путь ждёт первой записи.",
+      "diary.emptyCopy": "После каждого этапа добавляйте сюда GPX из Komoot и ваши общие воспоминания.",
+      "diary.noRoute": "Этап без GPX-записи",
+      "diary.route": "GPX-маршрут",
+      "diary.distance": "Километры",
+      "diary.ascent": "Набор",
+      "diary.descent": "Спуск",
+      "diary.elevation": "Высота",
+      "diary.delete": "Удалить запись дневника",
+      "diary.deleteConfirm": "Удалить эту запись дневника?",
       "film.label": "Анимированная инструкция",
       "film.title": "Как правильно уложить рюкзак",
       "film.intro": "Прокручивайте страницу и изучайте рюкзак спереди и сбоку. Каждая зона объясняется именно тогда, когда появляется на экране.",
@@ -593,6 +686,7 @@
     weights: { p1: {}, p2: {}, shared: {} },
     custom: { p1: [], p2: [], shared: [] },
     deleted: { p1: {}, p2: {}, shared: {} },
+    diary: [],
     labels: {
       profiles: {},
       items: { p1: {}, p2: {}, shared: {} }
@@ -606,6 +700,7 @@
   let searchTerm = "";
   let serverReady = false;
   let syncTimer = null;
+  let pendingGpx = null;
   let currentSyncStatus = { key: "sync.loading", isError: false };
 
   const els = {
@@ -622,7 +717,16 @@
     customName: document.getElementById("custom-name"),
     customWeight: document.getElementById("custom-weight"),
     customPriority: document.getElementById("custom-priority"),
-    syncStatus: document.getElementById("sync-status")
+    syncStatus: document.getElementById("sync-status"),
+    diaryFeed: document.getElementById("diary-feed"),
+    diaryForm: document.getElementById("diary-form"),
+    diaryDate: document.getElementById("diary-date"),
+    diaryTitle: document.getElementById("diary-entry-title"),
+    diaryFrom: document.getElementById("diary-from"),
+    diaryTo: document.getElementById("diary-to"),
+    diaryNote: document.getElementById("diary-note"),
+    diaryGpx: document.getElementById("diary-gpx"),
+    gpxReadout: document.getElementById("gpx-readout")
   };
 
   function loadLanguage() {
@@ -730,6 +834,25 @@
     });
     if (value.labels?.profiles && typeof value.labels.profiles === "object") {
       normalized.labels.profiles = value.labels.profiles;
+    }
+    if (Array.isArray(value.diary)) {
+      normalized.diary = value.diary.slice(0, 40).filter((entry) => entry && typeof entry === "object").map((entry) => ({
+        id: String(entry.id || `diary-${Date.now()}`),
+        date: String(entry.date || "").slice(0, 10),
+        title: String(entry.title || "").slice(0, 80),
+        from: String(entry.from || "").slice(0, 60),
+        to: String(entry.to || "").slice(0, 60),
+        note: String(entry.note || "").slice(0, 2400),
+        gpxName: String(entry.gpxName || "").slice(0, 140),
+        stats: entry.stats && typeof entry.stats === "object" ? {
+          distance: Number(entry.stats.distance) || 0,
+          ascent: Number(entry.stats.ascent) || 0,
+          descent: Number(entry.stats.descent) || 0,
+          min: Number(entry.stats.min) || 0,
+          max: Number(entry.stats.max) || 0
+        } : null,
+        track: Array.isArray(entry.track) ? entry.track.slice(0, 100).filter((point) => Array.isArray(point) && point.length >= 3).map((point) => [Number(point[0]), Number(point[1]), Number(point[2])]) : []
+      }));
     }
     return normalized;
   }
@@ -841,9 +964,112 @@
     return String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
   }
 
+  function formatDiaryDate(value) {
+    const date = new Date(`${value || "1970-01-01"}T12:00:00`);
+    return new Intl.DateTimeFormat(languageLocale(), { weekday: "long", day: "2-digit", month: "long", year: "numeric" }).format(date);
+  }
+
+  function routePolyline(track, width = 640, height = 300, padding = 34) {
+    if (!Array.isArray(track) || track.length < 2) return "";
+    const lats = track.map((point) => point[0]);
+    const lons = track.map((point) => point[1]);
+    const minLat = Math.min(...lats);
+    const maxLat = Math.max(...lats);
+    const minLon = Math.min(...lons);
+    const maxLon = Math.max(...lons);
+    const spanLon = Math.max(.00001, maxLon - minLon);
+    const spanLat = Math.max(.00001, maxLat - minLat);
+    const scale = Math.min((width - padding * 2) / spanLon, (height - padding * 2) / spanLat);
+    const offsetX = (width - spanLon * scale) / 2;
+    const offsetY = (height - spanLat * scale) / 2;
+    return track.map((point) => `${(offsetX + (point[1] - minLon) * scale).toFixed(1)},${(offsetY + (maxLat - point[0]) * scale).toFixed(1)}`).join(" ");
+  }
+
+  function elevationPath(track, width = 640, height = 72) {
+    if (!Array.isArray(track) || track.length < 2) return "";
+    const elevations = track.map((point) => Number(point[2]) || 0);
+    const min = Math.min(...elevations);
+    const max = Math.max(...elevations);
+    const span = Math.max(1, max - min);
+    const points = elevations.map((elevation, index) => `${(index / (elevations.length - 1) * width).toFixed(1)},${(6 + (max - elevation) / span * (height - 14)).toFixed(1)}`);
+    return `M0,${height} L${points.join(" L")} L${width},${height} Z`;
+  }
+
+  function renderDiary() {
+    if (!els.diaryFeed) return;
+    const entries = [...state.diary].sort((left, right) => String(right.date).localeCompare(String(left.date)));
+    if (!entries.length) {
+      els.diaryFeed.innerHTML = `<div class="diary-empty"><div><span aria-hidden="true">◒</span><h3>${escapeHTML(t("diary.emptyTitle"))}</h3><p>${escapeHTML(t("diary.emptyCopy"))}</p></div></div>`;
+      return;
+    }
+    els.diaryFeed.innerHTML = entries.map((entry, index) => {
+      const stats = entry.stats;
+      const polyline = routePolyline(entry.track);
+      const map = polyline
+        ? `<svg class="diary-route-svg" viewBox="0 0 640 300" role="img" aria-label="${escapeHTML(t("diary.route"))}"><polyline class="diary-route-casing" points="${polyline}"></polyline><polyline class="diary-route-line" points="${polyline}"></polyline></svg>`
+        : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
+      const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
+      const statMarkup = stats ? `<div class="diary-stats">
+        <div class="diary-stat"><strong>${stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })}</strong><span>${escapeHTML(t("diary.distance"))}</span></div>
+        <div class="diary-stat"><strong>${Math.round(stats.ascent)} m</strong><span>${escapeHTML(t("diary.ascent"))}</span></div>
+        <div class="diary-stat"><strong>${Math.round(stats.descent)} m</strong><span>${escapeHTML(t("diary.descent"))}</span></div>
+        <div class="diary-stat"><strong>${Math.round(stats.min)}–${Math.round(stats.max)} m</strong><span>${escapeHTML(t("diary.elevation"))}</span></div>
+      </div>${entry.track.length > 1 ? `<svg class="diary-elevation" viewBox="0 0 640 72" preserveAspectRatio="none" aria-hidden="true"><path d="${elevationPath(entry.track)}"></path></svg>` : ""}` : "";
+      return `<article class="diary-entry">
+        <div class="diary-map"><span class="diary-map-badge">${escapeHTML(entry.gpxName || `${t("diary.route")} ${entries.length - index}`)}</span>${map}</div>
+        <div class="diary-entry-body">
+          <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div>
+          ${places ? `<p class="diary-places">${places}</p>` : ""}
+          ${entry.note ? `<p class="diary-note">${escapeHTML(entry.note)}</p>` : ""}
+          ${statMarkup}
+        </div>
+      </article>`;
+    }).join("");
+  }
+
+  function haversine(left, right) {
+    const radius = 6371;
+    const radians = (value) => value * Math.PI / 180;
+    const lat = radians(right[0] - left[0]);
+    const lon = radians(right[1] - left[1]);
+    const a = Math.sin(lat / 2) ** 2 + Math.cos(radians(left[0])) * Math.cos(radians(right[0])) * Math.sin(lon / 2) ** 2;
+    return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  }
+
+  function parseGpx(text, name) {
+    const documentNode = new DOMParser().parseFromString(text, "application/xml");
+    if (documentNode.querySelector("parsererror")) throw new Error("Invalid GPX");
+    const nodes = [...documentNode.getElementsByTagNameNS("*", "trkpt")];
+    if (nodes.length < 2) throw new Error("No track");
+    const points = nodes.map((node) => {
+      const elevationNode = node.getElementsByTagNameNS("*", "ele")[0];
+      return [Number(node.getAttribute("lat")), Number(node.getAttribute("lon")), Number(elevationNode?.textContent || 0)];
+    }).filter((point) => point.every(Number.isFinite));
+    if (points.length < 2) throw new Error("No points");
+    let distance = 0;
+    let ascent = 0;
+    let descent = 0;
+    for (let index = 1; index < points.length; index += 1) {
+      distance += haversine(points[index - 1], points[index]);
+      const difference = points[index][2] - points[index - 1][2];
+      if (difference > 0) ascent += difference;
+      else descent += Math.abs(difference);
+    }
+    const stride = Math.max(1, Math.ceil(points.length / 90));
+    const sampled = points.filter((_, index) => index % stride === 0);
+    if (sampled.at(-1) !== points.at(-1)) sampled.push(points.at(-1));
+    const elevations = points.map((point) => point[2]);
+    return {
+      gpxName: name.slice(0, 140),
+      stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)) },
+      track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
+    };
+  }
+
   function render() {
     renderTabs();
     renderOverview();
+    renderDiary();
 
     const stats = profileStats(activeProfile);
     els.profileTitle.textContent = profileName(activeProfile, true);
@@ -1072,10 +1298,68 @@
     render();
   });
 
+  if (els.diaryDate && !els.diaryDate.value) els.diaryDate.value = new Date().toISOString().slice(0, 10);
+
+  els.diaryGpx?.addEventListener("change", async () => {
+    const file = els.diaryGpx.files?.[0];
+    pendingGpx = null;
+    els.gpxReadout.classList.remove("ready", "error");
+    if (!file) {
+      els.gpxReadout.textContent = t("diary.gpxEmpty");
+      return;
+    }
+    try {
+      pendingGpx = parseGpx(await file.text(), file.name);
+      els.gpxReadout.textContent = t("diary.gpxReady", {
+        name: pendingGpx.gpxName,
+        distance: pendingGpx.stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 }),
+        ascent: pendingGpx.stats.ascent
+      });
+      els.gpxReadout.classList.add("ready");
+    } catch (_) {
+      els.gpxReadout.textContent = t("diary.gpxError");
+      els.gpxReadout.classList.add("error");
+    }
+  });
+
+  els.diaryForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const title = els.diaryTitle.value.trim();
+    if (!title) return;
+    state.diary.push({
+      id: `diary-${globalThis.crypto?.randomUUID?.() || Date.now()}`,
+      date: els.diaryDate.value || new Date().toISOString().slice(0, 10),
+      title: title.slice(0, 80),
+      from: els.diaryFrom.value.trim().slice(0, 60),
+      to: els.diaryTo.value.trim().slice(0, 60),
+      note: els.diaryNote.value.trim().slice(0, 2400),
+      gpxName: pendingGpx?.gpxName || "",
+      stats: pendingGpx?.stats || null,
+      track: pendingGpx?.track || []
+    });
+    saveState();
+    els.diaryForm.reset();
+    els.diaryDate.value = new Date().toISOString().slice(0, 10);
+    pendingGpx = null;
+    els.gpxReadout.textContent = t("diary.gpxEmpty");
+    els.gpxReadout.classList.remove("ready", "error");
+    renderDiary();
+  });
+
+  els.diaryFeed?.addEventListener("click", (event) => {
+    const id = event.target.dataset.diaryDelete;
+    if (!id || !window.confirm(t("diary.deleteConfirm"))) return;
+    state.diary = state.diary.filter((entry) => entry.id !== id);
+    saveState();
+    renderDiary();
+  });
+
   document.getElementById("print-button").addEventListener("click", () => window.print());
   document.getElementById("reset-button").addEventListener("click", () => {
     if (!window.confirm(t("reset.confirm"))) return;
+    const diary = state.diary;
     state = freshState();
+    state.diary = diary;
     saveState();
     render();
   });
