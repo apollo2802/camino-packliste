@@ -476,7 +476,7 @@ export function mountDiaryTour(root, entry, translations) {
       const overviewTarget = controls.target.clone();
       const segments = Math.max(280, entry.track.length * 4);
       const trail = new THREE.Mesh(
-        makeTrailGeometry(curve, segments, .25),
+        makeTrailGeometry(curve, segments, .14),
         new THREE.MeshStandardMaterial({ map: makeTrailTexture(), roughness: .96, metalness: 0, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1 })
       );
       trail.renderOrder = 3;
@@ -548,7 +548,6 @@ export function mountDiaryTour(root, entry, translations) {
         smoothedDirection.lerp(direction, 1 - Math.exp(-5.5 * deltaSeconds)).normalize();
         smoothedCameraDirection.lerp(direction, 1 - Math.exp(-2.4 * deltaSeconds)).normalize();
         walker.position.copy(point);
-        walker.position.y += .09;
         const routeHeading = Math.atan2(smoothedDirection.x, smoothedDirection.z);
         targetWalkerQuaternion.setFromAxisAngle(upAxis, routeHeading + Math.PI);
         walker.quaternion.slerp(targetWalkerQuaternion, 1 - Math.exp(-12 * deltaSeconds));
@@ -558,7 +557,6 @@ export function mountDiaryTour(root, entry, translations) {
         walker.userData.leftArm.rotation.x = -stride * .72;
         walker.userData.rightArm.rotation.x = -.22 + stride * .48;
         walker.userData.trekkingPole.rotation.x = -.18 + stride * .18;
-        walker.position.y += Math.abs(Math.sin(time / 175)) * .018;
         if (exporting) elevationHud.update(fraction);
         if (playing && followCamera?.checked) {
           const cameraTarget = point.clone().addScaledVector(smoothedCameraDirection, .3 * playbackRate);
