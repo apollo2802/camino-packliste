@@ -159,6 +159,87 @@ function makeWalker() {
   return group;
 }
 
+function makeElevationHud(elevations) {
+  const canvas = document.createElement("canvas");
+  canvas.width = 768;
+  canvas.height = 192;
+  const context = canvas.getContext("2d");
+  const min = Math.min(...elevations);
+  const max = Math.max(...elevations);
+  const span = Math.max(1, max - min);
+  const left = 34;
+  const right = 734;
+  const top = 24;
+  const bottom = 158;
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false }));
+  sprite.position.set(0, -.39, -1.7);
+  sprite.scale.set(.96, .24, 1);
+  sprite.renderOrder = 1000;
+  sprite.visible = false;
+  let displayedFraction = -1;
+
+  function profilePoint(index) {
+    const x = left + index / Math.max(1, elevations.length - 1) * (right - left);
+    const y = top + (max - elevations[index]) / span * (bottom - top);
+    return [x, y];
+  }
+
+  function update(fraction) {
+    const clamped = Math.max(0, Math.min(1, fraction));
+    if (Math.abs(clamped - displayedFraction) < .0005) return;
+    displayedFraction = clamped;
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "rgba(255,247,232,.94)";
+    context.beginPath();
+    context.roundRect(8, 8, 752, 176, 30);
+    context.fill();
+    context.beginPath();
+    elevations.forEach((_, index) => {
+      const [x, y] = profilePoint(index);
+      if (!index) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    });
+    context.lineTo(right, bottom);
+    context.lineTo(left, bottom);
+    context.closePath();
+    context.fillStyle = "rgba(227,174,59,.2)";
+    context.fill();
+    context.beginPath();
+    elevations.forEach((_, index) => {
+      const [x, y] = profilePoint(index);
+      if (!index) context.moveTo(x, y);
+      else context.lineTo(x, y);
+    });
+    context.strokeStyle = "#d9a72d";
+    context.lineWidth = 4;
+    context.lineJoin = "round";
+    context.stroke();
+    const scaled = clamped * (elevations.length - 1);
+    const index = Math.min(elevations.length - 2, Math.floor(scaled));
+    const mix = scaled - index;
+    const elevation = elevations[index] + (elevations[index + 1] - elevations[index]) * mix;
+    const markerX = left + clamped * (right - left);
+    const markerY = top + (max - elevation) / span * (bottom - top);
+    context.beginPath();
+    context.arc(markerX, markerY, 14, 0, Math.PI * 2);
+    context.fillStyle = "rgba(232,74,42,.2)";
+    context.fill();
+    context.beginPath();
+    context.arc(markerX, markerY, 7, 0, Math.PI * 2);
+    context.fillStyle = "#e84a2a";
+    context.fill();
+    context.strokeStyle = "#fff7e8";
+    context.lineWidth = 4;
+    context.stroke();
+    texture.needsUpdate = true;
+  }
+
+  update(0);
+  return { sprite, update };
+}
+
 function routeCurve(track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale) {
   const points = track.map(([lat, lon, elevation]) => {
     const tile = tilePoint(lon, lat, grid.zoom);
@@ -237,6 +318,7 @@ export function mountDiaryTour(root, entry, translations) {
       scene.background = new THREE.Color(0xdcebf2);
       scene.fog = new THREE.Fog(0xdcebf2, 17, 28);
       const camera = new THREE.PerspectiveCamera(35, 1, .1, 80);
+      scene.add(camera);
       camera.position.set(9.7, 9.1, 11.2);
       controls = new OrbitControls(camera, canvas);
       controls.enableDamping = true;
@@ -296,6 +378,16 @@ export function mountDiaryTour(root, entry, translations) {
       const walker = makeWalker();
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
+      const elevationHud = makeElevationHud(profileElevations);
+      camera.add(elevationHud.sprite);
+      const upAxis = new THREE.Vector3(0, 1, 0);
+      const targetWalkerQuaternion = new THREE.Quaternion();
+      const smoothedDirection = curve.getTangentAt(0);
+      smoothedDirection.y = 0;
+      smoothedDirection.normalize();
+      targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
+      walker.quaternion.copy(targetWalkerQuaternion);
+      let previousFrameTime = 0;
 
       function resize() {
         const rect = canvas.getBoundingClientRect();
@@ -308,6 +400,8 @@ export function mountDiaryTour(root, entry, translations) {
 
       function draw(time = 0) {
         if (destroyed) return;
+        const deltaSeconds = previousFrameTime ? Math.min(.05, Math.max(.001, (time - previousFrameTime) / 1000)) : 1 / 60;
+        previousFrameTime = time;
         if (playing) {
           if (!startedAt) startedAt = time;
           fraction = Math.min(1, startFraction + (time - startedAt) / (exporting ? 12000 : 24000));
@@ -315,11 +409,15 @@ export function mountDiaryTour(root, entry, translations) {
         }
         updateElevationMarker(fraction);
         const point = curve.getPointAt(fraction);
-        const direction = curve.getTangentAt(fraction).normalize();
+        const direction = curve.getTangentAt(fraction);
+        direction.y = 0;
+        direction.normalize();
+        smoothedDirection.lerp(direction, 1 - Math.exp(-8 * deltaSeconds)).normalize();
         walker.position.copy(point);
         walker.position.y += .09;
-        const routeHeading = Math.atan2(direction.x, direction.z);
-        walker.rotation.set(0, routeHeading + Math.PI, 0);
+        const routeHeading = Math.atan2(smoothedDirection.x, smoothedDirection.z);
+        targetWalkerQuaternion.setFromAxisAngle(upAxis, routeHeading + Math.PI);
+        walker.quaternion.slerp(targetWalkerQuaternion, 1 - Math.exp(-12 * deltaSeconds));
         const stride = Math.sin(time / 175) * .38;
         walker.userData.leftLeg.rotation.x = stride;
         walker.userData.rightLeg.rotation.x = -stride;
@@ -327,14 +425,15 @@ export function mountDiaryTour(root, entry, translations) {
         walker.userData.rightArm.rotation.x = -.22 + stride * .48;
         walker.userData.trekkingPole.rotation.x = -.18 + stride * .18;
         walker.position.y += Math.abs(Math.sin(time / 175)) * .018;
+        if (exporting) elevationHud.update(fraction);
         if (playing && followCamera?.checked) {
           const cameraTarget = point.clone();
           cameraTarget.y += .48;
           const desiredCamera = cameraTarget.clone()
-            .addScaledVector(direction, -4.25)
+            .addScaledVector(smoothedDirection, -4.25)
             .add(new THREE.Vector3(1.45, 3.35, 0));
-          camera.position.lerp(desiredCamera, .055);
-          controls.target.lerp(cameraTarget, .075);
+          camera.position.lerp(desiredCamera, 1 - Math.exp(-2.8 * deltaSeconds));
+          controls.target.lerp(cameraTarget, 1 - Math.exp(-3.8 * deltaSeconds));
         }
         controls.update();
         renderer.render(scene, camera);
@@ -414,6 +513,24 @@ export function mountDiaryTour(root, entry, translations) {
           renderer.setSize(1080, 1080, false);
           camera.aspect = 1;
           camera.updateProjectionMatrix();
+          elevationHud.sprite.visible = true;
+          elevationHud.update(0);
+          fraction = 0;
+          startFraction = 0;
+          startedAt = 0;
+          previousFrameTime = 0;
+          const exportStartPoint = curve.getPointAt(0);
+          const exportStartDirection = curve.getTangentAt(0);
+          exportStartDirection.y = 0;
+          exportStartDirection.normalize();
+          smoothedDirection.copy(exportStartDirection);
+          targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
+          walker.quaternion.copy(targetWalkerQuaternion);
+          const exportCameraTarget = exportStartPoint.clone();
+          exportCameraTarget.y += .48;
+          camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
+          controls.target.copy(exportCameraTarget);
+          controls.update();
           const stream = canvas.captureStream(30);
           activeRecorder = new MediaRecorder(stream, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : undefined);
           activeRecorder.addEventListener("dataavailable", (event) => {
@@ -424,9 +541,6 @@ export function mountDiaryTour(root, entry, translations) {
             activeRecorder.addEventListener("error", reject, { once: true });
           });
           activeRecorder.start(250);
-          fraction = 0;
-          startFraction = 0;
-          startedAt = 0;
           playing = true;
           playButton.textContent = translations.pause;
           playButton.classList.add("playing");
@@ -451,6 +565,7 @@ export function mountDiaryTour(root, entry, translations) {
           await new Promise((resolve) => window.setTimeout(resolve, 2200));
         } finally {
           exporting = false;
+          elevationHud.sprite.visible = false;
           activeRecorder = null;
           playing = false;
           fraction = previous.fraction;
