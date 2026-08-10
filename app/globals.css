@@ -252,8 +252,8 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-tour-controls { position: absolute; z-index: 3; right: 1rem; bottom: 1.55rem; left: 1rem; display: flex; align-items: center; gap: .7rem; padding: .55rem; border: 1px solid rgba(255,255,255,.44); border-radius: 999px; background: rgba(12,43,38,.78); box-shadow: 0 9px 25px rgba(5,30,29,.22); backdrop-filter: blur(12px); }
 .diary-tour-controls button { flex: 0 0 auto; min-width: 150px; border: 0; border-radius: 999px; padding: .6rem .8rem; color: #20313a; background: #ffcd30; cursor: pointer; font-size: .72rem; font-weight: 850; }
 .diary-tour-controls [data-tour-play] { display: grid; place-items: center; width: 42px; min-width: 42px; height: 42px; padding: 0; font-size: 0; }
-.diary-tour-controls [data-tour-play]::before { content: ""; width: 14px; height: 16px; margin-left: -2px; background: currentColor; clip-path: polygon(10% 0, 100% 50%, 10% 100%); }
-.diary-tour-controls [data-tour-play].playing::before { width: 14px; height: 16px; margin-left: 0; background: linear-gradient(90deg, currentColor 0 36%, transparent 36% 64%, currentColor 64% 100%); clip-path: none; }
+.diary-tour-controls [data-tour-play]::before { content: ""; width: 14px; height: 16px; margin-left: -2px; background: currentColor; clip-path: polygon(10% 0, 100% 50%, 10% 100%); transform: translateY(2px); }
+.diary-tour-controls [data-tour-play].playing::before { width: 14px; height: 16px; margin-left: 0; background: linear-gradient(90deg, currentColor 0 36%, transparent 36% 64%, currentColor 64% 100%); clip-path: none; transform: translateY(2px); }
 .diary-tour-controls .diary-tour-speed { min-width: 52px; padding-inline: .65rem; background: #fff7e8; }
 .diary-tour-controls .diary-tour-speed[aria-pressed="true"] { color: white; background: #0d5f5a; }
 .diary-tour-controls button.playing { color: white; background: #e84a2a; }
