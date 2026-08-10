@@ -232,6 +232,14 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-map-loading[hidden] { display: none; }
 .diary-map-loading.error { color: #8b352b; background: #f8eae5; }
 .diary-tour-hint { position: absolute; z-index: 3; top: 1rem; right: 1rem; padding: .4rem .55rem; border: 1px solid rgba(255,255,255,.55); border-radius: 999px; color: white; background: rgba(12,43,38,.64); backdrop-filter: blur(8px); font-size: .65rem; font-weight: 850; letter-spacing: .08em; }
+.diary-tour-actions { position: absolute; z-index: 3; top: 3.65rem; right: 1rem; display: grid; justify-items: end; gap: .45rem; }
+.diary-tour-actions label, .diary-tour-actions button, .diary-tour-actions a { border: 1px solid rgba(255,255,255,.5); border-radius: 999px; color: white; background: rgba(12,43,38,.72); box-shadow: 0 5px 16px rgba(5,30,29,.15); backdrop-filter: blur(9px); font-size: .66rem; font-weight: 800; }
+.diary-tour-actions label { display: flex; align-items: center; gap: .38rem; padding: .42rem .58rem; cursor: pointer; }
+.diary-tour-actions input { accent-color: #ffcd30; }
+.diary-tour-actions button, .diary-tour-actions a { padding: .48rem .68rem; cursor: pointer; text-decoration: none; }
+.diary-tour-actions button:hover, .diary-tour-actions a:hover { color: #20313a; background: #ffcd30; }
+.diary-tour-actions button:disabled { cursor: wait; opacity: .72; }
+.diary-tour-actions [hidden] { display: none; }
 .diary-map-attribution { position: absolute; z-index: 3; right: 1rem; bottom: 4.8rem; padding: .25rem .4rem; border-radius: 6px; color: rgba(255,255,255,.86); background: rgba(12,43,38,.58); font-size: .52rem; }
 .diary-tour-controls { position: absolute; z-index: 3; right: 1rem; bottom: 1rem; left: 1rem; display: flex; align-items: center; gap: .7rem; padding: .55rem; border: 1px solid rgba(255,255,255,.44); border-radius: 999px; background: rgba(12,43,38,.78); box-shadow: 0 9px 25px rgba(5,30,29,.22); backdrop-filter: blur(12px); }
 .diary-tour-controls button { flex: 0 0 auto; min-width: 150px; border: 0; border-radius: 999px; padding: .6rem .8rem; color: #20313a; background: #ffcd30; cursor: pointer; font-size: .72rem; font-weight: 850; }
@@ -364,6 +372,7 @@ footer p { margin: 0; }
   .diary-map, .diary-map-empty, .diary-route-svg, .diary-tour, .diary-route-canvas { min-height: 250px; height: 250px; }
   .diary-tour-controls { right: .65rem; bottom: .65rem; left: .65rem; gap: .45rem; }
   .diary-tour-controls button { min-width: 0; padding-inline: .7rem; }
+  .diary-tour-actions { top: 3.35rem; right: .65rem; }
   .diary-stats { grid-template-columns: 1fr 1fr; gap: .8rem; }
   .quick-guide { margin-left: -1rem; margin-right: -1rem; border-radius: 22px; }
   .camino-note { grid-template-columns: 1fr; }

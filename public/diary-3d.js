@@ -114,29 +114,42 @@ function makeWalker() {
   const crown = new THREE.Mesh(new THREE.CylinderGeometry(.1, .12, .1, 16), hat);
   crown.position.y = .96;
   group.add(crown);
-  const leftLeg = new THREE.Mesh(new THREE.CapsuleGeometry(.035, .27, 3, 6), trousers);
-  const rightLeg = leftLeg.clone();
-  leftLeg.position.set(-.065, .19, 0);
-  rightLeg.position.set(.065, .19, 0);
+  const legGeometry = new THREE.CapsuleGeometry(.035, .27, 3, 6);
+  const leftLeg = new THREE.Group();
+  const rightLeg = new THREE.Group();
+  const leftLegMesh = new THREE.Mesh(legGeometry, trousers);
+  const rightLegMesh = leftLegMesh.clone();
+  leftLegMesh.position.y = rightLegMesh.position.y = -.17;
+  leftLeg.position.set(-.065, .35, 0);
+  rightLeg.position.set(.065, .35, 0);
+  leftLeg.add(leftLegMesh);
+  rightLeg.add(rightLegMesh);
   group.add(leftLeg, rightLeg);
-  const leftArm = new THREE.Mesh(new THREE.CapsuleGeometry(.027, .22, 3, 6), jacket);
-  const rightArm = leftArm.clone();
-  leftArm.position.set(-.16, .49, 0);
-  rightArm.position.set(.16, .49, -.015);
-  leftArm.rotation.z = -.42;
-  rightArm.rotation.z = .58;
-  rightArm.rotation.x = -.36;
+  const armGeometry = new THREE.CapsuleGeometry(.027, .22, 3, 6);
+  const leftArm = new THREE.Group();
+  const rightArm = new THREE.Group();
+  const leftArmMesh = new THREE.Mesh(armGeometry, jacket);
+  const rightArmMesh = leftArmMesh.clone();
+  leftArmMesh.position.y = rightArmMesh.position.y = -.13;
+  leftArm.position.set(-.14, .62, 0);
+  rightArm.position.set(.14, .62, -.015);
+  leftArm.rotation.z = -.28;
+  rightArm.rotation.z = .34;
+  rightArm.rotation.x = -.22;
+  leftArm.add(leftArmMesh);
+  rightArm.add(rightArmMesh);
   group.add(leftArm, rightArm);
-  const trekkingPole = new THREE.Mesh(new THREE.CylinderGeometry(.013, .019, .78, 8), poleMaterial);
-  trekkingPole.position.set(.29, .31, -.12);
-  trekkingPole.rotation.z = -.14;
-  trekkingPole.rotation.x = -.2;
+  const trekkingPole = new THREE.Group();
+  trekkingPole.position.set(.25, .67, -.08);
+  trekkingPole.rotation.z = -.12;
+  trekkingPole.rotation.x = -.18;
+  const poleShaft = new THREE.Mesh(new THREE.CylinderGeometry(.013, .019, .78, 8), poleMaterial);
+  poleShaft.position.y = -.39;
+  trekkingPole.add(poleShaft);
   group.add(trekkingPole);
   const poleGrip = new THREE.Mesh(new THREE.CylinderGeometry(.026, .026, .12, 8), hat);
-  poleGrip.position.set(.235, .69, -.04);
-  poleGrip.rotation.z = -.14;
-  poleGrip.rotation.x = -.2;
-  group.add(poleGrip);
+  poleGrip.position.y = .015;
+  trekkingPole.add(poleGrip);
   const ring = new THREE.Mesh(new THREE.RingGeometry(.22, .31, 24), white);
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = .025;
@@ -165,6 +178,9 @@ export function mountDiaryTour(root, entry, translations) {
   const loading = root.querySelector("[data-tour-loading]");
   const playButton = root.querySelector("[data-tour-play]");
   const progress = root.querySelector("[data-tour-progress]");
+  const followCamera = root.querySelector("[data-tour-follow]");
+  const exportButton = root.querySelector("[data-tour-export]");
+  const downloadLink = root.querySelector("[data-tour-download]");
   const abortController = new AbortController();
   let destroyed = false;
   let renderer;
@@ -175,6 +191,9 @@ export function mountDiaryTour(root, entry, translations) {
   let fraction = 0;
   let startedAt = 0;
   let startFraction = 0;
+  let exporting = false;
+  let activeRecorder = null;
+  let readyExport = null;
 
   async function initialize() {
     try {
@@ -184,7 +203,7 @@ export function mountDiaryTour(root, entry, translations) {
       const elevations = entry.track.map((point) => point[2]);
       const baseElevation = Math.min(...elevations) - 22;
       const elevationSpan = Math.max(50, Math.max(...elevations) - Math.min(...elevations));
-      const verticalScale = Math.min(.018, 2.7 / elevationSpan);
+      const verticalScale = Math.min(.0075, 1.18 / elevationSpan);
       const terrainWidth = 12;
       const terrainDepth = terrainWidth * grid.rows / grid.columns;
 
@@ -269,7 +288,7 @@ export function mountDiaryTour(root, entry, translations) {
         if (destroyed) return;
         if (playing) {
           if (!startedAt) startedAt = time;
-          fraction = Math.min(1, startFraction + (time - startedAt) / 24000);
+          fraction = Math.min(1, startFraction + (time - startedAt) / (exporting ? 12000 : 24000));
           progress.value = String(Math.round(fraction * 1000));
         }
         const point = curve.getPointAt(fraction);
@@ -277,14 +296,14 @@ export function mountDiaryTour(root, entry, translations) {
         walker.position.copy(point);
         walker.position.y += .09;
         walker.lookAt(ahead.x, point.y, ahead.z);
-        const stride = Math.sin(time / 105) * .55;
+        const stride = Math.sin(time / 175) * .38;
         walker.userData.leftLeg.rotation.x = stride;
         walker.userData.rightLeg.rotation.x = -stride;
-        walker.userData.leftArm.rotation.x = -stride * .58;
-        walker.userData.rightArm.rotation.x = -.36 + stride * .34;
-        walker.userData.trekkingPole.rotation.x = -.2 + stride * .08;
-        walker.position.y += Math.abs(Math.sin(time / 105)) * .025;
-        if (playing) {
+        walker.userData.leftArm.rotation.x = -stride * .72;
+        walker.userData.rightArm.rotation.x = -.22 + stride * .48;
+        walker.userData.trekkingPole.rotation.x = -.18 + stride * .18;
+        walker.position.y += Math.abs(Math.sin(time / 175)) * .018;
+        if (playing && followCamera?.checked) {
           const direction = ahead.clone().sub(point).normalize();
           const cameraTarget = point.clone();
           cameraTarget.y += .48;
@@ -300,6 +319,7 @@ export function mountDiaryTour(root, entry, translations) {
           playing = false;
           playButton.textContent = translations.replay;
           playButton.classList.remove("playing");
+          if (exporting && activeRecorder?.state === "recording") activeRecorder.stop();
         }
         animationFrame = requestAnimationFrame(draw);
       }
@@ -316,6 +336,123 @@ export function mountDiaryTour(root, entry, translations) {
         fraction = Number(progress.value) / 1000;
         startFraction = fraction;
         startedAt = 0;
+      });
+
+      exportButton?.addEventListener("click", async () => {
+        if (exporting) return;
+        if (readyExport) {
+          const link = document.createElement("a");
+          link.href = readyExport.url;
+          link.download = readyExport.filename;
+          link.style.display = "none";
+          document.body.append(link);
+          link.click();
+          link.remove();
+          URL.revokeObjectURL(readyExport.url);
+          readyExport = null;
+          exportButton.textContent = translations.export;
+          return;
+        }
+        if (!canvas.captureStream || typeof MediaRecorder === "undefined") {
+          exportButton.textContent = translations.exportError;
+          window.setTimeout(() => { exportButton.textContent = translations.export; }, 2600);
+          return;
+        }
+        const mimeTypes = [
+          "video/mp4;codecs=avc1.42E01E",
+          "video/webm;codecs=vp9",
+          "video/webm;codecs=vp8",
+          "video/webm"
+        ];
+        const mimeType = mimeTypes.find((type) => MediaRecorder.isTypeSupported(type)) || "";
+        const previous = {
+          fraction,
+          cameraPosition: camera.position.clone(),
+          target: controls.target.clone(),
+          follow: followCamera?.checked
+        };
+        const chunks = [];
+        try {
+          exporting = true;
+          exportButton.disabled = true;
+          exportButton.textContent = translations.exporting;
+          playButton.disabled = true;
+          if (followCamera) {
+            followCamera.checked = true;
+            followCamera.disabled = true;
+          }
+          renderer.setPixelRatio(1);
+          renderer.setSize(1080, 1080, false);
+          camera.aspect = 1;
+          camera.updateProjectionMatrix();
+          const stream = canvas.captureStream(30);
+          activeRecorder = new MediaRecorder(stream, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : undefined);
+          activeRecorder.addEventListener("dataavailable", (event) => {
+            if (event.data?.size) chunks.push(event.data);
+          });
+          const finished = new Promise((resolve, reject) => {
+            activeRecorder.addEventListener("stop", resolve, { once: true });
+            activeRecorder.addEventListener("error", reject, { once: true });
+          });
+          activeRecorder.start(250);
+          fraction = 0;
+          startFraction = 0;
+          startedAt = 0;
+          playing = true;
+          playButton.textContent = translations.pause;
+          playButton.classList.add("playing");
+          await finished;
+          const actualType = activeRecorder.mimeType || mimeType || "video/webm";
+          const extension = actualType.includes("mp4") ? "mp4" : "webm";
+          const blob = new Blob(chunks, { type: actualType });
+          if (!blob.size) throw new Error("Recorded video is empty");
+          const url = URL.createObjectURL(blob);
+          const safeTitle = String(entry.title || "camino-etappe").toLowerCase().replace(/[^a-z0-9äöüß]+/gi, "-").replace(/^-|-$/g, "");
+          readyExport = {
+            url,
+            filename: `${entry.date || "camino"}-${safeTitle || "etappe"}-3d.${extension}`
+          };
+          downloadLink.href = readyExport.url;
+          downloadLink.download = readyExport.filename;
+          downloadLink.hidden = false;
+          exportButton.hidden = true;
+        } catch (error) {
+          console.warn("Camino diary video export failed", error);
+          exportButton.textContent = translations.exportError;
+          await new Promise((resolve) => window.setTimeout(resolve, 2200));
+        } finally {
+          exporting = false;
+          activeRecorder = null;
+          playing = false;
+          fraction = previous.fraction;
+          startFraction = fraction;
+          startedAt = 0;
+          progress.value = String(Math.round(fraction * 1000));
+          camera.position.copy(previous.cameraPosition);
+          controls.target.copy(previous.target);
+          if (followCamera) {
+            followCamera.checked = previous.follow;
+            followCamera.disabled = false;
+          }
+          playButton.disabled = false;
+          playButton.textContent = fraction >= 1 ? translations.replay : translations.play;
+          playButton.classList.remove("playing");
+          exportButton.disabled = false;
+          exportButton.textContent = readyExport ? translations.exportReady : translations.export;
+          renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+          resize();
+        }
+      });
+      downloadLink?.addEventListener("click", () => {
+        const completedExport = readyExport;
+        window.setTimeout(() => {
+          if (completedExport) URL.revokeObjectURL(completedExport.url);
+          if (readyExport === completedExport) readyExport = null;
+          downloadLink.hidden = true;
+          downloadLink.removeAttribute("href");
+          exportButton.hidden = false;
+          exportButton.textContent = translations.export;
+        }, 30000);
       });
       const onResize = () => {
         cancelAnimationFrame(resizeFrame);
@@ -338,6 +475,8 @@ export function mountDiaryTour(root, entry, translations) {
   return () => {
     destroyed = true;
     abortController.abort();
+    if (activeRecorder?.state === "recording") activeRecorder.stop();
+    if (readyExport) URL.revokeObjectURL(readyExport.url);
     cancelAnimationFrame(animationFrame);
     cancelAnimationFrame(resizeFrame);
     if (root._diary3dResize) window.removeEventListener("resize", root._diary3dResize);
