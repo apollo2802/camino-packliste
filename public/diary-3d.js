@@ -295,7 +295,8 @@ export function mountDiaryTour(root, entry, translations) {
         const ahead = curve.getPointAt(Math.min(1, fraction + .003));
         walker.position.copy(point);
         walker.position.y += .09;
-        walker.lookAt(ahead.x, point.y, ahead.z);
+        const routeHeading = Math.atan2(ahead.x - point.x, ahead.z - point.z);
+        walker.rotation.set(0, routeHeading + Math.PI / 2, 0);
         const stride = Math.sin(time / 175) * .38;
         walker.userData.leftLeg.rotation.x = stride;
         walker.userData.rightLeg.rotation.x = -stride;
