@@ -253,6 +253,7 @@ export function mountDiaryTour(root, entry, translations) {
   const progress = root.querySelector("[data-tour-progress]");
   const speedButton = root.querySelector("[data-tour-speed]");
   const resetButton = root.querySelector("[data-tour-reset]");
+  const fullscreenButton = root.querySelector("[data-tour-fullscreen]");
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
@@ -505,6 +506,25 @@ export function mountDiaryTour(root, entry, translations) {
         controls.target.copy(overviewTarget);
         controls.update();
       });
+      const onFullscreenChange = () => {
+        const active = document.fullscreenElement === root;
+        if (fullscreenButton) {
+          const label = active ? translations.exitFullscreen : translations.fullscreen;
+          fullscreenButton.setAttribute("aria-label", label);
+          fullscreenButton.setAttribute("title", label);
+        }
+        window.requestAnimationFrame(resize);
+      };
+      if (!root.requestFullscreen || !document.exitFullscreen) {
+        if (fullscreenButton) fullscreenButton.hidden = true;
+      } else {
+        fullscreenButton?.addEventListener("click", async () => {
+          if (document.fullscreenElement === root) await document.exitFullscreen();
+          else await root.requestFullscreen();
+        });
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        root._diaryFullscreenChange = onFullscreenChange;
+      }
 
       exportButton?.addEventListener("click", async () => {
         if (exporting) return;
@@ -681,6 +701,7 @@ export function mountDiaryTour(root, entry, translations) {
     cancelAnimationFrame(animationFrame);
     cancelAnimationFrame(resizeFrame);
     if (root._diary3dResize) window.removeEventListener("resize", root._diary3dResize);
+    if (root._diaryFullscreenChange) document.removeEventListener("fullscreenchange", root._diaryFullscreenChange);
     controls?.dispose();
     renderer?.dispose();
   };
