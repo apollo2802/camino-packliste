@@ -360,6 +360,10 @@ export function mountDiaryTour(root, entry, translations) {
     return new Intl.DateTimeFormat(document.documentElement.lang || "de", { day: "2-digit", month: "long", year: "numeric" }).format(date);
   })();
   const exportRoute = [entry.from, entry.to].filter(Boolean).join(" → ") || entry.title || "Camino";
+  const setPlayButtonLabel = (label) => {
+    playButton.setAttribute("aria-label", label);
+    playButton.setAttribute("title", label);
+  };
 
   function updateElevationMarker(value) {
     if (!elevationMarkers.length || entry.track.length < 2) return;
@@ -551,7 +555,7 @@ export function mountDiaryTour(root, entry, translations) {
         if (exporting) composeExportFrame();
         if (playing && fraction >= 1) {
           playing = false;
-          playButton.textContent = translations.replay;
+          setPlayButtonLabel(translations.replay);
           playButton.classList.remove("playing");
           if (exporting && activeRecorder?.state === "recording") activeRecorder.stop();
         }
@@ -563,7 +567,7 @@ export function mountDiaryTour(root, entry, translations) {
         playing = !playing;
         startFraction = fraction;
         startedAt = 0;
-        playButton.textContent = playing ? translations.pause : translations.play;
+        setPlayButtonLabel(playing ? translations.pause : translations.play);
         playButton.classList.toggle("playing", playing);
       });
       progress.addEventListener("input", () => {
@@ -579,7 +583,7 @@ export function mountDiaryTour(root, entry, translations) {
         updateElevationMarker(fraction);
         if (pause && playing) {
           playing = false;
-          playButton.textContent = translations.play;
+          setPlayButtonLabel(translations.play);
           playButton.classList.remove("playing");
         }
       };
@@ -767,7 +771,7 @@ export function mountDiaryTour(root, entry, translations) {
           });
           activeRecorder.start(250);
           playing = true;
-          playButton.textContent = translations.pause;
+          setPlayButtonLabel(translations.pause);
           playButton.classList.add("playing");
           await finished;
           const actualType = activeRecorder.mimeType || mimeType || "video/webm";
@@ -807,7 +811,7 @@ export function mountDiaryTour(root, entry, translations) {
           }
           playButton.disabled = false;
           if (speedButton) speedButton.disabled = false;
-          playButton.textContent = fraction >= 1 ? translations.replay : translations.play;
+          setPlayButtonLabel(fraction >= 1 ? translations.replay : translations.play);
           playButton.classList.remove("playing");
           exportButton.disabled = false;
           exportButton.textContent = readyExport ? translations.exportReady : translations.export;

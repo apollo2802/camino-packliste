@@ -1067,6 +1067,10 @@
       let startedAt = 0;
       let startFraction = 0;
       let stopped = false;
+      const setButtonLabel = (label) => {
+        button.setAttribute("aria-label", label);
+        button.setAttribute("title", label);
+      };
 
       function geometry(width, height) {
         const lats = entry.track.map((point) => point[0]);
@@ -1231,7 +1235,7 @@
         draw(time);
         if (fraction >= 1) {
           playing = false;
-          button.textContent = t("diary.replay");
+          setButtonLabel(t("diary.replay"));
           button.classList.remove("playing");
           return;
         }
@@ -1242,7 +1246,7 @@
         if (playing) {
           playing = false;
           cancelAnimationFrame(frame);
-          button.textContent = t("diary.play");
+          setButtonLabel(t("diary.play"));
           button.classList.remove("playing");
           return;
         }
@@ -1250,7 +1254,7 @@
         playing = true;
         startFraction = fraction;
         startedAt = 0;
-        button.textContent = t("diary.pause");
+        setButtonLabel(t("diary.pause"));
         button.classList.add("playing");
         frame = requestAnimationFrame(tick);
       }
