@@ -181,6 +181,11 @@ export function mountDiaryTour(root, entry, translations) {
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
+  const elevationMarkers = [...(root.closest(".diary-entry")?.querySelectorAll("[data-elevation-marker]") || [])];
+  const profileElevations = entry.track.map((point) => Number(point[2]) || 0);
+  const profileMin = Math.min(...profileElevations);
+  const profileMax = Math.max(...profileElevations);
+  const profileSpan = Math.max(1, profileMax - profileMin);
   const abortController = new AbortController();
   let destroyed = false;
   let renderer;
@@ -194,6 +199,20 @@ export function mountDiaryTour(root, entry, translations) {
   let exporting = false;
   let activeRecorder = null;
   let readyExport = null;
+
+  function updateElevationMarker(value) {
+    if (!elevationMarkers.length || entry.track.length < 2) return;
+    const scaled = Math.max(0, Math.min(1, value)) * (entry.track.length - 1);
+    const index = Math.min(entry.track.length - 2, Math.floor(scaled));
+    const mix = scaled - index;
+    const elevation = profileElevations[index] + (profileElevations[index + 1] - profileElevations[index]) * mix;
+    const x = value * 640;
+    const y = 6 + (profileMax - elevation) / profileSpan * 58;
+    elevationMarkers.forEach((marker) => {
+      marker.setAttribute("cx", x.toFixed(1));
+      marker.setAttribute("cy", y.toFixed(1));
+    });
+  }
 
   async function initialize() {
     try {
@@ -291,6 +310,7 @@ export function mountDiaryTour(root, entry, translations) {
           fraction = Math.min(1, startFraction + (time - startedAt) / (exporting ? 12000 : 24000));
           progress.value = String(Math.round(fraction * 1000));
         }
+        updateElevationMarker(fraction);
         const point = curve.getPointAt(fraction);
         const ahead = curve.getPointAt(Math.min(1, fraction + .003));
         walker.position.copy(point);
