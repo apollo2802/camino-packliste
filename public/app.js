@@ -1366,6 +1366,11 @@
     if (nodes.length < 2) throw new Error("No track");
     const trackNode = documentNode.getElementsByTagNameNS("*", "trk")[0];
     const gpxRouteName = trackNode?.getElementsByTagNameNS("*", "name")[0]?.textContent?.trim();
+    const gpxTimestamp = documentNode.getElementsByTagNameNS("*", "metadata")[0]
+      ?.getElementsByTagNameNS("*", "time")[0]?.textContent?.trim()
+      || nodes[0].getElementsByTagNameNS("*", "time")[0]?.textContent?.trim();
+    const timestampDate = /^\d{4}-\d{2}-\d{2}/.exec(gpxTimestamp || "")?.[0];
+    const filenameDate = /^\d{4}-\d{2}-\d{2}/.exec(name)?.[0];
     const fileRouteName = name
       .replace(/\.gpx$/i, "")
       .replace(/^\d{4}-\d{2}-\d{2}_\d+_/, "")
@@ -1392,6 +1397,7 @@
     return {
       gpxName: name.slice(0, 140),
       routeName: (gpxRouteName || fileRouteName).slice(0, 80),
+      date: timestampDate || filenameDate || "",
       stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)) },
       track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
     };
@@ -1642,6 +1648,7 @@
     try {
       pendingGpx = parseGpx(await file.text(), file.name);
       if (!els.diaryTitle.value.trim() && pendingGpx.routeName) els.diaryTitle.value = pendingGpx.routeName;
+      if (pendingGpx.date) els.diaryDate.value = pendingGpx.date;
       els.gpxReadout.textContent = t("diary.gpxReady", {
         name: pendingGpx.gpxName,
         distance: pendingGpx.stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 }),
