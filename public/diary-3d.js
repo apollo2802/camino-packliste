@@ -251,6 +251,7 @@ export function mountDiaryTour(root, entry, translations) {
   const loading = root.querySelector("[data-tour-loading]");
   const playButton = root.querySelector("[data-tour-play]");
   const progress = root.querySelector("[data-tour-progress]");
+  const speedButton = root.querySelector("[data-tour-speed]");
   const resetButton = root.querySelector("[data-tour-reset]");
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
@@ -270,6 +271,7 @@ export function mountDiaryTour(root, entry, translations) {
   let fraction = 0;
   let startedAt = 0;
   let startFraction = 0;
+  let playbackRate = 1;
   let exporting = false;
   let activeRecorder = null;
   let readyExport = null;
@@ -426,7 +428,7 @@ export function mountDiaryTour(root, entry, translations) {
         previousFrameTime = time;
         if (playing) {
           if (!startedAt) startedAt = time;
-          fraction = Math.min(1, startFraction + (time - startedAt) / (exporting ? 12000 : 24000));
+          fraction = Math.min(1, startFraction + (time - startedAt) / (24000 / playbackRate));
           progress.value = String(Math.round(fraction * 1000));
         }
         updateElevationMarker(fraction);
@@ -482,6 +484,15 @@ export function mountDiaryTour(root, entry, translations) {
         startFraction = fraction;
         startedAt = 0;
       });
+      speedButton?.addEventListener("click", () => {
+        playbackRate = playbackRate === 1 ? 2 : 1;
+        speedButton.textContent = `${playbackRate}×`;
+        speedButton.setAttribute("aria-pressed", String(playbackRate === 2));
+        if (playing) {
+          startFraction = fraction;
+          startedAt = 0;
+        }
+      });
       resetButton?.addEventListener("click", () => {
         if (followCamera) followCamera.checked = false;
         camera.position.copy(overviewCameraPosition);
@@ -530,9 +541,9 @@ export function mountDiaryTour(root, entry, translations) {
           exportButton.textContent = translations.exporting;
           playButton.disabled = true;
           if (followCamera) {
-            followCamera.checked = true;
             followCamera.disabled = true;
           }
+          if (speedButton) speedButton.disabled = true;
           renderer.setPixelRatio(1);
           renderer.setSize(1080, 1080, false);
           camera.aspect = 1;
@@ -552,8 +563,13 @@ export function mountDiaryTour(root, entry, translations) {
           walker.scale.copy(previous.walkerScale).multiplyScalar(.5);
           const exportCameraTarget = exportStartPoint.clone();
           exportCameraTarget.y += .48;
-          camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
-          controls.target.copy(exportCameraTarget);
+          if (followCamera?.checked) {
+            camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
+            controls.target.copy(exportCameraTarget);
+          } else {
+            camera.position.copy(previous.cameraPosition);
+            controls.target.copy(previous.target);
+          }
           controls.update();
           exportSurface = document.createElement("canvas");
           exportSurface.width = 1080;
@@ -611,6 +627,7 @@ export function mountDiaryTour(root, entry, translations) {
             followCamera.disabled = false;
           }
           playButton.disabled = false;
+          if (speedButton) speedButton.disabled = false;
           playButton.textContent = fraction >= 1 ? translations.replay : translations.play;
           playButton.classList.remove("playing");
           exportButton.disabled = false;
