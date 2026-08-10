@@ -1317,7 +1317,7 @@
         <div class="diary-stat"><strong>${Math.round(stats.min)}–${Math.round(stats.max)} m</strong><span>${escapeHTML(t("diary.elevation"))}</span></div>
       </div>${entry.track.length > 1 ? `<svg class="diary-elevation" viewBox="0 0 640 72" preserveAspectRatio="none" aria-hidden="true"><path d="${elevationPath(entry.track)}"></path><circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>` : ""}` : "";
       return `<article class="diary-entry">
-        <div class="diary-map"><span class="diary-map-badge">${escapeHTML(entry.gpxName || `${t("diary.route")} ${entries.length - index}`)}</span>${map}</div>
+        <div class="diary-map">${map}</div>
         <div class="diary-entry-body">
           <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div>
           ${places ? `<p class="diary-places">${places}</p>` : ""}

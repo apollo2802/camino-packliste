@@ -246,7 +246,6 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-tour-controls button.playing { color: white; background: #e84a2a; }
 .diary-tour-controls input { width: 100%; accent-color: #ffcd30; cursor: pointer; }
 .diary-map-empty { position: relative; z-index: 1; min-height: 360px; display: grid; place-items: center; color: rgba(255,255,255,.72); font-size: .85rem; }
-.diary-map-badge { position: absolute; z-index: 2; top: 1rem; left: 1rem; max-width: calc(100% - 2rem); overflow: hidden; text-overflow: ellipsis; padding: .48rem .7rem; border: 1px solid rgba(255,255,255,.24); border-radius: 999px; background: rgba(5,43,41,.68); backdrop-filter: blur(8px); font-size: .69rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; white-space: nowrap; }
 .diary-entry-body { padding: clamp(1.25rem, 4vw, 2.2rem); }
 .diary-entry-top { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
 .diary-date { color: var(--teal); font-size: .7rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
