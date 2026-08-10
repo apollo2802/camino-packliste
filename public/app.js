@@ -1332,7 +1332,7 @@
         <div class="diary-stat"><strong>${Math.round(stats.ascent)} m</strong><span>${escapeHTML(t("diary.ascent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.descent)} m</strong><span>${escapeHTML(t("diary.descent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.min)}–${Math.round(stats.max)} m</strong><span>${escapeHTML(t("diary.elevation"))}</span></div>
-      </div>${entry.track.length > 1 ? `<svg class="diary-elevation" viewBox="0 0 640 72" preserveAspectRatio="none" aria-hidden="true"><path d="${elevationPath(entry.track)}"></path><circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>` : ""}` : "";
+      </div>${entry.track.length > 1 ? `<svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path><circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>` : ""}` : "";
       return `<article class="diary-entry">
         <div class="diary-map">${map}</div>
         <div class="diary-entry-body">

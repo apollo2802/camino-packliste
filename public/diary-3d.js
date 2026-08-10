@@ -331,7 +331,9 @@ export function mountDiaryTour(root, entry, translations) {
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
-  const elevationMarkers = [...(root.closest(".diary-entry")?.querySelectorAll("[data-elevation-marker]") || [])];
+  const diaryEntry = root.closest(".diary-entry");
+  const elevationProfile = diaryEntry?.querySelector("[data-elevation-profile]");
+  const elevationMarkers = [...(diaryEntry?.querySelectorAll("[data-elevation-marker]") || [])];
   const profileElevations = entry.track.map((point) => Number(point[2]) || 0);
   const profileMin = Math.min(...profileElevations);
   const profileMax = Math.max(...profileElevations);
@@ -361,16 +363,19 @@ export function mountDiaryTour(root, entry, translations) {
 
   function updateElevationMarker(value) {
     if (!elevationMarkers.length || entry.track.length < 2) return;
-    const scaled = Math.max(0, Math.min(1, value)) * (entry.track.length - 1);
+    const clamped = Math.max(0, Math.min(1, value));
+    const scaled = clamped * (entry.track.length - 1);
     const index = Math.min(entry.track.length - 2, Math.floor(scaled));
     const mix = scaled - index;
     const elevation = profileElevations[index] + (profileElevations[index + 1] - profileElevations[index]) * mix;
-    const x = value * 640;
+    const x = clamped * 640;
     const y = 6 + (profileMax - elevation) / profileSpan * 58;
     elevationMarkers.forEach((marker) => {
       marker.setAttribute("cx", x.toFixed(1));
       marker.setAttribute("cy", y.toFixed(1));
     });
+    elevationProfile?.setAttribute("aria-valuenow", String(Math.round(clamped * 100)));
+    elevationProfile?.setAttribute("aria-valuetext", `${Math.round(clamped * 100)}%`);
   }
 
   async function initialize() {
@@ -566,6 +571,57 @@ export function mountDiaryTour(root, entry, translations) {
         startFraction = fraction;
         startedAt = 0;
       });
+      const setProfileFraction = (value, pause = false) => {
+        fraction = Math.max(0, Math.min(1, value));
+        startFraction = fraction;
+        startedAt = 0;
+        progress.value = String(Math.round(fraction * 1000));
+        updateElevationMarker(fraction);
+        if (pause && playing) {
+          playing = false;
+          playButton.textContent = translations.play;
+          playButton.classList.remove("playing");
+        }
+      };
+      const profileValueFromEvent = (event) => {
+        const rect = elevationProfile.getBoundingClientRect();
+        return (event.clientX - rect.left) / Math.max(1, rect.width);
+      };
+      let activeProfilePointer = null;
+      const onProfilePointerDown = (event) => {
+        activeProfilePointer = event.pointerId;
+        elevationProfile.setPointerCapture?.(event.pointerId);
+        setProfileFraction(profileValueFromEvent(event), true);
+      };
+      const onProfilePointerMove = (event) => {
+        if (event.pointerId === activeProfilePointer) setProfileFraction(profileValueFromEvent(event), true);
+      };
+      const onProfilePointerEnd = (event) => {
+        if (event.pointerId !== activeProfilePointer) return;
+        elevationProfile.releasePointerCapture?.(event.pointerId);
+        activeProfilePointer = null;
+      };
+      const onProfileKeyDown = (event) => {
+        const increment = event.shiftKey ? .1 : .02;
+        if (event.key === "Home") setProfileFraction(0, true);
+        else if (event.key === "End") setProfileFraction(1, true);
+        else if (["ArrowLeft", "ArrowDown"].includes(event.key)) setProfileFraction(fraction - increment, true);
+        else if (["ArrowRight", "ArrowUp"].includes(event.key)) setProfileFraction(fraction + increment, true);
+        else return;
+        event.preventDefault();
+      };
+      elevationProfile?.addEventListener("pointerdown", onProfilePointerDown);
+      elevationProfile?.addEventListener("pointermove", onProfilePointerMove);
+      elevationProfile?.addEventListener("pointerup", onProfilePointerEnd);
+      elevationProfile?.addEventListener("pointercancel", onProfilePointerEnd);
+      elevationProfile?.addEventListener("keydown", onProfileKeyDown);
+      root._diaryElevationProfileCleanup = () => {
+        elevationProfile?.removeEventListener("pointerdown", onProfilePointerDown);
+        elevationProfile?.removeEventListener("pointermove", onProfilePointerMove);
+        elevationProfile?.removeEventListener("pointerup", onProfilePointerEnd);
+        elevationProfile?.removeEventListener("pointercancel", onProfilePointerEnd);
+        elevationProfile?.removeEventListener("keydown", onProfileKeyDown);
+      };
       speedButton?.addEventListener("click", () => {
         playbackRate = playbackRate === 1 ? 2 : 1;
         speedButton.textContent = `${playbackRate}×`;
@@ -800,6 +856,7 @@ export function mountDiaryTour(root, entry, translations) {
     if (root._diaryFullscreenChange) document.removeEventListener("fullscreenchange", root._diaryFullscreenChange);
     if (root._diaryMenuPointerDown) document.removeEventListener("pointerdown", root._diaryMenuPointerDown);
     if (root._diaryMenuKeyDown) document.removeEventListener("keydown", root._diaryMenuKeyDown);
+    root._diaryElevationProfileCleanup?.();
     controls?.dispose();
     renderer?.dispose();
   };
