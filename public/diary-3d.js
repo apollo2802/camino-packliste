@@ -325,6 +325,9 @@ export function mountDiaryTour(root, entry, translations) {
   const speedButton = root.querySelector("[data-tour-speed]");
   const resetButton = root.querySelector("[data-tour-reset]");
   const fullscreenButton = root.querySelector("[data-tour-fullscreen]");
+  const fullscreenLabel = root.querySelector("[data-tour-fullscreen-label]");
+  const menuToggle = root.querySelector("[data-tour-menu-toggle]");
+  const menuPanel = root.querySelector("[data-tour-menu-panel]");
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
@@ -572,7 +575,24 @@ export function mountDiaryTour(root, entry, translations) {
           startedAt = 0;
         }
       });
+      const setMenuOpen = (open) => {
+        if (!menuToggle || !menuPanel) return;
+        menuToggle.setAttribute("aria-expanded", String(open));
+        menuPanel.hidden = !open;
+      };
+      const onMenuPointerDown = (event) => {
+        if (!root.querySelector(".diary-tour-menu")?.contains(event.target)) setMenuOpen(false);
+      };
+      const onMenuKeyDown = (event) => {
+        if (event.key === "Escape") setMenuOpen(false);
+      };
+      menuToggle?.addEventListener("click", () => setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true"));
+      document.addEventListener("pointerdown", onMenuPointerDown);
+      document.addEventListener("keydown", onMenuKeyDown);
+      root._diaryMenuPointerDown = onMenuPointerDown;
+      root._diaryMenuKeyDown = onMenuKeyDown;
       resetButton?.addEventListener("click", () => {
+        setMenuOpen(false);
         if (followCamera) followCamera.checked = false;
         camera.position.copy(overviewCameraPosition);
         controls.target.copy(overviewTarget);
@@ -584,6 +604,7 @@ export function mountDiaryTour(root, entry, translations) {
           const label = active ? translations.exitFullscreen : translations.fullscreen;
           fullscreenButton.setAttribute("aria-label", label);
           fullscreenButton.setAttribute("title", label);
+          if (fullscreenLabel) fullscreenLabel.textContent = label;
         }
         window.requestAnimationFrame(resize);
       };
@@ -591,6 +612,7 @@ export function mountDiaryTour(root, entry, translations) {
         if (fullscreenButton) fullscreenButton.hidden = true;
       } else {
         fullscreenButton?.addEventListener("click", async () => {
+          setMenuOpen(false);
           if (document.fullscreenElement === root) await document.exitFullscreen();
           else await root.requestFullscreen();
         });
@@ -599,6 +621,7 @@ export function mountDiaryTour(root, entry, translations) {
       }
 
       exportButton?.addEventListener("click", async () => {
+        setMenuOpen(false);
         if (exporting) return;
         if (readyExport) {
           const link = document.createElement("a");
@@ -737,6 +760,7 @@ export function mountDiaryTour(root, entry, translations) {
         }
       });
       downloadLink?.addEventListener("click", () => {
+        setMenuOpen(false);
         const completedExport = readyExport;
         window.setTimeout(() => {
           if (completedExport) URL.revokeObjectURL(completedExport.url);
@@ -774,6 +798,8 @@ export function mountDiaryTour(root, entry, translations) {
     cancelAnimationFrame(resizeFrame);
     if (root._diary3dResize) window.removeEventListener("resize", root._diary3dResize);
     if (root._diaryFullscreenChange) document.removeEventListener("fullscreenchange", root._diaryFullscreenChange);
+    if (root._diaryMenuPointerDown) document.removeEventListener("pointerdown", root._diaryMenuPointerDown);
+    if (root._diaryMenuKeyDown) document.removeEventListener("keydown", root._diaryMenuKeyDown);
     controls?.dispose();
     renderer?.dispose();
   };

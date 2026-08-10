@@ -112,6 +112,7 @@
       "diary.resetCamera": "Gesamtansicht wiederherstellen",
       "diary.fullscreen": "Karte maximieren",
       "diary.exitFullscreen": "Vollbild beenden",
+      "diary.menu": "Kartenoptionen",
       "diary.speed": "Animationsgeschwindigkeit",
       "diary.export": "Video exportieren",
       "diary.exporting": "Video wird erstellt …",
@@ -274,6 +275,7 @@
       "diary.resetCamera": "Restore overview",
       "diary.fullscreen": "Maximise map",
       "diary.exitFullscreen": "Exit fullscreen",
+      "diary.menu": "Map options",
       "diary.speed": "Animation speed",
       "diary.export": "Export video",
       "diary.exporting": "Creating video …",
@@ -436,6 +438,7 @@
       "diary.resetCamera": "Вернуть общий вид",
       "diary.fullscreen": "Развернуть карту",
       "diary.exitFullscreen": "Выйти из полноэкранного режима",
+      "diary.menu": "Настройки карты",
       "diary.speed": "Скорость анимации",
       "diary.export": "Экспорт видео",
       "diary.exporting": "Создаётся видео …",
@@ -1281,7 +1284,7 @@
     const generation = ++diaryAnimationGeneration;
     const tours = [...els.diaryFeed.querySelectorAll("[data-diary-tour]")];
     if (!tours.length) return;
-    import("/diary-3d.js?v=24").then(({ mountDiaryTour }) => {
+    import("/diary-3d.js?v=25").then(({ mountDiaryTour }) => {
       if (generation !== diaryAnimationGeneration) return;
       tours.forEach((tour) => {
         const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
@@ -1321,7 +1324,7 @@
       const stats = entry.stats;
       const polyline = routePolyline(entry.track);
       const map = polyline
-        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><button class="diary-tour-fullscreen" type="button" data-tour-fullscreen aria-label="${escapeHTML(t("diary.fullscreen"))}" title="${escapeHTML(t("diary.fullscreen"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fullscreen-enter" d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/><path class="fullscreen-exit" d="M9 4v5H4V7h3V4h2Zm6 0h2v3h3v2h-5V4ZM4 15h5v5H7v-3H4v-2Zm11 0h5v2h-3v3h-2v-5Z"/></svg></button><button class="diary-tour-hint" type="button" data-tour-reset aria-label="${escapeHTML(t("diary.resetCamera"))}" title="${escapeHTML(t("diary.resetCamera"))}">↻ 3D</button><div class="diary-tour-actions"><label class="diary-camera-toggle" title="${escapeHTML(t("diary.follow"))}"><input class="sr-only" type="checkbox" data-tour-follow checked><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 10 4h4l1.5 2H19a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3.5ZM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg><span class="sr-only">${escapeHTML(t("diary.follow"))}</span></label><button type="button" data-tour-export>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden>${escapeHTML(t("diary.exportReady"))}</a></div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><button class="diary-tour-speed" type="button" data-tour-speed aria-label="${escapeHTML(t("diary.speed"))}" title="${escapeHTML(t("diary.speed"))}" aria-pressed="false">1×</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
+        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><div class="diary-tour-menu"><button class="diary-menu-toggle" type="button" data-tour-menu-toggle aria-expanded="false" aria-label="${escapeHTML(t("diary.menu"))}" title="${escapeHTML(t("diary.menu"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg></button><div class="diary-menu-panel" data-tour-menu-panel hidden><label class="diary-menu-camera"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 10 4h4l1.5 2H19a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3.5ZM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg><span>${escapeHTML(t("diary.follow"))}</span><input type="checkbox" data-tour-follow checked></label><button type="button" data-tour-reset><span aria-hidden="true">↻</span>${escapeHTML(t("diary.resetCamera"))}</button><button type="button" data-tour-fullscreen><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fullscreen-enter" d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/><path class="fullscreen-exit" d="M9 4v5H4V7h3V4h2Zm6 0h2v3h3v2h-5V4ZM4 15h5v5H7v-3H4v-2Zm11 0h5v2h-3v3h-2v-5Z"/></svg><span data-tour-fullscreen-label>${escapeHTML(t("diary.fullscreen"))}</span></button><button type="button" data-tour-export><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.exportReady"))}</a></div></div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><button class="diary-tour-speed" type="button" data-tour-speed aria-label="${escapeHTML(t("diary.speed"))}" title="${escapeHTML(t("diary.speed"))}" aria-pressed="false">1×</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const statMarkup = stats ? `<div class="diary-stats">
