@@ -386,6 +386,9 @@ export function mountDiaryTour(root, entry, translations) {
       const smoothedDirection = curve.getTangentAt(0);
       smoothedDirection.y = 0;
       smoothedDirection.normalize();
+      const smoothedCameraDirection = smoothedDirection.clone();
+      const cameraSide = new THREE.Vector3();
+      const cameraLift = new THREE.Vector3(0, 3.45, 0);
       targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
       walker.quaternion.copy(targetWalkerQuaternion);
       let previousFrameTime = 0;
@@ -436,7 +439,8 @@ export function mountDiaryTour(root, entry, translations) {
         const direction = curve.getTangentAt(fraction);
         direction.y = 0;
         direction.normalize();
-        smoothedDirection.lerp(direction, 1 - Math.exp(-8 * deltaSeconds)).normalize();
+        smoothedDirection.lerp(direction, 1 - Math.exp(-5.5 * deltaSeconds)).normalize();
+        smoothedCameraDirection.lerp(direction, 1 - Math.exp(-2.4 * deltaSeconds)).normalize();
         walker.position.copy(point);
         walker.position.y += .09;
         const routeHeading = Math.atan2(smoothedDirection.x, smoothedDirection.z);
@@ -451,13 +455,15 @@ export function mountDiaryTour(root, entry, translations) {
         walker.position.y += Math.abs(Math.sin(time / 175)) * .018;
         if (exporting) elevationHud.update(fraction);
         if (playing && followCamera?.checked) {
-          const cameraTarget = point.clone();
+          const cameraTarget = point.clone().addScaledVector(smoothedCameraDirection, .3 * playbackRate);
           cameraTarget.y += .48;
+          cameraSide.set(smoothedCameraDirection.z, 0, -smoothedCameraDirection.x).multiplyScalar(1.15);
           const desiredCamera = cameraTarget.clone()
-            .addScaledVector(smoothedDirection, -4.25)
-            .add(new THREE.Vector3(1.45, 3.35, 0));
-          camera.position.lerp(desiredCamera, 1 - Math.exp(-2.8 * deltaSeconds));
-          controls.target.lerp(cameraTarget, 1 - Math.exp(-3.8 * deltaSeconds));
+            .addScaledVector(smoothedCameraDirection, -4.5)
+            .add(cameraSide)
+            .add(cameraLift);
+          camera.position.lerp(desiredCamera, 1 - Math.exp(-1.55 * deltaSeconds));
+          controls.target.lerp(cameraTarget, 1 - Math.exp(-3.4 * deltaSeconds));
         }
         controls.update();
         renderer.render(scene, camera);
@@ -558,13 +564,15 @@ export function mountDiaryTour(root, entry, translations) {
           exportStartDirection.y = 0;
           exportStartDirection.normalize();
           smoothedDirection.copy(exportStartDirection);
+          smoothedCameraDirection.copy(exportStartDirection);
           targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
           walker.quaternion.copy(targetWalkerQuaternion);
           walker.scale.copy(previous.walkerScale).multiplyScalar(.5);
-          const exportCameraTarget = exportStartPoint.clone();
+          const exportCameraTarget = exportStartPoint.clone().addScaledVector(smoothedCameraDirection, .3 * playbackRate);
           exportCameraTarget.y += .48;
           if (followCamera?.checked) {
-            camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
+            cameraSide.set(smoothedCameraDirection.z, 0, -smoothedCameraDirection.x).multiplyScalar(1.15);
+            camera.position.copy(exportCameraTarget).addScaledVector(smoothedCameraDirection, -4.5).add(cameraSide).add(cameraLift);
             controls.target.copy(exportCameraTarget);
           } else {
             camera.position.copy(previous.cameraPosition);
