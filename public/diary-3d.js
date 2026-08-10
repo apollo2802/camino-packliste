@@ -275,6 +275,12 @@ export function mountDiaryTour(root, entry, translations) {
   let readyExport = null;
   let exportSurface = null;
   let exportContext = null;
+  const exportDate = (() => {
+    const date = new Date(`${entry.date}T12:00:00`);
+    if (Number.isNaN(date.getTime())) return entry.date || "";
+    return new Intl.DateTimeFormat(document.documentElement.lang || "de", { day: "2-digit", month: "long", year: "numeric" }).format(date);
+  })();
+  const exportRoute = [entry.from, entry.to].filter(Boolean).join(" → ") || entry.title || "Camino";
 
   function updateElevationMarker(value) {
     if (!elevationMarkers.length || entry.track.length < 2) return;
@@ -382,6 +388,29 @@ export function mountDiaryTour(root, entry, translations) {
       walker.quaternion.copy(targetWalkerQuaternion);
       let previousFrameTime = 0;
 
+      function composeExportFrame() {
+        if (!exportContext || !exportSurface) return;
+        exportContext.clearRect(0, 0, exportSurface.width, exportSurface.height);
+        exportContext.drawImage(canvas, 0, 0, 1080, 1080);
+        const headerGradient = exportContext.createLinearGradient(0, 0, 0, 250);
+        headerGradient.addColorStop(0, "rgba(5,34,32,.9)");
+        headerGradient.addColorStop(1, "rgba(5,34,32,0)");
+        exportContext.fillStyle = headerGradient;
+        exportContext.fillRect(0, 0, 1080, 270);
+        exportContext.fillStyle = "#ffcd30";
+        exportContext.font = "700 28px system-ui, sans-serif";
+        exportContext.fillText(exportDate.toUpperCase(), 66, 78);
+        exportContext.fillStyle = "#fff7e8";
+        exportContext.font = "700 48px Georgia, serif";
+        exportContext.fillText(exportRoute, 66, 142, 948);
+        if (entry.stats?.distance) {
+          exportContext.fillStyle = "rgba(255,247,232,.82)";
+          exportContext.font = "600 25px system-ui, sans-serif";
+          exportContext.fillText(`${Number(entry.stats.distance).toLocaleString(document.documentElement.lang || "de", { maximumFractionDigits: 1 })} km`, 66, 188);
+        }
+        exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
+      }
+
       function resize() {
         const rect = canvas.getBoundingClientRect();
         const width = Math.max(320, Math.round(rect.width));
@@ -430,11 +459,7 @@ export function mountDiaryTour(root, entry, translations) {
         }
         controls.update();
         renderer.render(scene, camera);
-        if (exporting && exportContext && exportSurface) {
-          exportContext.clearRect(0, 0, exportSurface.width, exportSurface.height);
-          exportContext.drawImage(canvas, 0, 0, 1080, 1080);
-          exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
-        }
+        if (exporting) composeExportFrame();
         if (playing && fraction >= 1) {
           playing = false;
           playButton.textContent = translations.replay;
@@ -495,7 +520,8 @@ export function mountDiaryTour(root, entry, translations) {
           fraction,
           cameraPosition: camera.position.clone(),
           target: controls.target.clone(),
-          follow: followCamera?.checked
+          follow: followCamera?.checked,
+          walkerScale: walker.scale.clone()
         };
         const chunks = [];
         try {
@@ -523,6 +549,7 @@ export function mountDiaryTour(root, entry, translations) {
           smoothedDirection.copy(exportStartDirection);
           targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
           walker.quaternion.copy(targetWalkerQuaternion);
+          walker.scale.copy(previous.walkerScale).multiplyScalar(.5);
           const exportCameraTarget = exportStartPoint.clone();
           exportCameraTarget.y += .48;
           camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
@@ -533,8 +560,7 @@ export function mountDiaryTour(root, entry, translations) {
           exportSurface.height = 1080;
           exportContext = exportSurface.getContext("2d");
           renderer.render(scene, camera);
-          exportContext.drawImage(canvas, 0, 0, 1080, 1080);
-          exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
+          composeExportFrame();
           const stream = exportSurface.captureStream(30);
           activeRecorder = new MediaRecorder(stream, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : undefined);
           activeRecorder.addEventListener("dataavailable", (event) => {
@@ -576,6 +602,7 @@ export function mountDiaryTour(root, entry, translations) {
           fraction = previous.fraction;
           startFraction = fraction;
           startedAt = 0;
+          walker.scale.copy(previous.walkerScale);
           progress.value = String(Math.round(fraction * 1000));
           camera.position.copy(previous.cameraPosition);
           controls.target.copy(previous.target);
