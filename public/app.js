@@ -1364,6 +1364,13 @@
     if (documentNode.querySelector("parsererror")) throw new Error("Invalid GPX");
     const nodes = [...documentNode.getElementsByTagNameNS("*", "trkpt")];
     if (nodes.length < 2) throw new Error("No track");
+    const trackNode = documentNode.getElementsByTagNameNS("*", "trk")[0];
+    const gpxRouteName = trackNode?.getElementsByTagNameNS("*", "name")[0]?.textContent?.trim();
+    const fileRouteName = name
+      .replace(/\.gpx$/i, "")
+      .replace(/^\d{4}-\d{2}-\d{2}_\d+_/, "")
+      .replace(/[_-]+/g, " ")
+      .trim();
     const points = nodes.map((node) => {
       const elevationNode = node.getElementsByTagNameNS("*", "ele")[0];
       return [Number(node.getAttribute("lat")), Number(node.getAttribute("lon")), Number(elevationNode?.textContent || 0)];
@@ -1384,6 +1391,7 @@
     const elevations = points.map((point) => point[2]);
     return {
       gpxName: name.slice(0, 140),
+      routeName: (gpxRouteName || fileRouteName).slice(0, 80),
       stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)) },
       track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
     };
@@ -1633,6 +1641,7 @@
     }
     try {
       pendingGpx = parseGpx(await file.text(), file.name);
+      if (!els.diaryTitle.value.trim() && pendingGpx.routeName) els.diaryTitle.value = pendingGpx.routeName;
       els.gpxReadout.textContent = t("diary.gpxReady", {
         name: pendingGpx.gpxName,
         distance: pendingGpx.stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 }),
@@ -1647,7 +1656,7 @@
 
   els.diaryForm?.addEventListener("submit", (event) => {
     event.preventDefault();
-    const title = els.diaryTitle.value.trim();
+    const title = els.diaryTitle.value.trim() || pendingGpx?.routeName || "";
     if (!title) return;
     state.diary.push({
       id: `diary-${globalThis.crypto?.randomUUID?.() || Date.now()}`,
