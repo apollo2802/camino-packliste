@@ -171,13 +171,6 @@ function makeElevationHud(elevations) {
   const right = 734;
   const top = 24;
   const bottom = 158;
-  const texture = new THREE.CanvasTexture(canvas);
-  texture.colorSpace = THREE.SRGBColorSpace;
-  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: texture, transparent: true, depthTest: false, depthWrite: false }));
-  sprite.position.set(0, -.39, -1.7);
-  sprite.scale.set(.96, .24, 1);
-  sprite.renderOrder = 1000;
-  sprite.visible = false;
   let displayedFraction = -1;
 
   function profilePoint(index) {
@@ -233,11 +226,10 @@ function makeElevationHud(elevations) {
     context.strokeStyle = "#fff7e8";
     context.lineWidth = 4;
     context.stroke();
-    texture.needsUpdate = true;
   }
 
   update(0);
-  return { sprite, update };
+  return { canvas, update };
 }
 
 function routeCurve(track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale) {
@@ -281,6 +273,8 @@ export function mountDiaryTour(root, entry, translations) {
   let exporting = false;
   let activeRecorder = null;
   let readyExport = null;
+  let exportSurface = null;
+  let exportContext = null;
 
   function updateElevationMarker(value) {
     if (!elevationMarkers.length || entry.track.length < 2) return;
@@ -379,7 +373,6 @@ export function mountDiaryTour(root, entry, translations) {
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
       const elevationHud = makeElevationHud(profileElevations);
-      camera.add(elevationHud.sprite);
       const upAxis = new THREE.Vector3(0, 1, 0);
       const targetWalkerQuaternion = new THREE.Quaternion();
       const smoothedDirection = curve.getTangentAt(0);
@@ -437,6 +430,11 @@ export function mountDiaryTour(root, entry, translations) {
         }
         controls.update();
         renderer.render(scene, camera);
+        if (exporting && exportContext && exportSurface) {
+          exportContext.clearRect(0, 0, exportSurface.width, exportSurface.height);
+          exportContext.drawImage(canvas, 0, 0, 1080, 1080);
+          exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
+        }
         if (playing && fraction >= 1) {
           playing = false;
           playButton.textContent = translations.replay;
@@ -513,7 +511,6 @@ export function mountDiaryTour(root, entry, translations) {
           renderer.setSize(1080, 1080, false);
           camera.aspect = 1;
           camera.updateProjectionMatrix();
-          elevationHud.sprite.visible = true;
           elevationHud.update(0);
           fraction = 0;
           startFraction = 0;
@@ -531,7 +528,14 @@ export function mountDiaryTour(root, entry, translations) {
           camera.position.copy(exportCameraTarget).addScaledVector(smoothedDirection, -4.25).add(new THREE.Vector3(1.45, 3.35, 0));
           controls.target.copy(exportCameraTarget);
           controls.update();
-          const stream = canvas.captureStream(30);
+          exportSurface = document.createElement("canvas");
+          exportSurface.width = 1080;
+          exportSurface.height = 1080;
+          exportContext = exportSurface.getContext("2d");
+          renderer.render(scene, camera);
+          exportContext.drawImage(canvas, 0, 0, 1080, 1080);
+          exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
+          const stream = exportSurface.captureStream(30);
           activeRecorder = new MediaRecorder(stream, mimeType ? { mimeType, videoBitsPerSecond: 8_000_000 } : undefined);
           activeRecorder.addEventListener("dataavailable", (event) => {
             if (event.data?.size) chunks.push(event.data);
@@ -565,7 +569,8 @@ export function mountDiaryTour(root, entry, translations) {
           await new Promise((resolve) => window.setTimeout(resolve, 2200));
         } finally {
           exporting = false;
-          elevationHud.sprite.visible = false;
+          exportSurface = null;
+          exportContext = null;
           activeRecorder = null;
           playing = false;
           fraction = previous.fraction;
