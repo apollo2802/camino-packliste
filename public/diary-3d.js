@@ -312,11 +312,11 @@ export function mountDiaryTour(root, entry, translations) {
         }
         updateElevationMarker(fraction);
         const point = curve.getPointAt(fraction);
-        const ahead = curve.getPointAt(Math.min(1, fraction + .003));
+        const direction = curve.getTangentAt(fraction).normalize();
         walker.position.copy(point);
         walker.position.y += .09;
-        const routeHeading = Math.atan2(ahead.x - point.x, ahead.z - point.z);
-        walker.rotation.set(0, routeHeading + Math.PI / 2, 0);
+        const routeHeading = Math.atan2(direction.x, direction.z);
+        walker.rotation.set(0, routeHeading + Math.PI, 0);
         const stride = Math.sin(time / 175) * .38;
         walker.userData.leftLeg.rotation.x = stride;
         walker.userData.rightLeg.rotation.x = -stride;
@@ -325,7 +325,6 @@ export function mountDiaryTour(root, entry, translations) {
         walker.userData.trekkingPole.rotation.x = -.18 + stride * .18;
         walker.position.y += Math.abs(Math.sin(time / 175)) * .018;
         if (playing && followCamera?.checked) {
-          const direction = ahead.clone().sub(point).normalize();
           const cameraTarget = point.clone();
           cameraTarget.y += .48;
           const desiredCamera = cameraTarget.clone()
