@@ -240,14 +240,25 @@ function makeElevationHud(elevations) {
   return { canvas, update };
 }
 
-function routeCurve(track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale) {
-  const points = track.map(([lat, lon, elevation]) => {
+function terrainElevationAt(lat, lon, grid, mosaics) {
+  const tile = tilePoint(lon, lat, grid.zoom);
+  const u = Math.max(0, Math.min(1, (tile.x - grid.minX) / grid.columns));
+  const v = Math.max(0, Math.min(1, (tile.y - grid.minY) / grid.rows));
+  const x = Math.round(u * (mosaics.width - 1));
+  const y = Math.round(v * (mosaics.height - 1));
+  const elevation = decodeTerrarium(mosaics.demPixels.data, (y * mosaics.width + x) * 4);
+  return elevation > -500 && elevation < 9000 ? elevation : null;
+}
+
+function routeCurve(track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale, mosaics) {
+  const points = track.map(([lat, lon, gpxElevation]) => {
     const tile = tilePoint(lon, lat, grid.zoom);
     const u = (tile.x - grid.minX) / grid.columns;
     const v = (tile.y - grid.minY) / grid.rows;
+    const terrainElevation = terrainElevationAt(lat, lon, grid, mosaics) ?? gpxElevation;
     return new THREE.Vector3(
       (u - .5) * terrainWidth,
-      (elevation - baseElevation) * verticalScale + .12,
+      (terrainElevation - baseElevation) * verticalScale + .018,
       (v - .5) * terrainDepth
     );
   });
@@ -307,8 +318,6 @@ function makeTrailGeometry(curve, segments, width) {
     const irregularWidth = width * (1 + Math.sin(index * 1.71) * .055 + Math.sin(index * .37) * .035);
     const left = point.clone().addScaledVector(side, irregularWidth * .5);
     const right = point.clone().addScaledVector(side, -irregularWidth * .5);
-    left.y += .045;
-    right.y += .045;
     positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
     const textureProgress = fraction * 24;
     uvs.push(0, textureProgress, 1, textureProgress);
@@ -451,7 +460,7 @@ export function mountDiaryTour(root, entry, translations) {
       terrain.receiveShadow = true;
       scene.add(terrain);
 
-      const curve = routeCurve(entry.track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale);
+      const curve = routeCurve(entry.track, grid, terrainWidth, terrainDepth, baseElevation, verticalScale, mosaics);
       const routeBounds = new THREE.Box3().setFromPoints(curve.getPoints(160));
       const routeCenter = routeBounds.getCenter(new THREE.Vector3());
       const routeSize = routeBounds.getSize(new THREE.Vector3());
@@ -474,7 +483,7 @@ export function mountDiaryTour(root, entry, translations) {
       trail.receiveShadow = true;
       scene.add(trail);
       const walker = makeWalker();
-      walker.scale.multiplyScalar(Math.max(.35, Math.min(.928, terrainSpan * .15)));
+      walker.scale.multiplyScalar(Math.max(.35, Math.min(.928, terrainSpan * .15)) * .5);
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
       const elevationHud = makeElevationHud(profileElevations);
