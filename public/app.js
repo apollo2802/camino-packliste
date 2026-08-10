@@ -109,6 +109,7 @@
       "diary.mapError": "Die 3D-Karte konnte nicht geladen werden. Bitte Internetverbindung prüfen.",
       "diary.attribution": "© OpenStreetMap / OpenTopoMap · Höhen: Mapzen",
       "diary.follow": "Kamera folgt",
+      "diary.resetCamera": "Gesamtansicht wiederherstellen",
       "diary.export": "Social-Video exportieren",
       "diary.exporting": "Video wird erstellt …",
       "diary.exportReady": "Video herunterladen",
@@ -267,6 +268,7 @@
       "diary.mapError": "The 3D map could not be loaded. Please check your internet connection.",
       "diary.attribution": "© OpenStreetMap / OpenTopoMap · elevation: Mapzen",
       "diary.follow": "Follow camera",
+      "diary.resetCamera": "Restore overview",
       "diary.export": "Export social video",
       "diary.exporting": "Creating video …",
       "diary.exportReady": "Download video",
@@ -425,6 +427,7 @@
       "diary.mapError": "Не удалось загрузить 3D-карту. Проверьте подключение к интернету.",
       "diary.attribution": "© OpenStreetMap / OpenTopoMap · высоты: Mapzen",
       "diary.follow": "Камера следует",
+      "diary.resetCamera": "Вернуть общий вид",
       "diary.export": "Экспорт видео",
       "diary.exporting": "Создаётся видео …",
       "diary.exportReady": "Скачать видео",
@@ -1269,7 +1272,7 @@
     const generation = ++diaryAnimationGeneration;
     const tours = [...els.diaryFeed.querySelectorAll("[data-diary-tour]")];
     if (!tours.length) return;
-    import("/diary-3d.js?v=15").then(({ mountDiaryTour }) => {
+    import("/diary-3d.js?v=16").then(({ mountDiaryTour }) => {
       if (generation !== diaryAnimationGeneration) return;
       tours.forEach((tour) => {
         const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
@@ -1307,7 +1310,7 @@
       const stats = entry.stats;
       const polyline = routePolyline(entry.track);
       const map = polyline
-        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><div class="diary-tour-hint" aria-hidden="true">↻ 3D</div><div class="diary-tour-actions"><label><input type="checkbox" data-tour-follow checked><span>${escapeHTML(t("diary.follow"))}</span></label><button type="button" data-tour-export>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden>${escapeHTML(t("diary.exportReady"))}</a></div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
+        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><button class="diary-tour-hint" type="button" data-tour-reset aria-label="${escapeHTML(t("diary.resetCamera"))}" title="${escapeHTML(t("diary.resetCamera"))}">↻ 3D</button><div class="diary-tour-actions"><label><input type="checkbox" data-tour-follow checked><span>${escapeHTML(t("diary.follow"))}</span></label><button type="button" data-tour-export>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden>${escapeHTML(t("diary.exportReady"))}</a></div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const statMarkup = stats ? `<div class="diary-stats">

@@ -154,7 +154,7 @@ function makeWalker() {
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = .025;
   group.add(ring);
-  group.scale.setScalar(1.16);
+  group.scale.setScalar(.928);
   group.userData = { leftLeg, rightLeg, leftArm, rightArm, trekkingPole };
   return group;
 }
@@ -178,6 +178,7 @@ export function mountDiaryTour(root, entry, translations) {
   const loading = root.querySelector("[data-tour-loading]");
   const playButton = root.querySelector("[data-tour-play]");
   const progress = root.querySelector("[data-tour-progress]");
+  const resetButton = root.querySelector("[data-tour-reset]");
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
@@ -283,6 +284,8 @@ export function mountDiaryTour(root, entry, translations) {
         routeCenter.z + routeSpan * .96
       );
       controls.update();
+      const overviewCameraPosition = camera.position.clone();
+      const overviewTarget = controls.target.clone();
       const segments = Math.max(280, entry.track.length * 4);
       const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .105, 7, false), new THREE.MeshStandardMaterial({ color: 0xfff7e8, roughness: .7, depthTest: true }));
       casing.renderOrder = 3;
@@ -356,6 +359,12 @@ export function mountDiaryTour(root, entry, translations) {
         fraction = Number(progress.value) / 1000;
         startFraction = fraction;
         startedAt = 0;
+      });
+      resetButton?.addEventListener("click", () => {
+        if (followCamera) followCamera.checked = false;
+        camera.position.copy(overviewCameraPosition);
+        controls.target.copy(overviewTarget);
+        controls.update();
       });
 
       exportButton?.addEventListener("click", async () => {
