@@ -3,6 +3,14 @@ import { OrbitControls } from "https://esm.sh/three@0.180.0/examples/jsm/control
 
 const TILE_SIZE = 256;
 const MAX_TILES = 24;
+// One map unit equals 0.55 km everywhere. Terrain receives the same fixed
+// 1.35× vertical exaggeration for every stage, so slopes remain comparable.
+const MAP_UNITS_PER_KILOMETER = .55;
+const VERTICAL_EXAGGERATION = 1.35;
+
+function metersPerTile(latitude, zoom) {
+  return 40_075_016.68557849 * Math.cos(latitude * Math.PI / 180) / (2 ** zoom);
+}
 
 function tilePoint(lon, lat, zoom) {
   const scale = 2 ** zoom;
@@ -388,11 +396,14 @@ export function mountDiaryTour(root, entry, translations) {
       const mosaics = await buildMosaics(grid, abortController.signal);
       if (destroyed) return;
       const elevations = entry.track.map((point) => point[2]);
+      const averageLatitude = entry.track.reduce((sum, point) => sum + point[0], 0) / entry.track.length;
       const baseElevation = Math.min(...elevations) - 22;
-      const elevationSpan = Math.max(50, Math.max(...elevations) - Math.min(...elevations));
-      const verticalScale = Math.min(.0075, 1.18 / elevationSpan);
-      const terrainWidth = 12;
-      const terrainDepth = terrainWidth * grid.rows / grid.columns;
+      const horizontalUnitsPerMeter = MAP_UNITS_PER_KILOMETER / 1000;
+      const verticalScale = horizontalUnitsPerMeter * VERTICAL_EXAGGERATION;
+      const tileLengthKilometers = metersPerTile(averageLatitude, grid.zoom) / 1000;
+      const terrainWidth = grid.columns * tileLengthKilometers * MAP_UNITS_PER_KILOMETER;
+      const terrainDepth = grid.rows * tileLengthKilometers * MAP_UNITS_PER_KILOMETER;
+      const terrainSpan = Math.max(terrainWidth, terrainDepth);
 
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
       renderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
@@ -409,8 +420,8 @@ export function mountDiaryTour(root, entry, translations) {
       controls = new OrbitControls(camera, canvas);
       controls.enableDamping = true;
       controls.dampingFactor = .07;
-      controls.minDistance = 5;
-      controls.maxDistance = 25;
+      controls.minDistance = Math.max(.55, terrainSpan * .25);
+      controls.maxDistance = Math.max(8, terrainSpan * 2.4);
       controls.maxPolarAngle = Math.PI * .47;
       controls.target.set(0, .35, 0);
 
@@ -444,7 +455,7 @@ export function mountDiaryTour(root, entry, translations) {
       const routeBounds = new THREE.Box3().setFromPoints(curve.getPoints(160));
       const routeCenter = routeBounds.getCenter(new THREE.Vector3());
       const routeSize = routeBounds.getSize(new THREE.Vector3());
-      const routeSpan = Math.max(6, routeSize.x, routeSize.z);
+      const routeSpan = Math.max(terrainSpan * .9, routeSize.x, routeSize.z);
       controls.target.copy(routeCenter);
       camera.position.set(
         routeCenter.x + routeSpan * .82,
@@ -463,6 +474,7 @@ export function mountDiaryTour(root, entry, translations) {
       trail.receiveShadow = true;
       scene.add(trail);
       const walker = makeWalker();
+      walker.scale.multiplyScalar(Math.max(.35, Math.min(.928, terrainSpan * .15)));
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
       const elevationHud = makeElevationHud(profileElevations);
@@ -473,7 +485,7 @@ export function mountDiaryTour(root, entry, translations) {
       smoothedDirection.normalize();
       const smoothedCameraDirection = smoothedDirection.clone();
       const cameraSide = new THREE.Vector3();
-      const cameraLift = new THREE.Vector3(0, 3.45, 0);
+      const cameraLift = new THREE.Vector3(0, Math.max(.9, terrainSpan * .29), 0);
       targetWalkerQuaternion.setFromAxisAngle(upAxis, Math.atan2(smoothedDirection.x, smoothedDirection.z) + Math.PI);
       walker.quaternion.copy(targetWalkerQuaternion);
       let previousFrameTime = 0;
