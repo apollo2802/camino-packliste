@@ -246,6 +246,77 @@ function routeCurve(track, grid, terrainWidth, terrainDepth, baseElevation, vert
   return new THREE.CatmullRomCurve3(points, false, "centripetal", .18);
 }
 
+function makeTrailTexture() {
+  const canvas = document.createElement("canvas");
+  canvas.width = 128;
+  canvas.height = 256;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#a98961";
+  context.fillRect(0, 0, 128, 256);
+  const earthGradient = context.createLinearGradient(0, 0, 128, 0);
+  earthGradient.addColorStop(0, "#71583f");
+  earthGradient.addColorStop(.12, "#987650");
+  earthGradient.addColorStop(.32, "#b89a70");
+  earthGradient.addColorStop(.68, "#b89a70");
+  earthGradient.addColorStop(.88, "#987650");
+  earthGradient.addColorStop(1, "#71583f");
+  context.fillStyle = earthGradient;
+  context.fillRect(0, 0, 128, 256);
+  for (let index = 0; index < 90; index += 1) {
+    const x = 14 + ((index * 47) % 100);
+    const y = (index * 83) % 256;
+    const radius = 1 + (index % 4) * .55;
+    context.beginPath();
+    context.ellipse(x, y, radius * 1.6, radius, (index % 7) * .31, 0, Math.PI * 2);
+    context.fillStyle = index % 3 ? "rgba(237,220,181,.38)" : "rgba(80,59,42,.26)";
+    context.fill();
+  }
+  context.strokeStyle = "rgba(255,205,48,.92)";
+  context.lineWidth = 4;
+  context.setLineDash([22, 18]);
+  context.beginPath();
+  context.moveTo(64, 0);
+  context.lineTo(64, 256);
+  context.stroke();
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.ClampToEdgeWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 8;
+  return texture;
+}
+
+function makeTrailGeometry(curve, segments, width) {
+  const positions = [];
+  const uvs = [];
+  const indices = [];
+  const side = new THREE.Vector3();
+  for (let index = 0; index <= segments; index += 1) {
+    const fraction = index / segments;
+    const point = curve.getPointAt(fraction);
+    const tangent = curve.getTangentAt(fraction);
+    side.set(-tangent.z, 0, tangent.x).normalize();
+    const irregularWidth = width * (1 + Math.sin(index * 1.71) * .055 + Math.sin(index * .37) * .035);
+    const left = point.clone().addScaledVector(side, irregularWidth * .5);
+    const right = point.clone().addScaledVector(side, -irregularWidth * .5);
+    left.y += .045;
+    right.y += .045;
+    positions.push(left.x, left.y, left.z, right.x, right.y, right.z);
+    const textureProgress = fraction * 24;
+    uvs.push(0, textureProgress, 1, textureProgress);
+    if (index < segments) {
+      const offset = index * 2;
+      indices.push(offset, offset + 2, offset + 1, offset + 1, offset + 2, offset + 3);
+    }
+  }
+  const geometry = new THREE.BufferGeometry();
+  geometry.setAttribute("position", new THREE.Float32BufferAttribute(positions, 3));
+  geometry.setAttribute("uv", new THREE.Float32BufferAttribute(uvs, 2));
+  geometry.setIndex(indices);
+  geometry.computeVertexNormals();
+  return geometry;
+}
+
 export function mountDiaryTour(root, entry, translations) {
   const canvas = root.querySelector("canvas");
   const loading = root.querySelector("[data-tour-loading]");
@@ -372,12 +443,13 @@ export function mountDiaryTour(root, entry, translations) {
       const overviewCameraPosition = camera.position.clone();
       const overviewTarget = controls.target.clone();
       const segments = Math.max(280, entry.track.length * 4);
-      const casing = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .105, 7, false), new THREE.MeshStandardMaterial({ color: 0xfff7e8, roughness: .7, depthTest: true }));
-      casing.renderOrder = 3;
-      scene.add(casing);
-      const route = new THREE.Mesh(new THREE.TubeGeometry(curve, segments, .067, 7, false), new THREE.MeshStandardMaterial({ color: 0xffcd30, emissive: 0xd69816, emissiveIntensity: .08, roughness: .58, depthTest: true }));
-      route.renderOrder = 4;
-      scene.add(route);
+      const trail = new THREE.Mesh(
+        makeTrailGeometry(curve, segments, .25),
+        new THREE.MeshStandardMaterial({ map: makeTrailTexture(), roughness: .96, metalness: 0, side: THREE.DoubleSide, polygonOffset: true, polygonOffsetFactor: -1 })
+      );
+      trail.renderOrder = 3;
+      trail.receiveShadow = true;
+      scene.add(trail);
       const walker = makeWalker();
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
