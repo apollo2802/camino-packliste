@@ -28,8 +28,10 @@ function chooseTileGrid(track) {
     minLat: Math.min(...lats), maxLat: Math.max(...lats),
     minLon: Math.min(...lons), maxLon: Math.max(...lons)
   };
-  const latPad = Math.max(.002, (bounds.maxLat - bounds.minLat) * .12);
-  const lonPad = Math.max(.002, (bounds.maxLon - bounds.minLon) * .12);
+  // Give the relief map real geographic context around the GPX instead of
+  // cutting the terrain closely around the route.
+  const latPad = Math.max(.0112, (bounds.maxLat - bounds.minLat) * .61);
+  const lonPad = Math.max(.0112, (bounds.maxLon - bounds.minLon) * .61);
   bounds.minLat -= latPad; bounds.maxLat += latPad;
   bounds.minLon -= lonPad; bounds.maxLon += lonPad;
 
@@ -336,6 +338,8 @@ function makeTrailGeometry(curve, segments, width) {
 
 export function mountDiaryTour(root, entry, translations) {
   const canvas = root.querySelector("canvas");
+  const cityMapContainer = root.querySelector("[data-tour-city-map]");
+  const mapViewButtons = [...root.querySelectorAll("[data-tour-view]")];
   const loading = root.querySelector("[data-tour-loading]");
   const playButton = root.querySelector("[data-tour-play]");
   const progress = root.querySelector("[data-tour-progress]");
@@ -371,6 +375,14 @@ export function mountDiaryTour(root, entry, translations) {
   let readyExport = null;
   let exportSurface = null;
   let exportContext = null;
+  let cityMap = null;
+  let cityMarker = null;
+  let cityWalkerRenderer = null;
+  let cityWalkerScene = null;
+  let cityWalkerCamera = null;
+  let cityWalkerModel = null;
+  let cityMapPromise = null;
+  let activeMapView = "terrain";
   const exportDate = (() => {
     const date = new Date(`${entry.date}T12:00:00`);
     if (Number.isNaN(date.getTime())) return entry.date || "";
@@ -464,12 +476,12 @@ export function mountDiaryTour(root, entry, translations) {
       const routeBounds = new THREE.Box3().setFromPoints(curve.getPoints(160));
       const routeCenter = routeBounds.getCenter(new THREE.Vector3());
       const routeSize = routeBounds.getSize(new THREE.Vector3());
-      const routeSpan = Math.max(terrainSpan * .9, routeSize.x, routeSize.z);
+      const routeSpan = Math.max(terrainSpan * .86, routeSize.x * 1.12, routeSize.z * 1.12);
       controls.target.copy(routeCenter);
       camera.position.set(
-        routeCenter.x + routeSpan * .82,
-        routeCenter.y + routeSpan * .78,
-        routeCenter.z + routeSpan * .96
+        routeCenter.x + routeSpan * .43,
+        routeCenter.y + routeSpan * .76,
+        routeCenter.z + routeSpan * .52
       );
       controls.update();
       const overviewCameraPosition = camera.position.clone();
@@ -487,6 +499,232 @@ export function mountDiaryTour(root, entry, translations) {
       walker.position.copy(curve.getPointAt(0));
       scene.add(walker);
       const elevationHud = makeElevationHud(profileElevations);
+      const cityRouteCoordinates = entry.track.map(([latitude, longitude]) => [longitude, latitude]);
+      const cityStart = cityRouteCoordinates[0];
+      const cityBounds = cityRouteCoordinates.reduce((bounds, [longitude, latitude]) => ({
+        minLongitude: Math.min(bounds.minLongitude, longitude),
+        maxLongitude: Math.max(bounds.maxLongitude, longitude),
+        minLatitude: Math.min(bounds.minLatitude, latitude),
+        maxLatitude: Math.max(bounds.maxLatitude, latitude)
+      }), {
+        minLongitude: Infinity,
+        maxLongitude: -Infinity,
+        minLatitude: Infinity,
+        maxLatitude: -Infinity
+      });
+      const cityRouteCurve = new THREE.CatmullRomCurve3(
+        cityRouteCoordinates.map(([longitude, latitude]) => new THREE.Vector3(longitude, 0, -latitude)),
+        false,
+        "centripetal",
+        .18
+      );
+      const cityRouteDisplayCoordinates = cityRouteCurve
+        .getPoints(Math.max(360, cityRouteCoordinates.length * 8))
+        .map((point) => [point.x, -point.z]);
+
+      function cityCoordinateAt(value) {
+        const point = cityRouteCurve.getPointAt(Math.max(0, Math.min(1, value)));
+        return [point.x, -point.z];
+      }
+
+      function showCityOverview(animate = false) {
+        if (!cityMap) return;
+        const compact = cityMapContainer.clientWidth < 520;
+        cityMap.fitBounds(
+          [
+            [cityBounds.minLongitude, cityBounds.minLatitude],
+            [cityBounds.maxLongitude, cityBounds.maxLatitude]
+          ],
+          {
+            padding: compact
+              ? { top: 64, right: 28, bottom: 88, left: 28 }
+              : { top: 72, right: 56, bottom: 100, left: 56 },
+            bearing: -20,
+            pitch: 48,
+            maxZoom: 15.4,
+            duration: animate ? 650 : 0
+          }
+        );
+      }
+
+      function terrainWalkerPixelHeight() {
+        const bottom = walker.position.clone().project(camera);
+        const top = walker.position.clone().add(new THREE.Vector3(0, walker.scale.y * 1.05, 0)).project(camera);
+        return Math.max(28, Math.min(46, Math.abs(top.y - bottom.y) * canvas.clientHeight * .5));
+      }
+
+      function renderCityWalker(time, stride) {
+        if (!cityWalkerRenderer || !cityWalkerModel) return;
+        cityWalkerModel.userData.leftLeg.rotation.x = stride;
+        cityWalkerModel.userData.rightLeg.rotation.x = -stride;
+        cityWalkerModel.userData.leftArm.rotation.x = -stride * .72;
+        cityWalkerModel.userData.rightArm.rotation.x = -.22 + stride * .48;
+        cityWalkerModel.userData.trekkingPole.rotation.x = -.18 + stride * .18;
+        if (cityMap) {
+          const step = .002;
+          const startFraction = fraction < 1 - step ? fraction : Math.max(0, fraction - step);
+          const endFraction = fraction < 1 - step ? fraction + step : fraction;
+          const startPixel = cityMap.project(cityCoordinateAt(startFraction));
+          const endPixel = cityMap.project(cityCoordinateAt(endFraction));
+          const screenHeading = Math.atan2(endPixel.x - startPixel.x, -(endPixel.y - startPixel.y));
+          // The walker faces away from the marker camera at rotation 0.
+          // Rotating against the screen heading makes him look along the path.
+          cityWalkerModel.rotation.y = -screenHeading;
+        }
+        cityWalkerRenderer.render(cityWalkerScene, cityWalkerCamera);
+      }
+
+      async function initializeCityMap() {
+        if (cityMap) return cityMap;
+        if (cityMapPromise) return cityMapPromise;
+        cityMapPromise = (async () => {
+          const module = await import("https://esm.sh/maplibre-gl@5.14.0?bundle");
+          if (destroyed) throw new DOMException("Aborted", "AbortError");
+          const maplibregl = module.default || module;
+          cityMap = new maplibregl.Map({
+            container: cityMapContainer,
+            style: "https://tiles.openfreemap.org/styles/bright",
+            center: cityStart,
+            zoom: 15.4,
+            pitch: 58,
+            bearing: -20,
+            maxPitch: 75,
+            attributionControl: true,
+            canvasContextAttributes: { antialias: true }
+          });
+          await new Promise((resolve) => cityMap.once("load", resolve));
+          if (destroyed) return cityMap;
+          const styleLayers = cityMap.getStyle().layers || [];
+          const labelLayer = styleLayers.find((layer) => layer.type === "symbol" && layer.layout?.["text-field"]);
+          cityMap.addSource("camino-buildings", { url: "https://tiles.openfreemap.org/planet", type: "vector" });
+          cityMap.addLayer({
+            id: "camino-3d-buildings",
+            source: "camino-buildings",
+            "source-layer": "building",
+            type: "fill-extrusion",
+            minzoom: 14,
+            filter: ["all", ["has", "render_height"], ["!=", ["get", "hide_3d"], true]],
+            paint: {
+              "fill-extrusion-color": "#d8c7af",
+              "fill-extrusion-height": ["get", "render_height"],
+              "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+              "fill-extrusion-opacity": .92
+            }
+          }, labelLayer?.id);
+          cityMap.addSource("camino-route", {
+            type: "geojson",
+            data: { type: "Feature", properties: {}, geometry: { type: "LineString", coordinates: cityRouteDisplayCoordinates } }
+          });
+          const trailPattern = document.createElement("canvas");
+          trailPattern.width = 64;
+          trailPattern.height = 16;
+          const trailContext = trailPattern.getContext("2d");
+          const trailGradient = trailContext.createLinearGradient(0, 0, 0, 16);
+          trailGradient.addColorStop(0, "#71583f");
+          trailGradient.addColorStop(.2, "#a98961");
+          trailGradient.addColorStop(.5, "#b89a70");
+          trailGradient.addColorStop(.8, "#a98961");
+          trailGradient.addColorStop(1, "#71583f");
+          trailContext.fillStyle = trailGradient;
+          trailContext.fillRect(0, 0, 64, 16);
+          trailContext.strokeStyle = "rgba(255,205,48,.95)";
+          trailContext.lineWidth = 2;
+          trailContext.setLineDash([18, 12]);
+          trailContext.beginPath();
+          trailContext.moveTo(0, 8);
+          trailContext.lineTo(64, 8);
+          trailContext.stroke();
+          cityMap.addImage("camino-trail-pattern", trailContext.getImageData(0, 0, 64, 16), { pixelRatio: 2 });
+          cityMap.addLayer({
+            id: "camino-route-casing",
+            type: "line",
+            source: "camino-route",
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { "line-color": "#58452d", "line-width": 9, "line-opacity": .88 }
+          });
+          cityMap.addLayer({
+            id: "camino-route-trail",
+            type: "line",
+            source: "camino-route",
+            layout: { "line-cap": "round", "line-join": "round" },
+            paint: { "line-pattern": "camino-trail-pattern", "line-width": 7, "line-opacity": 1 }
+          });
+          const walkerElement = document.createElement("div");
+          walkerElement.className = "diary-city-walker";
+          walkerElement.setAttribute("aria-label", "Wanderer");
+          walkerElement.setAttribute("role", "img");
+          const walkerCanvas = document.createElement("canvas");
+          walkerCanvas.setAttribute("aria-hidden", "true");
+          walkerElement.append(walkerCanvas);
+          // The transparent canvas needs extra room around the model. This
+          // compensates that margin so the visible figure matches the terrain walker.
+          const walkerHeight = Math.max(42, Math.min(64, Math.round(terrainWalkerPixelHeight() * 1.45)));
+          walkerElement.style.width = `${Math.round(walkerHeight * .78)}px`;
+          walkerElement.style.height = `${walkerHeight}px`;
+          cityWalkerRenderer = new THREE.WebGLRenderer({ canvas: walkerCanvas, alpha: true, antialias: true, powerPreference: "low-power" });
+          cityWalkerRenderer.setPixelRatio(Math.min(2, devicePixelRatio || 1));
+          cityWalkerRenderer.setSize(Math.round(walkerHeight * .78), walkerHeight, false);
+          cityWalkerRenderer.setClearColor(0x000000, 0);
+          cityWalkerRenderer.outputColorSpace = THREE.SRGBColorSpace;
+          cityWalkerScene = new THREE.Scene();
+          cityWalkerScene.add(new THREE.HemisphereLight(0xf5fafc, 0x8c977e, 1.6));
+          const cityWalkerSun = new THREE.DirectionalLight(0xfff4de, 1.35);
+          cityWalkerSun.position.set(-2, 4, 3);
+          cityWalkerScene.add(cityWalkerSun);
+          cityWalkerCamera = new THREE.PerspectiveCamera(30, .78, .1, 10);
+          cityWalkerCamera.position.set(1.35, 1.05, 2.4);
+          cityWalkerCamera.lookAt(0, .48, 0);
+          cityWalkerModel = makeWalker();
+          cityWalkerModel.scale.setScalar(.92);
+          cityWalkerScene.add(cityWalkerModel);
+          renderCityWalker(0, 0);
+          cityMarker = new maplibregl.Marker({ element: walkerElement, anchor: "bottom" }).setLngLat(cityStart).addTo(cityMap);
+          return cityMap;
+        })().catch((error) => {
+          cityMap?.remove();
+          cityMap = null;
+          cityMarker = null;
+          throw error;
+        }).finally(() => { cityMapPromise = null; });
+        return cityMapPromise;
+      }
+
+      async function setMapView(nextView) {
+        activeMapView = nextView === "city" ? "city" : "terrain";
+        mapViewButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.tourView === activeMapView)));
+        root.classList.toggle("city-view", activeMapView === "city");
+        cityMapContainer.hidden = activeMapView !== "city";
+        cityMapContainer.setAttribute("aria-hidden", String(activeMapView !== "city"));
+        localStorage.setItem("camino-diary-map-view", activeMapView);
+        if (activeMapView !== "city") return;
+        try {
+          const map = await initializeCityMap();
+          if (activeMapView !== "city" || destroyed) return;
+          map.resize();
+          showCityOverview(false);
+        } catch (error) {
+          if (error?.name === "AbortError" || destroyed) return;
+          console.warn("Camino city map failed", error);
+          activeMapView = "terrain";
+          root.classList.remove("city-view");
+          cityMapContainer.hidden = true;
+          cityMapContainer.setAttribute("aria-hidden", "true");
+          mapViewButtons.forEach((button) => button.setAttribute("aria-pressed", String(button.dataset.tourView === "terrain")));
+          loading.textContent = translations.cityError;
+          loading.classList.add("error");
+          loading.hidden = false;
+          window.setTimeout(() => { if (!destroyed) loading.hidden = true; }, 2600);
+        }
+      }
+
+      function syncCityWalker(time, stride) {
+        if (!cityMap || activeMapView !== "city") return;
+        const coordinate = cityCoordinateAt(fraction);
+        cityMarker?.setLngLat(coordinate);
+        renderCityWalker(time, stride);
+        if (playing && followCamera?.checked) cityMap.setCenter(coordinate);
+      }
+
       const upAxis = new THREE.Vector3(0, 1, 0);
       const targetWalkerQuaternion = new THREE.Quaternion();
       const smoothedDirection = curve.getTangentAt(0);
@@ -502,6 +740,10 @@ export function mountDiaryTour(root, entry, translations) {
       function composeExportFrame() {
         if (!exportContext || !exportSurface) return;
         exportContext.clearRect(0, 0, exportSurface.width, exportSurface.height);
+        // Keep the terrain unobstructed: the elevation profile gets its own
+        // bottom card in the exported 4:5 social video.
+        exportContext.fillStyle = "#f3ead8";
+        exportContext.fillRect(0, 0, exportSurface.width, exportSurface.height);
         exportContext.drawImage(canvas, 0, 0, 1080, 1080);
         const headerGradient = exportContext.createLinearGradient(0, 0, 0, 250);
         headerGradient.addColorStop(0, "rgba(5,34,32,.9)");
@@ -519,7 +761,9 @@ export function mountDiaryTour(root, entry, translations) {
           exportContext.font = "600 25px system-ui, sans-serif";
           exportContext.fillText(`${Number(entry.stats.distance).toLocaleString(document.documentElement.lang || "de", { maximumFractionDigits: 1 })} km`, 66, 188);
         }
-        exportContext.drawImage(elevationHud.canvas, 54, 810, 972, 243);
+        exportContext.fillStyle = "#e6d7bc";
+        exportContext.fillRect(0, 1080, 1080, 5);
+        exportContext.drawImage(elevationHud.canvas, 54, 1088, 972, 243);
       }
 
       function resize() {
@@ -558,6 +802,7 @@ export function mountDiaryTour(root, entry, translations) {
         walker.userData.rightArm.rotation.x = -.22 + stride * .48;
         walker.userData.trekkingPole.rotation.x = -.18 + stride * .18;
         if (exporting) elevationHud.update(fraction);
+        syncCityWalker(time, stride);
         if (playing && followCamera?.checked) {
           const cameraTarget = point.clone().addScaledVector(smoothedCameraDirection, .3 * playbackRate);
           cameraTarget.y += .48;
@@ -666,6 +911,10 @@ export function mountDiaryTour(root, entry, translations) {
         if (event.key === "Escape") setMenuOpen(false);
       };
       menuToggle?.addEventListener("click", () => setMenuOpen(menuToggle.getAttribute("aria-expanded") !== "true"));
+      mapViewButtons.forEach((button) => button.addEventListener("click", () => {
+        setMenuOpen(false);
+        setMapView(button.dataset.tourView);
+      }));
       document.addEventListener("pointerdown", onMenuPointerDown);
       document.addEventListener("keydown", onMenuKeyDown);
       root._diaryMenuPointerDown = onMenuPointerDown;
@@ -673,6 +922,10 @@ export function mountDiaryTour(root, entry, translations) {
       resetButton?.addEventListener("click", () => {
         setMenuOpen(false);
         if (followCamera) followCamera.checked = false;
+        if (activeMapView === "city" && cityMap) {
+          showCityOverview(true);
+          return;
+        }
         camera.position.copy(overviewCameraPosition);
         controls.target.copy(overviewTarget);
         controls.update();
@@ -685,6 +938,7 @@ export function mountDiaryTour(root, entry, translations) {
           fullscreenButton.setAttribute("title", label);
           if (fullscreenLabel) fullscreenLabel.textContent = label;
         }
+        cityMap?.resize();
         window.requestAnimationFrame(resize);
       };
       if (!root.requestFullscreen || !document.exitFullscreen) {
@@ -775,7 +1029,7 @@ export function mountDiaryTour(root, entry, translations) {
           controls.update();
           exportSurface = document.createElement("canvas");
           exportSurface.width = 1080;
-          exportSurface.height = 1080;
+          exportSurface.height = 1350;
           exportContext = exportSurface.getContext("2d");
           renderer.render(scene, camera);
           composeExportFrame();
@@ -858,6 +1112,7 @@ export function mountDiaryTour(root, entry, translations) {
       root._diary3dResize = onResize;
       resize();
       loading.hidden = true;
+      if (localStorage.getItem("camino-diary-map-view") === "city") setMapView("city");
       draw();
     } catch (error) {
       if (error?.name === "AbortError" || destroyed) return;
@@ -880,6 +1135,13 @@ export function mountDiaryTour(root, entry, translations) {
     if (root._diaryMenuPointerDown) document.removeEventListener("pointerdown", root._diaryMenuPointerDown);
     if (root._diaryMenuKeyDown) document.removeEventListener("keydown", root._diaryMenuKeyDown);
     root._diaryElevationProfileCleanup?.();
+    cityMap?.remove();
+    cityWalkerModel?.traverse((object) => {
+      object.geometry?.dispose?.();
+      if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose?.());
+      else object.material?.dispose?.();
+    });
+    cityWalkerRenderer?.dispose();
     controls?.dispose();
     renderer?.dispose();
   };

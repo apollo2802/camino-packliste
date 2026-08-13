@@ -176,9 +176,9 @@ const encoder = new TextEncoder();
 
 const SECURITY_HEADERS = {
   "cache-control": "private, no-store",
-  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; img-src 'self' data: https://a.tile.opentopomap.org https://s3.amazonaws.com; connect-src 'self' https://esm.sh; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; img-src 'self' data: https://a.tile.opentopomap.org https://s3.amazonaws.com https://tiles.openfreemap.org; connect-src 'self' https://esm.sh https://tiles.openfreemap.org https://api.open-meteo.com; worker-src blob:; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   "cross-origin-opener-policy": "same-origin",
-  "permissions-policy": "camera=(), microphone=(), geolocation=()",
+  "permissions-policy": "camera=(), microphone=(), geolocation=(self)",
   "referrer-policy": "no-referrer",
   "x-content-type-options": "nosniff",
   "x-frame-options": "DENY",

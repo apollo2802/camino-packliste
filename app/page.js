@@ -16,7 +16,7 @@ const pageMarkup = `
             <button class="language-button" type="button" data-language="ru" aria-pressed="false">RU</button>
           </div>
           <button class="ghost-button" id="print-button" type="button" data-i18n="nav.print">Drucken</button>
-          <a class="ghost-button diary-link" href="#tagebuch" data-i18n="nav.diary">Tagebuch</a>
+          <a class="ghost-button diary-link" href="#unterwegs" data-i18n="nav.diary">Unterwegs</a>
           <button class="ghost-button danger-subtle" id="reset-button" type="button" data-i18n="nav.reset">Zurücksetzen</button>
           <a class="ghost-button" href="/logout" data-i18n="nav.logout">Abmelden</a>
         </div>
@@ -218,6 +218,69 @@ const pageMarkup = `
               <span id="packing-frame-label">001 / 100</span>
               <span class="film-scroll-cue" data-i18n="film.scroll">Scrollen</span>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="trail-weather-section" id="unterwegs" aria-labelledby="trail-weather-title">
+        <div class="section-heading trail-weather-heading">
+          <div>
+            <p class="section-label" data-i18n="weather.label">Live am Weg</p>
+            <h2 id="trail-weather-title" data-i18n="weather.title">Heute draußen</h2>
+          </div>
+          <p data-i18n="weather.copy">Wetter, Stundenverlauf und wichtige Hinweise für deinen aktuellen Standort – auf einen Blick.</p>
+        </div>
+
+        <div class="trail-weather" data-weather>
+          <div class="weather-start" data-weather-start>
+            <span class="weather-start-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7Zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5Z"/></svg>
+            </span>
+            <div>
+              <p class="section-label" data-i18n="weather.locationLabel">Dein Standort</p>
+              <h3 data-i18n="weather.startTitle">Was erwartet dich auf dem Weg?</h3>
+              <p data-i18n="weather.startCopy">Standort freigeben und die Bedingungen für die nächsten Stunden sehen.</p>
+            </div>
+            <button type="button" class="weather-location-button" data-weather-locate>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm9 3h-2.07A7.02 7.02 0 0 0 13 5.07V3h-2v2.07A7.02 7.02 0 0 0 5.07 11H3v2h2.07A7.02 7.02 0 0 0 11 18.93V21h2v-2.07A7.02 7.02 0 0 0 18.93 13H21v-2Zm-9 6a5 5 0 1 1 0-10 5 5 0 0 1 0 10Z"/></svg>
+              <span data-i18n="weather.useLocation">Standort verwenden</span>
+            </button>
+            <p class="weather-privacy" data-i18n="weather.privacy">Deine Position wird nur an Open‑Meteo übertragen und nicht im gemeinsamen Speicher gesichert.</p>
+          </div>
+
+          <div class="weather-loading" data-weather-loading hidden role="status">
+            <span aria-hidden="true"></span><p data-i18n="weather.loading">Aktuelle Bedingungen werden geladen …</p>
+          </div>
+
+          <div class="weather-error" data-weather-error hidden role="alert">
+            <strong data-i18n="weather.errorTitle">Standort nicht verfügbar</strong>
+            <p data-weather-error-copy data-i18n="weather.errorCopy">Bitte Standortfreigabe prüfen oder später erneut versuchen.</p>
+            <button type="button" data-weather-retry data-i18n="weather.retry">Erneut versuchen</button>
+          </div>
+
+          <div class="weather-dashboard" data-weather-dashboard hidden>
+            <header class="weather-dashboard-head">
+              <div><span data-weather-location>Aktueller Standort</span><small data-weather-updated></small></div>
+              <button type="button" data-weather-refresh aria-label="Standort und Wetter aktualisieren" data-i18n-aria="weather.refresh"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35A8 8 0 1 0 20 12h-2a6 6 0 1 1-1.76-4.24L13 11h8V3l-3.35 3.35Z"/></svg></button>
+            </header>
+
+            <div class="weather-hero">
+              <div class="weather-now-icon" data-weather-icon aria-hidden="true">☀️</div>
+              <div class="weather-temperature"><strong data-weather-temperature>--°</strong><span data-weather-condition>–</span></div>
+              <div class="weather-verdict" data-weather-verdict></div>
+            </div>
+
+            <div class="weather-facts" data-weather-facts></div>
+            <div class="weather-alerts" data-weather-alerts></div>
+
+            <details class="weather-hourly">
+              <summary><span><strong data-i18n="weather.hourly">Stündliche Vorschau</strong><small data-i18n="weather.hourlyCopy">Die nächsten 12 Stunden</small></span><span class="weather-chevron" aria-hidden="true">⌄</span></summary>
+              <div class="weather-hourly-scroll" data-weather-hourly></div>
+            </details>
+
+            <footer class="weather-sources">
+              <p><span data-i18n="weather.source">Wetterdaten: Open‑Meteo. Risikoangaben sind Orientierung, keine amtliche Warnung.</span> <a href="https://www.meteoalarm.org/" target="_blank" rel="noopener" data-i18n="weather.warningMap">Amtliche Wetterwarnungen ↗</a> · <a href="https://forest-fire.emergency.copernicus.eu/apps/effis_current_situation/" target="_blank" rel="noopener" data-i18n="weather.fireMap">EFFIS-Waldbrandkarte ↗</a></p>
+            </footer>
           </div>
         </div>
       </section>

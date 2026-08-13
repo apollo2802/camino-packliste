@@ -3,13 +3,14 @@
 
   const STORAGE_KEY = "camino-packliste-2026-v1";
   const LANGUAGE_KEY = "camino-language-v1";
+  const WEATHER_POSITION_KEY = "camino-weather-position-v1";
   const translations = {
     de: {
       "page.title": "Unsere Camino-Packliste",
       "nav.main": "Hauptnavigation",
       "nav.home": "Camino-Packliste Startseite",
       "nav.print": "Drucken",
-      "nav.diary": "Tagebuch",
+      "nav.diary": "Unterwegs",
       "nav.reset": "Zurücksetzen",
       "nav.logout": "Abmelden",
       "language.label": "Sprache auswählen",
@@ -77,6 +78,65 @@
       "custom.grams": "Gramm",
       "custom.priority": "Priorität",
       "custom.add": "Hinzufügen",
+      "weather.label": "Live am Weg",
+      "weather.title": "Heute draußen",
+      "weather.copy": "Wetter, Stundenverlauf und wichtige Hinweise für deinen aktuellen Standort – auf einen Blick.",
+      "weather.locationLabel": "Dein Standort",
+      "weather.startTitle": "Was erwartet dich auf dem Weg?",
+      "weather.startCopy": "Standort freigeben und die Bedingungen für die nächsten Stunden sehen.",
+      "weather.useLocation": "Standort verwenden",
+      "weather.privacy": "Deine Position wird nur an Open‑Meteo übertragen und nicht im gemeinsamen Speicher gesichert.",
+      "weather.loading": "Aktuelle Bedingungen werden geladen …",
+      "weather.errorTitle": "Standort nicht verfügbar",
+      "weather.errorCopy": "Bitte Standortfreigabe prüfen oder später erneut versuchen.",
+      "weather.errorDenied": "Der Standortzugriff wurde abgelehnt. Du kannst ihn in den Browser-Einstellungen wieder erlauben.",
+      "weather.errorNetwork": "Die Wetterdaten konnten gerade nicht geladen werden. Bitte Verbindung prüfen.",
+      "weather.retry": "Erneut versuchen",
+      "weather.refresh": "Standort und Wetter aktualisieren",
+      "weather.currentLocation": "Aktueller Standort",
+      "weather.updated": "Aktualisiert {time}",
+      "weather.hourly": "Stündliche Vorschau",
+      "weather.hourlyCopy": "Die nächsten 12 Stunden",
+      "weather.now": "Jetzt",
+      "weather.source": "Wetterdaten: Open‑Meteo. Risikoangaben sind Orientierung, keine amtliche Warnung.",
+      "weather.warningMap": "Amtliche Wetterwarnungen ↗",
+      "weather.fireMap": "EFFIS-Waldbrandkarte ↗",
+      "weather.feels": "Gefühlt",
+      "weather.rain": "Regen heute",
+      "weather.wind": "Wind",
+      "weather.gusts": "Böen",
+      "weather.uv": "UV-Index",
+      "weather.sun": "Tageslicht",
+      "weather.visibility": "Sichtweite",
+      "weather.humidity": "Luftfeuchte",
+      "weather.fireRisk": "Waldbrandrisiko",
+      "weather.fireHint": "Lokale Wetter-Einschätzung",
+      "weather.levelLow": "Niedrig",
+      "weather.levelRaised": "Erhöht",
+      "weather.levelHigh": "Hoch",
+      "weather.levelVeryHigh": "Sehr hoch",
+      "weather.good": "Gute Wanderbedingungen",
+      "weather.goodCopy": "Zurzeit keine auffälligen Wetterrisiken.",
+      "weather.caution": "Mit Vorsicht planen",
+      "weather.cautionCopy": "Mindestens eine Bedingung verdient heute Aufmerksamkeit.",
+      "weather.rough": "Anspruchsvolle Bedingungen",
+      "weather.roughCopy": "Route, Pausen und Ausrüstung heute besonders sorgfältig prüfen.",
+      "weather.alertRain": "Kräftiger Regen möglich",
+      "weather.alertStorm": "Gewitter möglich",
+      "weather.alertWind": "Starke Böen möglich",
+      "weather.alertHeat": "Hohe Wärmebelastung",
+      "weather.alertUv": "Sehr hohe UV-Belastung",
+      "weather.alertFire": "Erhöhte Waldbrandgefahr",
+      "weather.alertNone": "Keine kritischen Hinweise",
+      "weather.codeClear": "Klar",
+      "weather.codeCloudy": "Leicht bewölkt",
+      "weather.codeOvercast": "Bedeckt",
+      "weather.codeFog": "Nebel",
+      "weather.codeDrizzle": "Nieselregen",
+      "weather.codeRain": "Regen",
+      "weather.codeSnow": "Schnee",
+      "weather.codeShowers": "Schauer",
+      "weather.codeThunder": "Gewitter",
       "diary.label": "Unterwegs",
       "diary.title": "Unser Camino-Tagebuch",
       "diary.copy": "Jeden Wandertag mit Gedanken, Höhenmetern und der aufgezeichneten GPX-Route festhalten.",
@@ -113,6 +173,10 @@
       "diary.fullscreen": "Karte maximieren",
       "diary.exitFullscreen": "Vollbild beenden",
       "diary.menu": "Kartenoptionen",
+      "diary.mapView": "Kartenansicht",
+      "diary.viewTerrain": "Gelände",
+      "diary.viewCity": "Stadt · 3D-Gebäude",
+      "diary.cityError": "Die 3D-Gebäude konnten nicht geladen werden.",
       "diary.speed": "Animationsgeschwindigkeit",
       "diary.export": "Video exportieren",
       "diary.exporting": "Video wird erstellt …",
@@ -172,7 +236,7 @@
       "nav.main": "Main navigation",
       "nav.home": "Camino packing list home",
       "nav.print": "Print",
-      "nav.diary": "Diary",
+      "nav.diary": "On the way",
       "nav.reset": "Reset",
       "nav.logout": "Sign out",
       "language.label": "Choose language",
@@ -240,6 +304,65 @@
       "custom.grams": "Grams",
       "custom.priority": "Priority",
       "custom.add": "Add",
+      "weather.label": "Live on the trail",
+      "weather.title": "Outside today",
+      "weather.copy": "Weather, hourly outlook and important guidance for your current location at a glance.",
+      "weather.locationLabel": "Your location",
+      "weather.startTitle": "What will the trail bring?",
+      "weather.startCopy": "Share your location to see conditions for the next few hours.",
+      "weather.useLocation": "Use my location",
+      "weather.privacy": "Your position is sent only to Open‑Meteo and is not stored in the shared account.",
+      "weather.loading": "Loading current conditions …",
+      "weather.errorTitle": "Location unavailable",
+      "weather.errorCopy": "Please check location access or try again later.",
+      "weather.errorDenied": "Location access was denied. You can allow it again in your browser settings.",
+      "weather.errorNetwork": "Weather data could not be loaded. Please check your connection.",
+      "weather.retry": "Try again",
+      "weather.refresh": "Refresh location and weather",
+      "weather.currentLocation": "Current location",
+      "weather.updated": "Updated {time}",
+      "weather.hourly": "Hourly forecast",
+      "weather.hourlyCopy": "The next 12 hours",
+      "weather.now": "Now",
+      "weather.source": "Weather data: Open‑Meteo. Risk indicators are guidance, not official warnings.",
+      "weather.warningMap": "Official weather warnings ↗",
+      "weather.fireMap": "EFFIS wildfire map ↗",
+      "weather.feels": "Feels like",
+      "weather.rain": "Rain today",
+      "weather.wind": "Wind",
+      "weather.gusts": "Gusts",
+      "weather.uv": "UV index",
+      "weather.sun": "Daylight",
+      "weather.visibility": "Visibility",
+      "weather.humidity": "Humidity",
+      "weather.fireRisk": "Wildfire risk",
+      "weather.fireHint": "Local weather estimate",
+      "weather.levelLow": "Low",
+      "weather.levelRaised": "Raised",
+      "weather.levelHigh": "High",
+      "weather.levelVeryHigh": "Very high",
+      "weather.good": "Good walking conditions",
+      "weather.goodCopy": "No notable weather risks right now.",
+      "weather.caution": "Plan with care",
+      "weather.cautionCopy": "At least one condition needs attention today.",
+      "weather.rough": "Demanding conditions",
+      "weather.roughCopy": "Check your route, breaks and equipment especially carefully today.",
+      "weather.alertRain": "Heavy rain possible",
+      "weather.alertStorm": "Thunderstorms possible",
+      "weather.alertWind": "Strong gusts possible",
+      "weather.alertHeat": "High heat stress",
+      "weather.alertUv": "Very high UV exposure",
+      "weather.alertFire": "Raised wildfire risk",
+      "weather.alertNone": "No critical notices",
+      "weather.codeClear": "Clear",
+      "weather.codeCloudy": "Partly cloudy",
+      "weather.codeOvercast": "Overcast",
+      "weather.codeFog": "Fog",
+      "weather.codeDrizzle": "Drizzle",
+      "weather.codeRain": "Rain",
+      "weather.codeSnow": "Snow",
+      "weather.codeShowers": "Showers",
+      "weather.codeThunder": "Thunderstorm",
       "diary.label": "On the way",
       "diary.title": "Our Camino diary",
       "diary.copy": "Keep every walking day together with thoughts, elevation and the recorded GPX route.",
@@ -276,6 +399,10 @@
       "diary.fullscreen": "Maximise map",
       "diary.exitFullscreen": "Exit fullscreen",
       "diary.menu": "Map options",
+      "diary.mapView": "Map view",
+      "diary.viewTerrain": "Terrain",
+      "diary.viewCity": "City · 3D buildings",
+      "diary.cityError": "The 3D buildings could not be loaded.",
       "diary.speed": "Animation speed",
       "diary.export": "Export video",
       "diary.exporting": "Creating video …",
@@ -335,7 +462,7 @@
       "nav.main": "Главная навигация",
       "nav.home": "На главную списка вещей",
       "nav.print": "Печать",
-      "nav.diary": "Дневник",
+      "nav.diary": "В пути",
       "nav.reset": "Сбросить",
       "nav.logout": "Выйти",
       "language.label": "Выбрать язык",
@@ -403,6 +530,65 @@
       "custom.grams": "Граммы",
       "custom.priority": "Важность",
       "custom.add": "Добавить",
+      "weather.label": "Сейчас на пути",
+      "weather.title": "Сегодня на улице",
+      "weather.copy": "Погода, почасовой прогноз и важные сведения для вашего текущего местоположения.",
+      "weather.locationLabel": "Ваше местоположение",
+      "weather.startTitle": "Что ждёт вас на пути?",
+      "weather.startCopy": "Разрешите доступ к геопозиции, чтобы увидеть условия на ближайшие часы.",
+      "weather.useLocation": "Использовать геопозицию",
+      "weather.privacy": "Геопозиция передаётся только Open‑Meteo и не сохраняется в общем аккаунте.",
+      "weather.loading": "Загружаем текущие условия …",
+      "weather.errorTitle": "Геопозиция недоступна",
+      "weather.errorCopy": "Проверьте разрешение на геопозицию или попробуйте позже.",
+      "weather.errorDenied": "Доступ к геопозиции запрещён. Его можно снова разрешить в настройках браузера.",
+      "weather.errorNetwork": "Не удалось загрузить погоду. Проверьте подключение.",
+      "weather.retry": "Попробовать снова",
+      "weather.refresh": "Обновить геопозицию и погоду",
+      "weather.currentLocation": "Текущее местоположение",
+      "weather.updated": "Обновлено в {time}",
+      "weather.hourly": "Почасовой прогноз",
+      "weather.hourlyCopy": "Следующие 12 часов",
+      "weather.now": "Сейчас",
+      "weather.source": "Данные о погоде: Open‑Meteo. Оценки риска не являются официальными предупреждениями.",
+      "weather.warningMap": "Официальные предупреждения ↗",
+      "weather.fireMap": "Карта пожаров EFFIS ↗",
+      "weather.feels": "Ощущается",
+      "weather.rain": "Осадки сегодня",
+      "weather.wind": "Ветер",
+      "weather.gusts": "Порывы",
+      "weather.uv": "УФ-индекс",
+      "weather.sun": "Световой день",
+      "weather.visibility": "Видимость",
+      "weather.humidity": "Влажность",
+      "weather.fireRisk": "Риск пожара",
+      "weather.fireHint": "Оценка по местной погоде",
+      "weather.levelLow": "Низкий",
+      "weather.levelRaised": "Повышенный",
+      "weather.levelHigh": "Высокий",
+      "weather.levelVeryHigh": "Очень высокий",
+      "weather.good": "Хорошие условия для ходьбы",
+      "weather.goodCopy": "Сейчас заметных погодных рисков нет.",
+      "weather.caution": "Планируйте осторожно",
+      "weather.cautionCopy": "Сегодня хотя бы одно условие требует внимания.",
+      "weather.rough": "Сложные условия",
+      "weather.roughCopy": "Особенно тщательно проверьте маршрут, остановки и снаряжение.",
+      "weather.alertRain": "Возможен сильный дождь",
+      "weather.alertStorm": "Возможна гроза",
+      "weather.alertWind": "Возможны сильные порывы",
+      "weather.alertHeat": "Высокая тепловая нагрузка",
+      "weather.alertUv": "Очень высокий уровень УФ",
+      "weather.alertFire": "Повышенный риск пожара",
+      "weather.alertNone": "Критических предупреждений нет",
+      "weather.codeClear": "Ясно",
+      "weather.codeCloudy": "Переменная облачность",
+      "weather.codeOvercast": "Пасмурно",
+      "weather.codeFog": "Туман",
+      "weather.codeDrizzle": "Морось",
+      "weather.codeRain": "Дождь",
+      "weather.codeSnow": "Снег",
+      "weather.codeShowers": "Ливни",
+      "weather.codeThunder": "Гроза",
       "diary.label": "В пути",
       "diary.title": "Наш дневник Камино",
       "diary.copy": "Сохраняйте каждый день пути: мысли, набор высоты и записанный GPX-маршрут.",
@@ -439,6 +625,10 @@
       "diary.fullscreen": "Развернуть карту",
       "diary.exitFullscreen": "Выйти из полноэкранного режима",
       "diary.menu": "Настройки карты",
+      "diary.mapView": "Вид карты",
+      "diary.viewTerrain": "Рельеф",
+      "diary.viewCity": "Город · 3D-здания",
+      "diary.cityError": "Не удалось загрузить 3D-здания.",
       "diary.speed": "Скорость анимации",
       "diary.export": "Экспорт видео",
       "diary.exporting": "Создаётся видео …",
@@ -754,6 +944,7 @@
   let pendingGpx = null;
   let diaryAnimationStops = [];
   let diaryAnimationGeneration = 0;
+  let renderActiveWeather = () => {};
   let currentSyncStatus = { key: "sync.loading", isError: false };
 
   const els = {
@@ -854,6 +1045,7 @@
     searchTerm = els.search.value.trim().toLocaleLowerCase(languageLocale());
     applyStaticTranslations();
     render();
+    renderActiveWeather();
   }
 
   function loadState() {
@@ -1288,7 +1480,7 @@
     const generation = ++diaryAnimationGeneration;
     const tours = [...els.diaryFeed.querySelectorAll("[data-diary-tour]")];
     if (!tours.length) return;
-    import("/diary-3d.js?v=31").then(({ mountDiaryTour }) => {
+    import("/diary-3d.js?v=32").then(({ mountDiaryTour }) => {
       if (generation !== diaryAnimationGeneration) return;
       tours.forEach((tour) => {
         const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
@@ -1302,6 +1494,10 @@
           exporting: t("diary.exporting"),
           exportReady: t("diary.exportReady"),
           exportError: t("diary.exportError"),
+          mapView: t("diary.mapView"),
+          terrain: t("diary.viewTerrain"),
+          city: t("diary.viewCity"),
+          cityError: t("diary.cityError"),
           fullscreen: t("diary.fullscreen"),
           exitFullscreen: t("diary.exitFullscreen")
         }));
@@ -1328,7 +1524,23 @@
       const stats = entry.stats;
       const polyline = routePolyline(entry.track);
       const map = polyline
-        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}"><canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas><div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div><div class="diary-tour-menu"><button class="diary-menu-toggle" type="button" data-tour-menu-toggle aria-expanded="false" aria-label="${escapeHTML(t("diary.menu"))}" title="${escapeHTML(t("diary.menu"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg></button><div class="diary-menu-panel" data-tour-menu-panel hidden><label class="diary-menu-camera"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 10 4h4l1.5 2H19a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3.5ZM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg><span>${escapeHTML(t("diary.follow"))}</span><input type="checkbox" data-tour-follow checked></label><button type="button" data-tour-reset><span aria-hidden="true">↻</span>${escapeHTML(t("diary.resetCamera"))}</button><button type="button" data-tour-fullscreen><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fullscreen-enter" d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/><path class="fullscreen-exit" d="M9 4v5H4V7h3V4h2Zm6 0h2v3h3v2h-5V4ZM4 15h5v5H7v-3H4v-2Zm11 0h5v2h-3v3h-2v-5Z"/></svg><span data-tour-fullscreen-label>${escapeHTML(t("diary.fullscreen"))}</span></button><button type="button" data-tour-export><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.exportReady"))}</a></div></div><small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small><div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><button class="diary-tour-speed" type="button" data-tour-speed aria-label="${escapeHTML(t("diary.speed"))}" title="${escapeHTML(t("diary.speed"))}" aria-pressed="false">1×</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div></div>`
+        ? `<div class="diary-tour" data-diary-tour="${escapeHTML(entry.id)}">
+            <canvas class="diary-route-canvas" role="img" aria-label="${escapeHTML(t("diary.animation"))}"></canvas>
+            <div class="diary-city-map" data-tour-city-map hidden aria-hidden="true"></div>
+            <div class="diary-map-loading" data-tour-loading role="status">${escapeHTML(t("diary.mapLoading"))}</div>
+            <div class="diary-tour-menu">
+              <button class="diary-menu-toggle" type="button" data-tour-menu-toggle aria-expanded="false" aria-label="${escapeHTML(t("diary.menu"))}" title="${escapeHTML(t("diary.menu"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16v2H4V6Zm0 5h16v2H4v-2Zm0 5h16v2H4v-2Z"/></svg></button>
+              <div class="diary-menu-panel" data-tour-menu-panel hidden>
+                <div class="diary-menu-views"><span>${escapeHTML(t("diary.mapView"))}</span><button type="button" data-tour-view="terrain" aria-pressed="true">⛰ ${escapeHTML(t("diary.viewTerrain"))}</button><button type="button" data-tour-view="city" aria-pressed="false">▦ ${escapeHTML(t("diary.viewCity"))}</button></div>
+                <label class="diary-menu-camera"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 10 4h4l1.5 2H19a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3.5ZM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg><span>${escapeHTML(t("diary.follow"))}</span><input type="checkbox" data-tour-follow checked></label>
+                <button type="button" data-tour-reset><span aria-hidden="true">↻</span>${escapeHTML(t("diary.resetCamera"))}</button>
+                <button type="button" data-tour-fullscreen><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fullscreen-enter" d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/><path class="fullscreen-exit" d="M9 4v5H4V7h3V4h2Zm6 0h2v3h3v2h-5V4ZM4 15h5v5H7v-3H4v-2Zm11 0h5v2h-3v3h-2v-5Z"/></svg><span data-tour-fullscreen-label>${escapeHTML(t("diary.fullscreen"))}</span></button>
+                <button type="button" data-tour-export><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.export"))}</button><a data-tour-download hidden><span aria-hidden="true">⇩</span>${escapeHTML(t("diary.exportReady"))}</a>
+              </div>
+            </div>
+            <small class="diary-map-attribution">${escapeHTML(t("diary.attribution"))}</small>
+            <div class="diary-tour-controls"><button type="button" data-tour-play>${escapeHTML(t("diary.play"))}</button><button class="diary-tour-speed" type="button" data-tour-speed aria-label="${escapeHTML(t("diary.speed"))}" title="${escapeHTML(t("diary.speed"))}" aria-pressed="false">1×</button><input type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escapeHTML(t("diary.animation"))}"></div>
+          </div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const statMarkup = stats ? `<div class="diary-stats">
@@ -1703,6 +1915,189 @@
     render();
   });
 
+  function initTrailWeather() {
+    const root = document.querySelector("[data-weather]");
+    if (!root) return;
+
+    const start = root.querySelector("[data-weather-start]");
+    const loading = root.querySelector("[data-weather-loading]");
+    const error = root.querySelector("[data-weather-error]");
+    const errorCopy = root.querySelector("[data-weather-error-copy]");
+    const dashboard = root.querySelector("[data-weather-dashboard]");
+    const locateButtons = root.querySelectorAll("[data-weather-locate], [data-weather-retry], [data-weather-refresh]");
+    let snapshot = null;
+    let lastPosition = null;
+
+    function show(view) {
+      start.hidden = view !== "start";
+      loading.hidden = view !== "loading";
+      error.hidden = view !== "error";
+      dashboard.hidden = view !== "dashboard";
+    }
+
+    function weatherCode(code) {
+      if (code === 0) return { icon: "☀️", key: "weather.codeClear" };
+      if (code <= 2) return { icon: "🌤️", key: "weather.codeCloudy" };
+      if (code === 3) return { icon: "☁️", key: "weather.codeOvercast" };
+      if (code <= 48) return { icon: "🌫️", key: "weather.codeFog" };
+      if (code <= 57) return { icon: "🌦️", key: "weather.codeDrizzle" };
+      if (code <= 67) return { icon: "🌧️", key: "weather.codeRain" };
+      if (code <= 77) return { icon: "🌨️", key: "weather.codeSnow" };
+      if (code <= 86) return { icon: "🌦️", key: "weather.codeShowers" };
+      return { icon: "⛈️", key: "weather.codeThunder" };
+    }
+
+    function number(value, digits = 0) {
+      return Number(value).toLocaleString(languageLocale(), { maximumFractionDigits: digits });
+    }
+
+    function timeOnly(value) {
+      return String(value || "").split("T")[1]?.slice(0, 5) || "–";
+    }
+
+    function fireRisk(data, todayIndexes) {
+      const humidity = todayIndexes.map((index) => data.hourly.relative_humidity_2m[index]).filter(Number.isFinite);
+      const humidityMin = humidity.length ? Math.min(...humidity) : data.current.relative_humidity_2m;
+      const maxTemp = data.daily.temperature_2m_max[0];
+      const precipitation = data.daily.precipitation_sum[0];
+      const gusts = data.daily.wind_gusts_10m_max[0];
+      let score = 0;
+      score += maxTemp >= 32 ? 2 : maxTemp >= 26 ? 1 : 0;
+      score += humidityMin <= 25 ? 2 : humidityMin <= 40 ? 1 : 0;
+      score += precipitation < .5 ? 2 : precipitation < 2 ? 1 : 0;
+      score += gusts >= 40 ? 1 : 0;
+      if (score >= 6) return { level: 3, label: t("weather.levelVeryHigh") };
+      if (score >= 4) return { level: 2, label: t("weather.levelHigh") };
+      if (score >= 2) return { level: 1, label: t("weather.levelRaised") };
+      return { level: 0, label: t("weather.levelLow") };
+    }
+
+    function fact(icon, label, value, note = "") {
+      return `<article class="weather-fact"><span aria-hidden="true">${icon}</span><div><small>${escapeHTML(label)}</small><strong>${escapeHTML(value)}</strong>${note ? `<em>${escapeHTML(note)}</em>` : ""}</div></article>`;
+    }
+
+    function renderWeather() {
+      if (!snapshot) return;
+      const data = snapshot.data;
+      const current = data.current;
+      const hourly = data.hourly;
+      const daily = data.daily;
+      const nowHour = String(current.time || "").slice(0, 13);
+      let hourIndex = hourly.time.findIndex((value) => String(value).slice(0, 13) >= nowHour);
+      if (hourIndex < 0) hourIndex = 0;
+      const today = daily.time[0];
+      const todayIndexes = hourly.time.map((value, index) => String(value).startsWith(today) ? index : -1).filter((index) => index >= 0);
+      const condition = weatherCode(current.weather_code);
+      const risk = fireRisk(data, todayIndexes);
+      const precipitationChance = daily.precipitation_probability_max[0];
+      const precipitationSum = daily.precipitation_sum[0];
+      const maxTemp = daily.temperature_2m_max[0];
+      const gustMax = daily.wind_gusts_10m_max[0];
+      const uvMax = daily.uv_index_max[0];
+      const storm = current.weather_code >= 95 || todayIndexes.some((index) => hourly.weather_code[index] >= 95);
+
+      const notices = [];
+      if (storm) notices.push({ icon: "⚡", key: "weather.alertStorm", level: "danger" });
+      if (precipitationChance >= 70 && precipitationSum >= 5) notices.push({ icon: "☂", key: "weather.alertRain", level: precipitationSum >= 15 ? "danger" : "watch" });
+      if (gustMax >= 38) notices.push({ icon: "↝", key: "weather.alertWind", level: gustMax >= 55 ? "danger" : "watch" });
+      if (maxTemp >= 29) notices.push({ icon: "♨", key: "weather.alertHeat", level: maxTemp >= 34 ? "danger" : "watch" });
+      if (uvMax >= 8) notices.push({ icon: "☀", key: "weather.alertUv", level: "watch" });
+      if (risk.level >= 1) notices.push({ icon: "♨", key: "weather.alertFire", level: risk.level >= 2 ? "danger" : "watch" });
+
+      let verdict = { tone: "good", title: "weather.good", copy: "weather.goodCopy" };
+      if (notices.some((item) => item.level === "danger")) verdict = { tone: "rough", title: "weather.rough", copy: "weather.roughCopy" };
+      else if (notices.length) verdict = { tone: "caution", title: "weather.caution", copy: "weather.cautionCopy" };
+
+      root.querySelector("[data-weather-location]").textContent = `${t("weather.currentLocation")} · ${number(snapshot.latitude, 3)}°, ${number(snapshot.longitude, 3)}°${Number.isFinite(data.elevation) ? ` · ${Math.round(data.elevation)} m` : ""}`;
+      root.querySelector("[data-weather-updated]").textContent = t("weather.updated", {
+        time: new Date(snapshot.updatedAt).toLocaleTimeString(languageLocale(), { hour: "2-digit", minute: "2-digit" })
+      });
+      root.querySelector("[data-weather-icon]").textContent = condition.icon;
+      root.querySelector("[data-weather-temperature]").textContent = `${number(current.temperature_2m)}°`;
+      root.querySelector("[data-weather-condition]").textContent = `${t(condition.key)} · ${number(daily.temperature_2m_min[0])}–${number(maxTemp)} °C`;
+      root.querySelector("[data-weather-verdict]").innerHTML = `<span class="weather-status-dot weather-status-dot--${verdict.tone}" aria-hidden="true"></span><div><strong>${escapeHTML(t(verdict.title))}</strong><small>${escapeHTML(t(verdict.copy))}</small></div>`;
+
+      const visibility = hourly.visibility[hourIndex];
+      root.querySelector("[data-weather-facts]").innerHTML = [
+        fact("◒", t("weather.feels"), `${number(current.apparent_temperature)} °C`),
+        fact("☂", t("weather.rain"), `${number(precipitationChance)} %`, `${number(precipitationSum, 1)} mm`),
+        fact("↝", t("weather.wind"), `${number(current.wind_speed_10m)} km/h`, `${t("weather.gusts")} ${number(gustMax)} km/h`),
+        fact("☀", t("weather.uv"), number(uvMax, 1)),
+        fact("◐", t("weather.sun"), `${timeOnly(daily.sunrise[0])}–${timeOnly(daily.sunset[0])}`),
+        fact("⌁", t("weather.visibility"), Number.isFinite(visibility) ? `${number(visibility / 1000, 1)} km` : "–", `${t("weather.humidity")} ${number(current.relative_humidity_2m)} %`)
+      ].join("");
+
+      const noticeMarkup = notices.length
+        ? notices.map((notice) => `<article class="weather-alert weather-alert--${notice.level}"><span aria-hidden="true">${notice.icon}</span><strong>${escapeHTML(t(notice.key))}</strong></article>`).join("")
+        : `<article class="weather-alert weather-alert--good"><span aria-hidden="true">✓</span><strong>${escapeHTML(t("weather.alertNone"))}</strong></article>`;
+      root.querySelector("[data-weather-alerts]").innerHTML = `${noticeMarkup}<article class="weather-alert weather-alert--fire risk-${risk.level}"><span aria-hidden="true">♨</span><div><strong>${escapeHTML(t("weather.fireRisk"))}: ${escapeHTML(risk.label)}</strong><small>${escapeHTML(t("weather.fireHint"))}</small></div></article>`;
+
+      root.querySelector("[data-weather-hourly]").innerHTML = hourly.time.slice(hourIndex, hourIndex + 12).map((value, offset) => {
+        const index = hourIndex + offset;
+        const hourCondition = weatherCode(hourly.weather_code[index]);
+        return `<article class="weather-hour${offset === 0 ? " is-now" : ""}"><time datetime="${escapeHTML(value)}">${offset === 0 ? escapeHTML(t("weather.now")) : escapeHTML(timeOnly(value))}</time><span aria-hidden="true">${hourCondition.icon}</span><strong>${number(hourly.temperature_2m[index])}°</strong><small>☂ ${number(hourly.precipitation_probability[index])}%</small><small>↝ ${number(hourly.wind_gusts_10m[index])}</small></article>`;
+      }).join("");
+      show("dashboard");
+    }
+
+    renderActiveWeather = renderWeather;
+
+    async function loadWeather(latitude, longitude) {
+      show("loading");
+      lastPosition = { latitude, longitude, savedAt: Date.now() };
+      try {
+        localStorage.setItem(WEATHER_POSITION_KEY, JSON.stringify(lastPosition));
+      } catch (_) {}
+      const params = new URLSearchParams({
+        latitude: String(latitude),
+        longitude: String(longitude),
+        timezone: "auto",
+        forecast_days: "2",
+        current: "temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_direction_10m,wind_gusts_10m",
+        hourly: "temperature_2m,apparent_temperature,precipitation_probability,precipitation,weather_code,visibility,wind_speed_10m,wind_gusts_10m,relative_humidity_2m,uv_index",
+        daily: "weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_sum,precipitation_probability_max,sunrise,sunset,uv_index_max,wind_speed_10m_max,wind_gusts_10m_max"
+      });
+      try {
+        const response = await fetch(`https://api.open-meteo.com/v1/forecast?${params}`);
+        if (!response.ok) throw new Error("Weather request failed");
+        const data = await response.json();
+        snapshot = { data, latitude, longitude, updatedAt: Date.now() };
+        renderWeather();
+      } catch (_) {
+        errorCopy.textContent = t("weather.errorNetwork");
+        show("error");
+      }
+    }
+
+    function locate() {
+      if (!navigator.geolocation) {
+        errorCopy.textContent = t("weather.errorCopy");
+        show("error");
+        return;
+      }
+      show("loading");
+      navigator.geolocation.getCurrentPosition(
+        (position) => loadWeather(position.coords.latitude, position.coords.longitude),
+        (reason) => {
+          errorCopy.textContent = t(reason.code === 1 ? "weather.errorDenied" : "weather.errorCopy");
+          show("error");
+        },
+        { enableHighAccuracy: false, maximumAge: 300000, timeout: 12000 }
+      );
+    }
+
+    locateButtons.forEach((button) => button.addEventListener("click", locate));
+    try {
+      const cached = JSON.parse(localStorage.getItem(WEATHER_POSITION_KEY));
+      if (Number.isFinite(cached?.latitude) && Number.isFinite(cached?.longitude)) {
+        lastPosition = cached;
+        loadWeather(cached.latitude, cached.longitude);
+      } else show("start");
+    } catch (_) {
+      show("start");
+    }
+  }
+
   function initPackingFilm() {
     const sequence = document.getElementById("packing-sequence");
     const stage = document.getElementById("packing-stage");
@@ -2031,6 +2426,7 @@
 
   applyStaticTranslations();
   render();
+  initTrailWeather();
   initPackingFilm();
   loadSharedState();
 })();
