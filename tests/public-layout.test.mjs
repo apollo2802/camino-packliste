@@ -10,3 +10,9 @@ test("public photo is rendered inside the hero instead of main content", async (
   assert.ok(photo > heroStart && photo < heroEnd);
   assert.equal(html.indexOf('id="public-journey-photo"', photo + 1), -1);
 });
+
+test("mobile hero reserves space for the absolutely positioned note", async () => {
+  const css = await readFile(new URL("../public/camino.css", import.meta.url), "utf8");
+  const mobileStyles = css.slice(css.indexOf("@media(max-width:760px)"));
+  assert.match(mobileStyles, /\.public-hero-content\{[^}]*padding-bottom:/);
+});
