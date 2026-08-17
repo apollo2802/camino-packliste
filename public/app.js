@@ -2190,13 +2190,25 @@
         headers: { "content-type": "image/jpeg" },
         body: blob
       });
-      if (!response.ok) throw new Error("Upload failed");
+      if (!response.ok) {
+        let detail = "";
+        try {
+          const payload = await response.clone().json();
+          detail = String(payload?.error || "").trim();
+        } catch (_) {
+          detail = String(await response.text()).trim();
+        }
+        throw new Error(detail || `HTTP ${response.status}`);
+      }
       const result = await response.json();
       publicPhoto = result.photo?.active === true ? result.photo : null;
       els.publicPhotoStatus.textContent = "";
       renderPublicPhotoAdmin();
-    } catch (_) {
-      els.publicPhotoStatus.textContent = t("diary.photoUploadError");
+    } catch (error) {
+      const detail = String(error?.message || "").trim();
+      els.publicPhotoStatus.textContent = detail
+        ? `${t("diary.photoUploadError")} (${detail})`
+        : t("diary.photoUploadError");
       els.publicPhotoStatus.classList.add("error");
     } finally {
       els.publicPhotoInput.disabled = false;
