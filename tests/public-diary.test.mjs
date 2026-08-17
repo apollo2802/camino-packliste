@@ -67,3 +67,11 @@ test("content security policy permits archived weather requests", async () => {
 
   assert.match(policy, /https:\/\/archive-api\.open-meteo\.com/);
 });
+
+test("content security policy permits local blob images for photo conversion", async () => {
+  const response = await app.fetch(new Request("https://example.test/intern"), environment({ diary: [] }));
+  const policy = response.headers.get("content-security-policy") || "";
+  const imagePolicy = policy.match(/img-src ([^;]+)/)?.[1] || "";
+
+  assert.match(imagePolicy, /(?:^|\s)blob:(?:\s|$)/);
+});
