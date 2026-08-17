@@ -11,6 +11,7 @@
       "nav.home": "Camino-Packliste Startseite",
       "nav.print": "Drucken",
       "nav.diary": "Unterwegs",
+      "nav.public": "Öffentliche Seite",
       "nav.reset": "Zurücksetzen",
       "nav.logout": "Abmelden",
       "language.label": "Sprache auswählen",
@@ -151,11 +152,43 @@
       "diary.toPlaceholder": "Vila do Conde",
       "diary.note": "Tagesnotiz",
       "diary.notePlaceholder": "Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …",
+      "diary.publicNote": "Öffentliche Beschreibung",
+      "diary.publicNotePlaceholder": "Das möchten wir über diese Etappe teilen …",
+      "diary.publicNoteHint": "Nur dieser Text erscheint im öffentlichen Reisetagebuch.",
+      "diary.publish": "Etappe veröffentlichen",
+      "diary.publishHint": "Route, Kennzahlen und öffentliche Beschreibung erscheinen auf der öffentlichen Seite.",
+      "diary.published": "Öffentlich",
+      "diary.private": "Privat",
+      "diary.editPublic": "Öffentlichen Text bearbeiten",
+      "diary.publicNotePrompt": "Öffentliche Beschreibung für diese Etappe:",
       "diary.gpxTitle": "Komoot-GPX auswählen",
       "diary.gpxCopy": "Die Route wird im Browser ausgewertet und mit dem Eintrag gespeichert.",
       "diary.gpxEmpty": "Noch keine GPX ausgewählt.",
       "diary.gpxReady": "{name} · {distance} km · {ascent} m Aufstieg",
       "diary.gpxError": "Die GPX-Datei konnte nicht gelesen werden.",
+      "diary.photoTitle": "Etappenfoto",
+      "diary.photoCopy": "Das Foto wird getrennt von der GPX verwaltet.",
+      "diary.photoAdd": "Foto hinzufügen",
+      "diary.photoChange": "Foto ändern",
+      "diary.photoRemove": "Foto entfernen",
+      "diary.photoRemoveConfirm": "Dieses Foto wirklich entfernen?",
+      "diary.photoError": "Das Foto konnte nicht vorbereitet werden.",
+      "diary.photoUploading": "Foto wird hochgeladen …",
+      "diary.photoUploadError": "Das Foto konnte nicht gespeichert werden. Bitte erneut versuchen.",
+      "diary.photoCaption": "Foto dieser Etappe",
+      "diary.publicPhotoLabel": "Öffentliche Seite",
+      "diary.publicPhotoTitle": "Unser aktuelles Camino-Foto",
+      "diary.publicPhotoCopy": "Dieses Bild ist unabhängig von Etappen, GPX-Dateien und Tagebucheinträgen. Es kann jederzeit ausgetauscht werden.",
+      "diary.publicPhotoEmpty": "Noch kein öffentliches Foto hochgeladen.",
+      "diary.weatherLoading": "Wetter der Etappe wird ermittelt …",
+      "diary.weatherUnavailable": "Für diese Etappe konnten keine historischen Wetterdaten geladen werden.",
+      "diary.weatherFuture": "Wetterdaten werden erst nach der Etappe ergänzt.",
+      "diary.weatherTitle": "Wetter auf der Etappe",
+      "diary.weatherTemperature": "Temperatur",
+      "diary.weatherRain": "Niederschlag",
+      "diary.weatherWind": "Wind · Böen",
+      "diary.weatherHumidity": "Luftfeuchte",
+      "diary.weatherSource": "Historische Wetterdaten · Open-Meteo",
       "diary.save": "Etappe speichern",
       "diary.emptyTitle": "Der Weg wartet auf seinen ersten Eintrag.",
       "diary.emptyCopy": "Nach jeder Etappe könnt ihr hier die Komoot-GPX und eure Erinnerungen gemeinsam festhalten.",
@@ -237,6 +270,7 @@
       "nav.home": "Camino packing list home",
       "nav.print": "Print",
       "nav.diary": "On the way",
+      "nav.public": "Public page",
       "nav.reset": "Reset",
       "nav.logout": "Sign out",
       "language.label": "Choose language",
@@ -377,11 +411,43 @@
       "diary.toPlaceholder": "Vila do Conde",
       "diary.note": "Day note",
       "diary.notePlaceholder": "Weather, encounters, thoughts and the small moments of the day …",
+      "diary.publicNote": "Public description",
+      "diary.publicNotePlaceholder": "What would you like to share about this stage?",
+      "diary.publicNoteHint": "Only this text appears in the public travel journal.",
+      "diary.publish": "Publish stage",
+      "diary.publishHint": "Route, stats and public description appear on the public page.",
+      "diary.published": "Public",
+      "diary.private": "Private",
+      "diary.editPublic": "Edit public text",
+      "diary.publicNotePrompt": "Public description for this stage:",
       "diary.gpxTitle": "Choose Komoot GPX",
       "diary.gpxCopy": "The route is analysed in your browser and saved with the entry.",
       "diary.gpxEmpty": "No GPX selected yet.",
       "diary.gpxReady": "{name} · {distance} km · {ascent} m ascent",
       "diary.gpxError": "The GPX file could not be read.",
+      "diary.photoTitle": "Stage photo",
+      "diary.photoCopy": "The photo is managed separately from the GPX.",
+      "diary.photoAdd": "Add photo",
+      "diary.photoChange": "Change photo",
+      "diary.photoRemove": "Remove photo",
+      "diary.photoRemoveConfirm": "Remove this photo?",
+      "diary.photoError": "The photo could not be prepared.",
+      "diary.photoUploading": "Uploading photo …",
+      "diary.photoUploadError": "The photo could not be saved. Please try again.",
+      "diary.photoCaption": "Photo from this stage",
+      "diary.publicPhotoLabel": "Public page",
+      "diary.publicPhotoTitle": "Our current Camino photo",
+      "diary.publicPhotoCopy": "This image is independent of stages, GPX files and diary entries. It can be replaced at any time.",
+      "diary.publicPhotoEmpty": "No public photo uploaded yet.",
+      "diary.weatherLoading": "Loading weather for this stage …",
+      "diary.weatherUnavailable": "Historical weather could not be loaded for this stage.",
+      "diary.weatherFuture": "Weather data will be added after the stage.",
+      "diary.weatherTitle": "Weather on the stage",
+      "diary.weatherTemperature": "Temperature",
+      "diary.weatherRain": "Precipitation",
+      "diary.weatherWind": "Wind · gusts",
+      "diary.weatherHumidity": "Humidity",
+      "diary.weatherSource": "Historical weather · Open-Meteo",
       "diary.save": "Save stage",
       "diary.emptyTitle": "The road is waiting for its first entry.",
       "diary.emptyCopy": "After each stage, add your Komoot GPX and shared memories here.",
@@ -463,6 +529,7 @@
       "nav.home": "На главную списка вещей",
       "nav.print": "Печать",
       "nav.diary": "В пути",
+      "nav.public": "Публичная страница",
       "nav.reset": "Сбросить",
       "nav.logout": "Выйти",
       "language.label": "Выбрать язык",
@@ -603,11 +670,43 @@
       "diary.toPlaceholder": "Вила-ду-Конди",
       "diary.note": "Заметка дня",
       "diary.notePlaceholder": "Погода, встречи, мысли и маленькие моменты дня …",
+      "diary.publicNote": "Публичное описание",
+      "diary.publicNotePlaceholder": "Что вы хотите рассказать об этом этапе?",
+      "diary.publicNoteHint": "Только этот текст будет виден в публичном дневнике.",
+      "diary.publish": "Опубликовать этап",
+      "diary.publishHint": "Маршрут, показатели и публичное описание появятся на общей странице.",
+      "diary.published": "Опубликовано",
+      "diary.private": "Приватно",
+      "diary.editPublic": "Изменить публичный текст",
+      "diary.publicNotePrompt": "Публичное описание этого этапа:",
       "diary.gpxTitle": "Выбрать GPX из Komoot",
       "diary.gpxCopy": "Маршрут будет обработан в браузере и сохранён вместе с записью.",
       "diary.gpxEmpty": "GPX ещё не выбран.",
       "diary.gpxReady": "{name} · {distance} км · набор {ascent} м",
       "diary.gpxError": "Не удалось прочитать GPX-файл.",
+      "diary.photoTitle": "Фото этапа",
+      "diary.photoCopy": "Фото загружается отдельно от GPX.",
+      "diary.photoAdd": "Добавить фото",
+      "diary.photoChange": "Изменить фото",
+      "diary.photoRemove": "Удалить фото",
+      "diary.photoRemoveConfirm": "Удалить это фото?",
+      "diary.photoError": "Не удалось подготовить фото.",
+      "diary.photoUploading": "Фото загружается …",
+      "diary.photoUploadError": "Не удалось сохранить фото. Попробуйте ещё раз.",
+      "diary.photoCaption": "Фото этого этапа",
+      "diary.publicPhotoLabel": "Публичная страница",
+      "diary.publicPhotoTitle": "Наше актуальное фото Камино",
+      "diary.publicPhotoCopy": "Это изображение не связано с этапами, GPX-файлами или записями дневника. Его можно заменить в любое время.",
+      "diary.publicPhotoEmpty": "Публичное фото ещё не загружено.",
+      "diary.weatherLoading": "Загружается погода для этапа …",
+      "diary.weatherUnavailable": "Не удалось загрузить историческую погоду для этого этапа.",
+      "diary.weatherFuture": "Погода будет добавлена после завершения этапа.",
+      "diary.weatherTitle": "Погода на этапе",
+      "diary.weatherTemperature": "Температура",
+      "diary.weatherRain": "Осадки",
+      "diary.weatherWind": "Ветер · порывы",
+      "diary.weatherHumidity": "Влажность",
+      "diary.weatherSource": "Историческая погода · Open-Meteo",
       "diary.save": "Сохранить этап",
       "diary.emptyTitle": "Путь ждёт первой записи.",
       "diary.emptyCopy": "После каждого этапа добавляйте сюда GPX из Komoot и ваши общие воспоминания.",
@@ -942,6 +1041,7 @@
   let serverReady = false;
   let syncTimer = null;
   let pendingGpx = null;
+  let publicPhoto = null;
   let diaryAnimationStops = [];
   let diaryAnimationGeneration = 0;
   let renderActiveWeather = () => {};
@@ -969,8 +1069,17 @@
     diaryFrom: document.getElementById("diary-from"),
     diaryTo: document.getElementById("diary-to"),
     diaryNote: document.getElementById("diary-note"),
+    diaryPublicNote: document.getElementById("diary-public-note"),
+    diaryPublish: document.getElementById("diary-publish"),
     diaryGpx: document.getElementById("diary-gpx"),
-    gpxReadout: document.getElementById("gpx-readout")
+    gpxReadout: document.getElementById("gpx-readout"),
+    diaryWeatherPreview: document.getElementById("diary-weather-preview"),
+    publicPhotoInput: document.getElementById("public-photo-input"),
+    publicPhotoImage: document.getElementById("public-photo-admin-image"),
+    publicPhotoEmpty: document.getElementById("public-photo-admin-empty"),
+    publicPhotoRemove: document.getElementById("public-photo-remove"),
+    publicPhotoUploadLabel: document.getElementById("public-photo-upload-label"),
+    publicPhotoStatus: document.getElementById("public-photo-status")
   };
 
   function loadLanguage() {
@@ -1057,6 +1166,28 @@
     }
   }
 
+  function normalizeDiaryWeather(value) {
+    if (!value || typeof value !== "object") return null;
+    const weather = {
+      date: String(value.date || "").slice(0, 10),
+      code: Number(value.code),
+      temperatureMin: Number(value.temperatureMin),
+      temperatureMax: Number(value.temperatureMax),
+      apparentMin: Number(value.apparentMin),
+      apparentMax: Number(value.apparentMax),
+      precipitation: Number(value.precipitation),
+      windMax: Number(value.windMax),
+      gustMax: Number(value.gustMax),
+      humidityAverage: Number(value.humidityAverage),
+      startTime: String(value.startTime || "").slice(0, 32),
+      endTime: String(value.endTime || "").slice(0, 32),
+      latitude: Number(value.latitude),
+      longitude: Number(value.longitude)
+    };
+    const numeric = [weather.code, weather.temperatureMin, weather.temperatureMax, weather.precipitation, weather.windMax, weather.gustMax, weather.humidityAverage];
+    return weather.date && numeric.every(Number.isFinite) ? weather : null;
+  }
+
   function normalizeState(value) {
     const normalized = freshState();
     if (!value || typeof value !== "object") return normalized;
@@ -1088,6 +1219,9 @@
         from: String(entry.from || "").slice(0, 60),
         to: String(entry.to || "").slice(0, 60),
         note: String(entry.note || "").slice(0, 2400),
+        publicNote: String(entry.publicNote || "").slice(0, 1200),
+        published: entry.published === true,
+        weather: normalizeDiaryWeather(entry.weather),
         gpxName: String(entry.gpxName || "").slice(0, 140),
         stats: entry.stats && typeof entry.stats === "object" ? {
           distance: Number(entry.stats.distance) || 0,
@@ -1124,7 +1258,7 @@
         body: JSON.stringify({ state })
       });
       if (response.status === 401) {
-        window.location.assign("/");
+        window.location.assign("/intern");
         return;
       }
       if (!response.ok) throw new Error("Save failed");
@@ -1146,12 +1280,15 @@
     try {
       const response = await fetch("/api/state", { credentials: "same-origin" });
       if (response.status === 401) {
-        window.location.assign("/");
+        window.location.assign("/intern");
         return;
       }
       if (!response.ok) throw new Error("Load failed");
       const data = await response.json();
       serverReady = true;
+      publicPhoto = data.publicPhoto?.active === true
+        ? { active: true, version: Number(data.publicPhoto.version) || 0 }
+        : null;
       if (data.state && data.state.checked && data.state.weights && data.state.custom) {
         state = normalizeState(data.state);
         writeLocalState();
@@ -1207,6 +1344,30 @@
 
   function escapeHTML(value) {
     return String(value).replace(/[&<>'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char]));
+  }
+
+  async function optimizeDiaryPhoto(file) {
+    if (!file || !/^image\/(jpeg|png|webp)$/.test(file.type) || file.size > 25_000_000) throw new Error("Invalid image");
+    const sourceUrl = URL.createObjectURL(file);
+    try {
+      const image = new Image();
+      image.decoding = "async";
+      image.src = sourceUrl;
+      await image.decode();
+      const scale = Math.min(1, 1800 / Math.max(image.naturalWidth, image.naturalHeight));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+      canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+      const context = canvas.getContext("2d", { alpha: false });
+      context.fillStyle = "#fffdf8";
+      context.fillRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/jpeg", .84));
+      if (!blob || blob.size > 2_500_000) throw new Error("Image conversion failed");
+      return blob;
+    } finally {
+      URL.revokeObjectURL(sourceUrl);
+    }
   }
 
   function formatDiaryDate(value) {
@@ -1552,9 +1713,10 @@
       return `<article class="diary-entry">
         <div class="diary-map">${map}</div>
         <div class="diary-entry-body">
-          <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div>
+          <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button>${entry.published ? `<button class="diary-edit-public" type="button" data-diary-public-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button>` : ""}<button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
           ${places ? `<p class="diary-places">${places}</p>` : ""}
           ${entry.note ? `<p class="diary-note">${escapeHTML(entry.note)}</p>` : ""}
+          ${diaryWeatherMarkup(entry.weather)}
           ${statMarkup}
         </div>
       </article>`;
@@ -1588,6 +1750,8 @@
       .replace(/^\d{4}-\d{2}-\d{2}_\d+_/, "")
       .replace(/[_-]+/g, " ")
       .trim();
+    const pointTimes = nodes.map((node) => node.getElementsByTagNameNS("*", "time")[0]?.textContent?.trim() || "");
+    const validTimes = pointTimes.filter((value) => Number.isFinite(Date.parse(value)));
     const points = nodes.map((node) => {
       const elevationNode = node.getElementsByTagNameNS("*", "ele")[0];
       return [Number(node.getAttribute("lat")), Number(node.getAttribute("lon")), Number(elevationNode?.textContent || 0)];
@@ -1610,15 +1774,142 @@
       gpxName: name.slice(0, 140),
       routeName: (gpxRouteName || fileRouteName).slice(0, 80),
       date: timestampDate || filenameDate || "",
+      startTime: validTimes[0] || gpxTimestamp || "",
+      endTime: validTimes.length > 1 ? validTimes.at(-1) : "",
       stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)) },
       track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
     };
+  }
+
+  function diaryWeatherCondition(code) {
+    if (code === 0) return { icon: "☀️", key: "weather.codeClear" };
+    if (code <= 2) return { icon: "🌤️", key: "weather.codeCloudy" };
+    if (code === 3) return { icon: "☁️", key: "weather.codeOvercast" };
+    if (code <= 48) return { icon: "🌫️", key: "weather.codeFog" };
+    if (code <= 57) return { icon: "🌦️", key: "weather.codeDrizzle" };
+    if (code <= 67) return { icon: "🌧️", key: "weather.codeRain" };
+    if (code <= 77) return { icon: "🌨️", key: "weather.codeSnow" };
+    if (code <= 86) return { icon: "🌦️", key: "weather.codeShowers" };
+    return { icon: "⛈️", key: "weather.codeThunder" };
+  }
+
+  function weatherMode(values) {
+    const counts = new Map();
+    values.filter(Number.isFinite).forEach((value) => counts.set(value, (counts.get(value) || 0) + 1));
+    return [...counts.entries()].sort((left, right) => right[1] - left[1])[0]?.[0] ?? 0;
+  }
+
+  async function fetchDiaryWeather(gpx) {
+    if (!gpx?.date || !Array.isArray(gpx.track) || !gpx.track.length) throw new Error("Weather location missing");
+    const routeDate = new Date(`${gpx.date}T12:00:00Z`);
+    const today = new Date();
+    const todayDate = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 12));
+    const ageDays = Math.floor((todayDate - routeDate) / 86400000);
+    if (ageDays < 0) {
+      const error = new Error("Future weather");
+      error.code = "FUTURE";
+      throw error;
+    }
+    const point = gpx.track[Math.floor(gpx.track.length / 2)];
+    const endpoint = ageDays <= 92 ? "https://api.open-meteo.com/v1/forecast" : "https://archive-api.open-meteo.com/v1/archive";
+    const params = new URLSearchParams({
+      latitude: String(point[0]),
+      longitude: String(point[1]),
+      start_date: gpx.date,
+      end_date: gpx.date,
+      hourly: "temperature_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,wind_gusts_10m,relative_humidity_2m",
+      timezone: "auto",
+      timeformat: "unixtime"
+    });
+    const response = await fetch(`${endpoint}?${params}`);
+    if (!response.ok) throw new Error(`Weather ${response.status}`);
+    const data = await response.json();
+    const hourly = data.hourly;
+    if (!hourly?.time?.length) throw new Error("Weather data missing");
+    const startEpoch = Date.parse(gpx.startTime) / 1000;
+    const endEpoch = Date.parse(gpx.endTime) / 1000;
+    let indexes = hourly.time.map((time, index) => ({ time:Number(time), index })).filter(({ time }) => Number.isFinite(startEpoch) && Number.isFinite(endEpoch) && endEpoch > startEpoch
+      ? time >= startEpoch - 1800 && time <= endEpoch + 1800
+      : false).map(({ index }) => index);
+    if (!indexes.length) {
+      const offset = Number(data.utc_offset_seconds) || 0;
+      indexes = hourly.time.map((time, index) => ({ hour:new Date((Number(time) + offset) * 1000).getUTCHours(), index })).filter(({ hour }) => hour >= 6 && hour <= 20).map(({ index }) => index);
+    }
+    const values = (key) => indexes.map((index) => Number(hourly[key]?.[index])).filter(Number.isFinite);
+    const temperature = values("temperature_2m");
+    const apparent = values("apparent_temperature");
+    const precipitation = values("precipitation");
+    const wind = values("wind_speed_10m");
+    const gusts = values("wind_gusts_10m");
+    const humidity = values("relative_humidity_2m");
+    const codes = values("weather_code");
+    if (!temperature.length || !wind.length) throw new Error("Weather values missing");
+    return normalizeDiaryWeather({
+      date: gpx.date,
+      code: weatherMode(codes),
+      temperatureMin: Math.min(...temperature),
+      temperatureMax: Math.max(...temperature),
+      apparentMin: apparent.length ? Math.min(...apparent) : Math.min(...temperature),
+      apparentMax: apparent.length ? Math.max(...apparent) : Math.max(...temperature),
+      precipitation: precipitation.reduce((sum, value) => sum + value, 0),
+      windMax: Math.max(...wind),
+      gustMax: gusts.length ? Math.max(...gusts) : Math.max(...wind),
+      humidityAverage: humidity.length ? humidity.reduce((sum, value) => sum + value, 0) / humidity.length : 0,
+      startTime: gpx.startTime,
+      endTime: gpx.endTime,
+      latitude: point[0],
+      longitude: point[1]
+    });
+  }
+
+  function diaryWeatherMarkup(weather, preview = false) {
+    if (!weather) return "";
+    const condition = diaryWeatherCondition(weather.code);
+    const number = (value, digits = 0) => Number(value).toLocaleString(languageLocale(), { maximumFractionDigits:digits });
+    return `<section class="diary-weather-card${preview ? " preview" : ""}" aria-label="${escapeHTML(t("diary.weatherTitle"))}">
+      <div class="diary-weather-head"><span aria-hidden="true">${condition.icon}</span><div><small>${escapeHTML(t("diary.weatherTitle"))}</small><strong>${escapeHTML(t(condition.key))}</strong></div></div>
+      <div class="diary-weather-facts">
+        <div><strong>${number(weather.temperatureMin)}–${number(weather.temperatureMax)} °C</strong><span>${escapeHTML(t("diary.weatherTemperature"))}</span></div>
+        <div><strong>${number(weather.precipitation, 1)} mm</strong><span>${escapeHTML(t("diary.weatherRain"))}</span></div>
+        <div><strong>${number(weather.windMax)} · ${number(weather.gustMax)} km/h</strong><span>${escapeHTML(t("diary.weatherWind"))}</span></div>
+        <div><strong>${number(weather.humidityAverage)} %</strong><span>${escapeHTML(t("diary.weatherHumidity"))}</span></div>
+      </div>
+      <small class="diary-weather-source">${escapeHTML(t("diary.weatherSource"))}</small>
+    </section>`;
+  }
+
+  function setDiaryWeatherPreview(view, weather = null) {
+    if (!els.diaryWeatherPreview) return;
+    els.diaryWeatherPreview.hidden = view === "hidden";
+    els.diaryWeatherPreview.classList.toggle("loading", view === "loading");
+    els.diaryWeatherPreview.classList.toggle("error", view === "error" || view === "future");
+    if (view === "loading") els.diaryWeatherPreview.innerHTML = `<span class="diary-weather-spinner" aria-hidden="true"></span><span>${escapeHTML(t("diary.weatherLoading"))}</span>`;
+    else if (view === "ready") els.diaryWeatherPreview.innerHTML = diaryWeatherMarkup(weather, true);
+    else if (view === "future") els.diaryWeatherPreview.textContent = t("diary.weatherFuture");
+    else if (view === "error") els.diaryWeatherPreview.textContent = t("diary.weatherUnavailable");
+    else els.diaryWeatherPreview.innerHTML = "";
+  }
+
+  function renderPublicPhotoAdmin() {
+    if (!els.publicPhotoImage) return;
+    const active = publicPhoto?.active === true;
+    if (active) {
+      els.publicPhotoImage.src = `/media/public-photo.jpg?v=${publicPhoto.version || 0}`;
+      els.publicPhotoImage.alt = t("diary.publicPhotoTitle");
+    } else {
+      els.publicPhotoImage.removeAttribute("src");
+    }
+    els.publicPhotoImage.hidden = !active;
+    els.publicPhotoEmpty.hidden = active;
+    els.publicPhotoRemove.hidden = !active;
+    els.publicPhotoUploadLabel.textContent = t(active ? "diary.photoChange" : "diary.photoAdd");
   }
 
   function render() {
     renderTabs();
     renderOverview();
     renderDiary();
+    renderPublicPhotoAdmin();
 
     const stats = profileStats(activeProfile);
     els.profileTitle.textContent = profileName(activeProfile, true);
@@ -1853,6 +2144,7 @@
     const file = els.diaryGpx.files?.[0];
     pendingGpx = null;
     els.gpxReadout.classList.remove("ready", "error");
+    setDiaryWeatherPreview("hidden");
     if (!file) {
       els.gpxReadout.textContent = t("diary.gpxEmpty");
       return;
@@ -1867,9 +2159,62 @@
         ascent: pendingGpx.stats.ascent
       });
       els.gpxReadout.classList.add("ready");
+      const importedGpx = pendingGpx;
+      setDiaryWeatherPreview("loading");
+      try {
+        const weather = await fetchDiaryWeather(importedGpx);
+        if (pendingGpx !== importedGpx) return;
+        importedGpx.weather = weather;
+        setDiaryWeatherPreview("ready", weather);
+      } catch (error) {
+        if (pendingGpx !== importedGpx) return;
+        setDiaryWeatherPreview(error?.code === "FUTURE" ? "future" : "error");
+      }
     } catch (_) {
       els.gpxReadout.textContent = t("diary.gpxError");
       els.gpxReadout.classList.add("error");
+    }
+  });
+
+  els.publicPhotoInput?.addEventListener("change", async () => {
+    const file = els.publicPhotoInput.files?.[0];
+    if (!file) return;
+    els.publicPhotoInput.disabled = true;
+    els.publicPhotoStatus.textContent = t("diary.photoUploading");
+    els.publicPhotoStatus.classList.remove("error");
+    try {
+      const blob = await optimizeDiaryPhoto(file);
+      const response = await fetch("/api/public-photo", {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "content-type": "image/jpeg" },
+        body: blob
+      });
+      if (!response.ok) throw new Error("Upload failed");
+      const result = await response.json();
+      publicPhoto = result.photo?.active === true ? result.photo : null;
+      els.publicPhotoStatus.textContent = "";
+      renderPublicPhotoAdmin();
+    } catch (_) {
+      els.publicPhotoStatus.textContent = t("diary.photoUploadError");
+      els.publicPhotoStatus.classList.add("error");
+    } finally {
+      els.publicPhotoInput.disabled = false;
+      els.publicPhotoInput.value = "";
+    }
+  });
+
+  els.publicPhotoRemove?.addEventListener("click", async () => {
+    if (!publicPhoto || !window.confirm(t("diary.photoRemoveConfirm"))) return;
+    try {
+      const response = await fetch("/api/public-photo", { method: "DELETE", credentials: "same-origin" });
+      if (!response.ok) throw new Error("Delete failed");
+      publicPhoto = null;
+      els.publicPhotoStatus.textContent = "";
+      renderPublicPhotoAdmin();
+    } catch (_) {
+      els.publicPhotoStatus.textContent = t("diary.photoUploadError");
+      els.publicPhotoStatus.classList.add("error");
     }
   });
 
@@ -1877,13 +2222,17 @@
     event.preventDefault();
     const title = els.diaryTitle.value.trim() || pendingGpx?.routeName || "";
     if (!title) return;
+    const id = `diary-${globalThis.crypto?.randomUUID?.() || Date.now()}`;
     state.diary.push({
-      id: `diary-${globalThis.crypto?.randomUUID?.() || Date.now()}`,
+      id,
       date: els.diaryDate.value || new Date().toISOString().slice(0, 10),
       title: title.slice(0, 80),
       from: els.diaryFrom.value.trim().slice(0, 60),
       to: els.diaryTo.value.trim().slice(0, 60),
       note: els.diaryNote.value.trim().slice(0, 2400),
+      publicNote: els.diaryPublicNote.value.trim().slice(0, 1200),
+      published: els.diaryPublish.checked,
+      weather: pendingGpx?.weather || null,
       gpxName: pendingGpx?.gpxName || "",
       stats: pendingGpx?.stats || null,
       track: pendingGpx?.track || []
@@ -1894,11 +2243,33 @@
     pendingGpx = null;
     els.gpxReadout.textContent = t("diary.gpxEmpty");
     els.gpxReadout.classList.remove("ready", "error");
+    setDiaryWeatherPreview("hidden");
     renderDiary();
   });
 
-  els.diaryFeed?.addEventListener("click", (event) => {
-    const id = event.target.dataset.diaryDelete;
+  els.diaryFeed?.addEventListener("click", async (event) => {
+    const publishButton = event.target.closest?.("[data-diary-publish]");
+    if (publishButton) {
+      const entry = state.diary.find((item) => item.id === publishButton.dataset.diaryPublish);
+      if (!entry) return;
+      entry.published = !entry.published;
+      saveState();
+      renderDiary();
+      return;
+    }
+    const editButton = event.target.closest?.("[data-diary-public-edit]");
+    if (editButton) {
+      const entry = state.diary.find((item) => item.id === editButton.dataset.diaryPublicEdit);
+      if (!entry) return;
+      const publicNote = window.prompt(t("diary.publicNotePrompt"), entry.publicNote || "");
+      if (publicNote === null) return;
+      entry.publicNote = publicNote.trim().slice(0, 1200);
+      saveState();
+      renderDiary();
+      return;
+    }
+    const deleteButton = event.target.closest?.("[data-diary-delete]");
+    const id = deleteButton?.dataset.diaryDelete;
     if (!id || !window.confirm(t("diary.deleteConfirm"))) return;
     state.diary = state.diary.filter((entry) => entry.id !== id);
     saveState();

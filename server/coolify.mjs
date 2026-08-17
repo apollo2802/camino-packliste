@@ -1,5 +1,7 @@
 import { createServer } from "node:http";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
 import app from "../dist/server/index.js";
@@ -15,6 +17,8 @@ const databaseConfigured = databaseUrl || (
   process.env.PGDATABASE
 );
 const sequenceRoot = resolve("dist/client/packing-sequence");
+const uploadRoot = resolve(process.env.UPLOAD_DIR || "data/uploads");
+await mkdir(uploadRoot, { recursive: true });
 
 if (accessCode.length < 10 || sessionSecret.length < 32 || !databaseConfigured) {
   console.error("Zugangscode, Sitzungsschlüssel und Datenbankverbindung müssen gesetzt sein.");
@@ -70,6 +74,41 @@ const database = {
   },
 };
 
+function mediaPath(key) {
+  if (/^public-photo-[a-zA-Z0-9-]+\.jpg$/.test(key)) return resolve(uploadRoot, key);
+  throw new Error("Invalid media key");
+}
+
+const media = {
+  async put(key, value) {
+    await writeFile(mediaPath(key), Buffer.from(value));
+  },
+  async get(key) {
+    try {
+      const value = await readFile(mediaPath(key));
+      return {
+        async arrayBuffer() {
+          return value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength);
+        },
+      };
+    } catch (error) {
+      if (error?.code === "ENOENT") return null;
+      throw error;
+    }
+  },
+  async delete(key) {
+    try {
+      await unlink(mediaPath(key));
+    } catch (error) {
+      if (error?.code !== "ENOENT") throw error;
+    }
+  },
+  deleteLater(key) {
+    const cleanup = setTimeout(() => media.delete(key).catch((error) => console.error(error)), 60_000);
+    cleanup.unref?.();
+  },
+};
+
 function requestUrl(request) {
   const forwardedProtocol = String(request.headers["x-forwarded-proto"] || "")
     .split(",")[0]
@@ -81,13 +120,13 @@ function requestUrl(request) {
   return `${protocol}://${host}${request.url}`;
 }
 
-function readBody(request) {
+function readBody(request, limit = 220_000) {
   return new Promise((resolve, reject) => {
     const chunks = [];
     let size = 0;
     request.on("data", (chunk) => {
       size += chunk.length;
-      if (size > 220_000) {
+      if (size > limit) {
         reject(Object.assign(new Error("Payload too large"), { status: 413 }));
         request.destroy();
         return;
@@ -97,6 +136,22 @@ function readBody(request) {
     request.on("end", () => resolve(Buffer.concat(chunks)));
     request.on("error", reject);
   });
+}
+
+function hasValidUploadSession(cookieHeader, secret) {
+  const cookie = String(cookieHeader || "").split(";").map((part) => part.trim())
+    .find((part) => part.startsWith("camino_session="));
+  const token = cookie ? cookie.slice("camino_session=".length) : "";
+  const separator = token.indexOf(".");
+  if (separator < 1) return false;
+  const expires = Number(token.slice(0, separator));
+  const signature = token.slice(separator + 1);
+  const maxLifetime = 60 * 60 * 24 * 30 + 300;
+  if (!Number.isFinite(expires) || expires <= Date.now() || expires > Date.now() + maxLifetime * 1000) return false;
+  const expected = createHmac("sha256", secret).update(String(expires)).digest("hex");
+  const suppliedBytes = Buffer.from(signature, "utf8");
+  const expectedBytes = Buffer.from(expected, "utf8");
+  return suppliedBytes.length === expectedBytes.length && timingSafeEqual(suppliedBytes, expectedBytes);
 }
 
 const server = createServer(async (request, response) => {
@@ -128,15 +183,22 @@ const server = createServer(async (request, response) => {
       else if (value !== undefined) headers.set(name, value);
     }
 
+    const requestPath = new URL(requestUrl(request)).pathname;
+    const uploadRequest = requestPath === "/api/public-photo";
     const init = { method: request.method, headers };
     if (!["GET", "HEAD"].includes(request.method)) {
-      init.body = await readBody(request);
+      if (uploadRequest && !hasValidUploadSession(request.headers.cookie, sessionSecret)) {
+        request.resume();
+      } else {
+        init.body = await readBody(request, uploadRequest ? 2_500_000 : 220_000);
+      }
     }
 
     const result = await app.fetch(new Request(requestUrl(request), init), {
       ACCESS_CODE: accessCode,
       SESSION_SECRET: sessionSecret,
       DB: database,
+      MEDIA: media,
     });
 
     response.writeHead(result.status, Object.fromEntries(result.headers));

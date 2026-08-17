@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Unser Camino Portugués von Porto nach Santiago de Compostela.">
+  <title>Unser Camino · Porto bis Santiago</title>
+  <style>/*__PUBLIC_CSS__*/</style>
+</head>
+<body>
+  <div class="public-shell">
+    <header class="public-hero" id="top">
+      <nav class="public-nav" aria-label="Hauptnavigation">
+        <a class="public-brand" href="#top"><span aria-hidden="true">✦</span> CAMINHO · 2026</a>
+        <div class="public-nav-actions">
+          <div class="public-languages" role="group" aria-label="Sprache auswählen">
+            <button type="button" data-language="de" aria-pressed="true">DE</button>
+            <button type="button" data-language="en" aria-pressed="false">EN</button>
+            <button type="button" data-language="ru" aria-pressed="false">RU</button>
+          </div>
+          <a class="public-private-link" href="/intern" data-i18n="private">Unser Bereich</a>
+        </div>
+      </nav>
+      <div class="public-hero-content">
+        <p class="public-kicker" data-i18n="kicker">UNSER WEG ZU FUSS</p>
+        <h1 data-i18n-html="title">Porto bis<br><em>Santiago.</em></h1>
+        <p class="public-hero-copy" data-i18n="intro">Wir gehen den Camino Portugués – Schritt für Schritt, Etappe für Etappe.</p>
+        <div class="public-route-line" aria-label="Route"><span>PORTO</span><i></i><span data-i18n="coast">KÜSTENWEG</span><i></i><span data-i18n="central">ZENTRALROUTE</span><i></i><span>SANTIAGO</span></div>
+      </div>
+      <div class="public-hero-note"><span aria-hidden="true">◒</span><span data-i18n="heroNote">Unser Reisetagebuch · Sommer 2026</span></div>
+    </header>
+
+    <main>
+      <section class="public-journey-photo" id="public-journey-photo" hidden>
+        <figure><img id="public-journey-photo-image" alt="Unser Camino" loading="eager"></figure>
+      </section>
+      <section class="public-latest" aria-labelledby="latest-title">
+        <div class="public-section-heading">
+          <div><p class="public-kicker dark" data-i18n="latestKicker">GERADE UNTERWEGS</p><h2 id="latest-title" data-i18n="latestTitle">Die letzte Etappe</h2></div>
+          <p data-i18n="latestCopy">Hier teilen wir die Etappen, die wir bewusst veröffentlicht haben.</p>
+        </div>
+        <div id="public-latest" class="public-latest-card" aria-live="polite"></div>
+      </section>
+
+      <section class="public-stages" id="etappen" aria-labelledby="stages-title">
+        <div class="public-section-heading">
+          <div><p class="public-kicker dark" data-i18n="stagesKicker">UNSER TAGEBUCH</p><h2 id="stages-title" data-i18n="stagesTitle">Etappen auf dem Weg</h2></div>
+          <p id="public-stage-count"></p>
+        </div>
+        <div id="public-stage-list" class="public-stage-list" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="public-footer"><div><strong>Bom caminho.</strong><span data-i18n="footer">Porto · Küste · Zentralroute · Santiago</span></div><a href="/intern" data-i18n="private">Unser Bereich</a></footer>
+  </div>
+  <script>/*__PUBLIC_SCRIPT__*/</script>
+</body>
+</html>

@@ -18,6 +18,8 @@ services:
         condition: service_healthy
     expose:
       - "3000"
+    volumes:
+      - camino_media:/app/data
     healthcheck:
       test:
         - CMD
@@ -45,3 +47,4 @@ services:
 
 volumes:
   camino_database:
+  camino_media:

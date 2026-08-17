@@ -39,6 +39,11 @@ const appScript = readFileSync("public/app.js", "utf8").replace(
   "<\\/script",
 );
 const diary3dScript = readFileSync("public/diary-3d.js", "utf8");
+const publicCss = readFileSync("public/camino.css", "utf8").replace(/<\/style/gi, "<\\/style");
+const publicScript = readFileSync("public/camino.js", "utf8").replace(/<\/script/gi, "<\\/script");
+const publicHtml = readFileSync("public/camino.html", "utf8")
+  .replace("/*__PUBLIC_CSS__*/", publicCss)
+  .replace("/*__PUBLIC_SCRIPT__*/", publicScript);
 
 html = html
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
@@ -164,19 +169,26 @@ const attemptsSchemaSql = `CREATE TABLE IF NOT EXISTS login_attempts (
   failures INTEGER NOT NULL,
   window_started INTEGER NOT NULL
 )`;
+const publicPhotoSchemaSql = `CREATE TABLE IF NOT EXISTS camino_public_photo (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  media_key TEXT NOT NULL,
+  updated_at INTEGER NOT NULL
+)`;
 
 const worker = `const INDEX_HTML = ${JSON.stringify(html)};
 const LOGIN_HTML = ${JSON.stringify(loginHtml)};
+const PUBLIC_HTML = ${JSON.stringify(publicHtml)};
 const DIARY_3D_JS = ${JSON.stringify(diary3dScript)};
 const STATE_SCHEMA_SQL = ${JSON.stringify(stateSchemaSql)};
 const ATTEMPTS_SCHEMA_SQL = ${JSON.stringify(attemptsSchemaSql)};
+const PUBLIC_PHOTO_SCHEMA_SQL = ${JSON.stringify(publicPhotoSchemaSql)};
 const SESSION_COOKIE = "camino_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
 const encoder = new TextEncoder();
 
 const SECURITY_HEADERS = {
   "cache-control": "private, no-store",
-  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; img-src 'self' data: https://a.tile.opentopomap.org https://s3.amazonaws.com https://tiles.openfreemap.org; connect-src 'self' https://esm.sh https://tiles.openfreemap.org https://api.open-meteo.com; worker-src blob:; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
+  "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; script-src 'self' 'unsafe-inline' https://esm.sh; img-src 'self' data: https://a.tile.opentopomap.org https://s3.amazonaws.com https://tiles.openfreemap.org; connect-src 'self' https://esm.sh https://tiles.openfreemap.org https://api.open-meteo.com https://archive-api.open-meteo.com; worker-src blob:; font-src 'none'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'",
   "cross-origin-opener-policy": "same-origin",
   "permissions-policy": "camera=(), microphone=(), geolocation=(self)",
   "referrer-policy": "no-referrer",
@@ -194,6 +206,19 @@ function response(body, options = {}) {
 
 function json(data, status = 200) {
   return response(JSON.stringify(data), { status, contentType: "application/json; charset=utf-8" });
+}
+
+function publicResponse(body, options = {}) {
+  const headers = new Headers(SECURITY_HEADERS);
+  headers.set("cache-control", "no-store");
+  headers.delete("x-robots-tag");
+  headers.set("content-type", options.contentType || "text/html; charset=utf-8");
+  for (const [key, value] of Object.entries(options.headers || {})) headers.set(key, value);
+  return new Response(body, { status: options.status || 200, headers });
+}
+
+function publicJson(data, status = 200) {
+  return publicResponse(JSON.stringify(data), { status, contentType: "application/json; charset=utf-8" });
 }
 
 function loginPage(message = "", status = 200) {
@@ -257,7 +282,18 @@ async function ensureSchema(env) {
   await env.DB.batch([
     env.DB.prepare(STATE_SCHEMA_SQL),
     env.DB.prepare(ATTEMPTS_SCHEMA_SQL),
+    env.DB.prepare(PUBLIC_PHOTO_SCHEMA_SQL),
   ]);
+}
+
+async function readPublicPhoto(env) {
+  return env.DB.prepare("SELECT media_key, updated_at FROM camino_public_photo WHERE id = 1").first();
+}
+
+function publicPhotoPayload(row) {
+  if (!row) return null;
+  const version = Number(row.updated_at) || 0;
+  return { active: true, version, url: "/media/public-photo.jpg?v=" + version };
 }
 
 function clientAddress(request) {
@@ -301,6 +337,36 @@ function validState(value) {
     );
 }
 
+function publishedEntries(value) {
+  if (!value || !Array.isArray(value.diary)) return [];
+  return value.diary.filter((entry) => entry && entry.published === true).slice(0, 40).map((entry) => ({
+    id: String(entry.id || ""),
+    date: String(entry.date || "").slice(0, 10),
+    title: String(entry.title || "").slice(0, 80),
+    from: String(entry.from || "").slice(0, 60),
+    to: String(entry.to || "").slice(0, 60),
+    publicNote: String(entry.publicNote || "").slice(0, 1200),
+    stats: entry.stats && typeof entry.stats === "object" ? {
+      distance: Number(entry.stats.distance) || 0,
+      ascent: Number(entry.stats.ascent) || 0,
+      descent: Number(entry.stats.descent) || 0,
+      min: Number(entry.stats.min) || 0,
+      max: Number(entry.stats.max) || 0
+    } : null,
+    weather: entry.weather && typeof entry.weather === "object" ? {
+      date: String(entry.weather.date || "").slice(0, 10),
+      code: Number(entry.weather.code) || 0,
+      temperatureMin: Number(entry.weather.temperatureMin) || 0,
+      temperatureMax: Number(entry.weather.temperatureMax) || 0,
+      precipitation: Number(entry.weather.precipitation) || 0,
+      windMax: Number(entry.weather.windMax) || 0,
+      gustMax: Number(entry.weather.gustMax) || 0,
+      humidityAverage: Number(entry.weather.humidityAverage) || 0
+    } : null,
+    track: Array.isArray(entry.track) ? entry.track.slice(0, 100).filter((point) => Array.isArray(point) && point.length >= 3).map((point) => [Number(point[0]), Number(point[1]), Number(point[2])]) : []
+  }));
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -328,7 +394,7 @@ export default {
       return response(null, {
         status: 303,
         headers: {
-          location: "/",
+          location: "/intern",
           "set-cookie": SESSION_COOKIE + "=" + session + "; Path=/; HttpOnly" + secure + "; SameSite=Strict; Max-Age=" + SESSION_SECONDS,
         },
       });
@@ -352,16 +418,85 @@ export default {
       });
     }
 
+    if ((url.pathname === "/" || url.pathname === "/index.html") && request.method === "GET") {
+      return publicResponse(PUBLIC_HTML);
+    }
+
+    if (url.pathname === "/api/public-diary" && request.method === "GET") {
+      const [row, photoRow] = await Promise.all([
+        env.DB.prepare("SELECT payload FROM camino_state WHERE id = 1").first(),
+        readPublicPhoto(env),
+      ]);
+      let state = null;
+      try { state = row ? JSON.parse(row.payload) : null; } catch (_) {}
+      return publicJson({ entries: publishedEntries(state), photo: publicPhotoPayload(photoRow) });
+    }
+
+    if (url.pathname === "/media/public-photo.jpg" && request.method === "GET") {
+      if (!env.MEDIA) return response("Not found", { status: 404, contentType: "text/plain; charset=utf-8" });
+      const photoRow = await readPublicPhoto(env);
+      if (!photoRow) return response("Not found", { status: 404, contentType: "text/plain; charset=utf-8" });
+      const object = await env.MEDIA.get(String(photoRow.media_key));
+      if (!object) return response("Not found", { status: 404, contentType: "text/plain; charset=utf-8" });
+      return publicResponse(await object.arrayBuffer(), {
+        contentType: "image/jpeg",
+      });
+    }
+
     const authenticated = await hasValidSession(request, sessionSecret);
     if (!authenticated) {
-      if (url.pathname === "/" || url.pathname === "/index.html") return loginPage();
+      if (url.pathname === "/intern" || url.pathname === "/intern/") return loginPage();
       return json({ error: "Nicht angemeldet" }, 401);
+    }
+
+    if (url.pathname === "/api/public-photo") {
+      const origin = request.headers.get("origin");
+      if (origin && origin !== url.origin) return json({ error: "Ungültige Herkunft" }, 403);
+      if (!env.MEDIA) return json({ error: "Bildspeicher nicht eingerichtet" }, 503);
+      if (request.method === "POST") {
+        if (request.headers.get("content-type") !== "image/jpeg") return json({ error: "Ungültiges Bildformat" }, 415);
+        const declaredLength = Number(request.headers.get("content-length") || 0);
+        if (declaredLength > 2500000) return json({ error: "Bild zu groß" }, 413);
+        const bytes = await request.arrayBuffer();
+        if (!bytes.byteLength || bytes.byteLength > 2500000) return json({ error: "Bild zu groß" }, 413);
+        const signature = new Uint8Array(bytes, 0, Math.min(3, bytes.byteLength));
+        if (signature.length < 3 || signature[0] !== 0xff || signature[1] !== 0xd8 || signature[2] !== 0xff) {
+          return json({ error: "Ungültiges Bildformat" }, 415);
+        }
+        const previous = await readPublicPhoto(env);
+        const version = Date.now();
+        const mediaKey = "public-photo-" + version + "-" + crypto.randomUUID() + ".jpg";
+        await env.MEDIA.put(mediaKey, bytes, { httpMetadata: { contentType: "image/jpeg" } });
+        try {
+          await env.DB.prepare("INSERT INTO camino_public_photo (id, media_key, updated_at) VALUES (1, ?, ?) ON CONFLICT(id) DO UPDATE SET media_key = excluded.media_key, updated_at = excluded.updated_at")
+            .bind(mediaKey, version).run();
+        } catch (error) {
+          await env.MEDIA.delete(mediaKey).catch(() => {});
+          throw error;
+        }
+        if (previous?.media_key && previous.media_key !== mediaKey) {
+          if (typeof env.MEDIA.deleteLater === "function") {
+            env.MEDIA.deleteLater(String(previous.media_key));
+          }
+        }
+        return json({ ok: true, photo: publicPhotoPayload({ media_key: mediaKey, updated_at: version }) });
+      }
+      if (request.method === "DELETE") {
+        const previous = await readPublicPhoto(env);
+        await env.DB.prepare("DELETE FROM camino_public_photo WHERE id = 1").run();
+        if (previous?.media_key) await env.MEDIA.delete(String(previous.media_key)).catch(() => {});
+        return json({ ok: true, photo: null });
+      }
+      return json({ error: "Methode nicht erlaubt" }, 405);
     }
 
     if (url.pathname === "/api/state") {
       if (request.method === "GET") {
-        const row = await env.DB.prepare("SELECT payload, updated_at FROM camino_state WHERE id = 1").first();
-        return json({ state: row ? JSON.parse(row.payload) : null, updatedAt: row ? row.updated_at : null });
+        const [row, photoRow] = await Promise.all([
+          env.DB.prepare("SELECT payload, updated_at FROM camino_state WHERE id = 1").first(),
+          readPublicPhoto(env),
+        ]);
+        return json({ state: row ? JSON.parse(row.payload) : null, updatedAt: row ? row.updated_at : null, publicPhoto: publicPhotoPayload(photoRow) });
       }
       if (request.method === "PUT") {
         const origin = request.headers.get("origin");
@@ -381,7 +516,7 @@ export default {
       return json({ error: "Methode nicht erlaubt" }, 405);
     }
 
-    if (url.pathname === "/" || url.pathname === "/index.html") return response(INDEX_HTML);
+    if (url.pathname === "/intern" || url.pathname === "/intern/") return response(INDEX_HTML);
     return response("Not found", { status: 404, contentType: "text/plain; charset=utf-8" });
   },
 };

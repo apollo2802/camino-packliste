@@ -337,6 +337,7 @@ function makeTrailGeometry(curve, segments, width) {
 }
 
 export function mountDiaryTour(root, entry, translations) {
+  const publicTour = root.dataset.publicTour === "true";
   const canvas = root.querySelector("canvas");
   const cityMapContainer = root.querySelector("[data-tour-city-map]");
   const mapViewButtons = [...root.querySelectorAll("[data-tour-view]")];
@@ -352,7 +353,7 @@ export function mountDiaryTour(root, entry, translations) {
   const followCamera = root.querySelector("[data-tour-follow]");
   const exportButton = root.querySelector("[data-tour-export]");
   const downloadLink = root.querySelector("[data-tour-download]");
-  const diaryEntry = root.closest(".diary-entry");
+  const diaryEntry = root.closest(".diary-entry, .public-feature, .public-stage-card");
   const elevationProfile = diaryEntry?.querySelector("[data-elevation-profile]");
   const elevationMarkers = [...(diaryEntry?.querySelectorAll("[data-elevation-marker]") || [])];
   const profileElevations = entry.track.map((point) => Number(point[2]) || 0);
@@ -1112,7 +1113,7 @@ export function mountDiaryTour(root, entry, translations) {
       root._diary3dResize = onResize;
       resize();
       loading.hidden = true;
-      if (localStorage.getItem("camino-diary-map-view") === "city") setMapView("city");
+      if (!publicTour && localStorage.getItem("camino-diary-map-view") === "city") setMapView("city");
       draw();
     } catch (error) {
       if (error?.name === "AbortError" || destroyed) return;

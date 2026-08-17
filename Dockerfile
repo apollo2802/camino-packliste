@@ -21,12 +21,16 @@ FROM node:22-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
+ENV UPLOAD_DIR=/app/data/uploads
 
 COPY --from=build --chown=node:node /app/node_modules ./node_modules
 COPY --from=build --chown=node:node /app/dist ./dist
 COPY --chown=node:node package.json ./
 COPY --chown=node:node server ./server
 
+RUN mkdir -p /app/data/uploads && chown -R node:node /app/data
+
+VOLUME ["/app/data"]
 USER node
 EXPOSE 3000
 

@@ -32,7 +32,7 @@ Zugangscode und Passwörter gehören ausschließlich in die Coolify-Variablen un
 
 ## Datenspeicherung
 
-Die Packliste wird in PostgreSQL gespeichert. Das Docker-Volume `camino_database` sorgt dafür, dass die Daten bei neuen Deployments erhalten bleiben. Für zusätzliche Sicherheit sollte in Coolify regelmäßig ein Datenbank-Backup eingerichtet werden.
+Die Packliste wird in PostgreSQL gespeichert. Das Docker-Volume `camino_database` sorgt dafür, dass die Daten bei neuen Deployments erhalten bleiben. Hochgeladene öffentliche Fotos liegen getrennt im Volume `camino_media`. Für zusätzliche Sicherheit sollten in Coolify beide Volumes regelmäßig gesichert werden.
 
 Beim ersten Öffnen einer noch leeren Installation wird ein bereits im Browser vorhandener Packlistenstand automatisch in den gemeinsamen Speicher übernommen.
 

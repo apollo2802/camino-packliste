@@ -7,6 +7,8 @@ const port = Number(process.env.PORT || 3000);
 const sequenceRoot = resolve("dist/client/packing-sequence");
 const state = { value: null, updatedAt: null };
 const attempts = new Map();
+const mediaFiles = new Map();
+let publicPhoto = null;
 
 function createStatement(sql) {
   let values = [];
@@ -22,6 +24,9 @@ function createStatement(sql) {
       if (sql.includes("FROM login_attempts")) {
         return attempts.get(values[0]) || null;
       }
+      if (sql.includes("FROM camino_public_photo")) {
+        return publicPhoto;
+      }
       return null;
     },
     async run() {
@@ -36,6 +41,10 @@ function createStatement(sql) {
           : { failures: current.failures + 1, window_started: current.window_started });
       } else if (sql.startsWith("DELETE FROM login_attempts")) {
         attempts.delete(values[0]);
+      } else if (sql.startsWith("INSERT INTO camino_public_photo")) {
+        publicPhoto = { media_key: values[0], updated_at: values[1] };
+      } else if (sql.startsWith("DELETE FROM camino_public_photo")) {
+        publicPhoto = null;
       }
       return { success: true };
     },
@@ -49,6 +58,23 @@ const env = {
     prepare: createStatement,
     async batch(statements) {
       return Promise.all(statements.map((statement) => statement.run()));
+    },
+  },
+  MEDIA: {
+    async put(key, value) {
+      mediaFiles.set(key, Buffer.from(value));
+    },
+    async get(key) {
+      const value = mediaFiles.get(key);
+      if (!value) return null;
+      return {
+        async arrayBuffer() {
+          return value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength);
+        },
+      };
+    },
+    async delete(key) {
+      mediaFiles.delete(key);
     },
   },
 };

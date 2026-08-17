@@ -17,6 +17,7 @@ const pageMarkup = `
           </div>
           <button class="ghost-button" id="print-button" type="button" data-i18n="nav.print">Drucken</button>
           <a class="ghost-button diary-link" href="#unterwegs" data-i18n="nav.diary">Unterwegs</a>
+          <a class="ghost-button public-link" href="/" data-i18n="nav.public">Öffentliche Seite</a>
           <button class="ghost-button danger-subtle" id="reset-button" type="button" data-i18n="nav.reset">Zurücksetzen</button>
           <a class="ghost-button" href="/logout" data-i18n="nav.logout">Abmelden</a>
         </div>
@@ -294,6 +295,23 @@ const pageMarkup = `
           <p data-i18n="diary.copy">Jeden Wandertag mit Gedanken, Höhenmetern und der aufgezeichneten GPX-Route festhalten.</p>
         </div>
 
+        <section class="public-photo-admin" aria-labelledby="public-photo-title">
+          <div class="public-photo-admin-copy">
+            <p class="section-label" data-i18n="diary.publicPhotoLabel">Öffentliche Seite</p>
+            <h3 id="public-photo-title" data-i18n="diary.publicPhotoTitle">Unser aktuelles Camino-Foto</h3>
+            <p data-i18n="diary.publicPhotoCopy">Dieses Bild ist unabhängig von Etappen, GPX-Dateien und Tagebucheinträgen. Es kann jederzeit ausgetauscht werden.</p>
+          </div>
+          <div class="public-photo-admin-preview" id="public-photo-admin-preview">
+            <img id="public-photo-admin-image" alt="" hidden>
+            <div id="public-photo-admin-empty"><span aria-hidden="true">▧</span><small data-i18n="diary.publicPhotoEmpty">Noch kein öffentliches Foto hochgeladen.</small></div>
+          </div>
+          <div class="public-photo-admin-actions">
+            <label class="public-photo-upload"><span id="public-photo-upload-label" data-i18n="diary.photoAdd">Foto hinzufügen</span><input id="public-photo-input" type="file" accept="image/jpeg,image/png,image/webp"></label>
+            <button id="public-photo-remove" type="button" data-i18n="diary.photoRemove" hidden>Foto entfernen</button>
+            <p id="public-photo-status" role="status"></p>
+          </div>
+        </section>
+
         <div class="diary-layout">
           <div class="diary-feed" id="diary-feed" aria-live="polite"></div>
           <form class="diary-form" id="diary-form">
@@ -309,12 +327,15 @@ const pageMarkup = `
               <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-to" maxlength="60" placeholder="Vila do Conde" data-i18n-placeholder="diary.toPlaceholder"></label>
             </div>
             <label class="diary-field diary-field-wide"><span data-i18n="diary.note">Tagesnotiz</span><textarea id="diary-note" rows="5" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
+            <label class="diary-field diary-field-wide"><span data-i18n="diary.publicNote">Öffentliche Beschreibung</span><textarea id="diary-public-note" rows="3" maxlength="1200" placeholder="Das möchten wir über diese Etappe teilen …" data-i18n-placeholder="diary.publicNotePlaceholder"></textarea><small data-i18n="diary.publicNoteHint">Nur dieser Text erscheint im öffentlichen Reisetagebuch.</small></label>
+            <label class="diary-publish-field diary-field-wide"><input id="diary-publish" type="checkbox"><span><strong data-i18n="diary.publish">Etappe veröffentlichen</strong><small data-i18n="diary.publishHint">Die Route, Kennzahlen und öffentliche Beschreibung werden auf der öffentlichen Seite gezeigt.</small></span></label>
             <label class="gpx-drop" for="diary-gpx">
               <span class="gpx-icon" aria-hidden="true">⌁</span>
               <span><strong data-i18n="diary.gpxTitle">Komoot-GPX auswählen</strong><small data-i18n="diary.gpxCopy">Die Route wird im Browser ausgewertet und mit dem Eintrag gespeichert.</small></span>
               <input id="diary-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
             </label>
             <p class="gpx-readout" id="gpx-readout" role="status" data-i18n="diary.gpxEmpty">Noch keine GPX ausgewählt.</p>
+            <div class="diary-weather-preview" id="diary-weather-preview" role="status" hidden></div>
             <button class="diary-submit" type="submit" data-i18n="diary.save">Etappe speichern</button>
           </form>
         </div>

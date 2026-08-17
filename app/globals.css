@@ -357,6 +357,10 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-map-empty { position: relative; z-index: 1; min-height: 360px; display: grid; place-items: center; color: rgba(255,255,255,.72); font-size: .85rem; }
 .diary-entry-body { padding: clamp(1.25rem, 4vw, 2.2rem); }
 .diary-entry-top { display: flex; justify-content: space-between; gap: 1rem; align-items: start; }
+.diary-entry-actions { display: flex; flex: 0 0 auto; align-items: center; gap: .4rem; }
+.diary-publish, .diary-edit-public { min-height: 32px; padding: .45rem .58rem; border: 1px solid rgba(13,95,90,.22); border-radius: 999px; color: #315a54; background: #eef5f2; cursor: pointer; font-size: .64rem; font-weight: 800; }
+.diary-publish.published { color: white; border-color: #0d5f5a; background: #0d5f5a; }
+.diary-edit-public:hover { color: #20313a; border-color: #f0b330; background: #fff0ca; }
 .diary-date { color: var(--teal); font-size: .7rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
 .diary-entry h3 { margin: .45rem 0 0; font: 500 clamp(1.8rem,4vw,3rem)/1 Georgia,serif; letter-spacing: -.035em; }
 .diary-delete { flex: 0 0 auto; width: 34px; height: 34px; border: 0; border-radius: 50%; color: #9f503f; background: #f8eae5; cursor: pointer; }
@@ -373,6 +377,19 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-elevation-marker { fill: #e84a2a; stroke: #fff7e8; stroke-width: 2.5; vector-effect: non-scaling-stroke; }
 .diary-elevation:focus-visible { outline: 3px solid rgba(227,174,59,.55); outline-offset: 5px; border-radius: 4px; }
 .diary-form { position: sticky; top: 1rem; display: grid; grid-template-columns: 1fr 1fr; gap: .85rem; padding: clamp(1.1rem,3vw,1.6rem); border-radius: 24px; background: #e8f0ed; border: 1px solid rgba(13,95,90,.15); }
+.public-photo-admin { display: grid; grid-template-columns: minmax(220px,.8fr) minmax(280px,1.2fr) auto; align-items: center; gap: clamp(1rem,3vw,2rem); margin-bottom: 2rem; padding: clamp(1rem,3vw,1.5rem); border: 1px solid rgba(13,95,90,.15); border-radius: 24px; background: #e8f0ed; }
+.public-photo-admin-copy h3 { margin: .35rem 0 .55rem; font: 500 clamp(1.5rem,3vw,2.25rem)/1 Georgia,serif; }
+.public-photo-admin-copy p:last-child { margin: 0; color: var(--muted); font-size: .76rem; line-height: 1.55; }
+.public-photo-admin-preview { min-height: 150px; overflow: hidden; border-radius: 17px; background: rgba(255,255,255,.58); }
+.public-photo-admin-preview img { display: block; width: 100%; height: 190px; object-fit: cover; }
+.public-photo-admin-preview > div { min-height: 150px; display: grid; place-items: center; align-content: center; gap: .5rem; padding: 1rem; color: var(--muted); text-align: center; }
+.public-photo-admin-preview > div span { color: var(--gold); font-size: 2rem; }
+.public-photo-admin-actions { display: grid; gap: .55rem; min-width: 140px; }
+.public-photo-upload, #public-photo-remove { display: flex; justify-content: center; padding: .7rem .9rem; border: 0; border-radius: 999px; color: white; background: var(--teal); font-size: .7rem; font-weight: 800; cursor: pointer; }
+.public-photo-upload input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
+#public-photo-remove { color: #8b352b; background: #f8eae5; }
+#public-photo-status { max-width: 170px; margin: 0; color: var(--muted); font-size: .64rem; line-height: 1.35; }
+#public-photo-status.error { color: #8b352b; }
 .diary-form-intro, .diary-field-wide, .diary-place-row, .gpx-drop, .gpx-readout, .diary-submit { grid-column: 1 / -1; }
 .diary-form-intro { display: flex; align-items: center; gap: .8rem; padding-bottom: .35rem; }
 .diary-form-intro .section-label { margin: 0 0 .3rem; }
@@ -381,6 +398,12 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-field > span { color: #45615d; font-size: .72rem; font-weight: 800; }
 .diary-field input, .diary-field textarea { width: 100%; border: 1px solid rgba(13,95,90,.18); border-radius: 11px; padding: .72rem .78rem; color: var(--ink); background: rgba(255,255,255,.88); outline: none; resize: vertical; }
 .diary-field input:focus, .diary-field textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,95,90,.1); }
+.diary-field small { color: #5e7570; font-size: .65rem; line-height: 1.35; }
+.diary-publish-field { display: flex; align-items: flex-start; gap: .65rem; padding: .78rem .82rem; border: 1px solid rgba(13,95,90,.2); border-radius: 12px; color: #315a54; background: rgba(255,255,255,.52); cursor: pointer; }
+.diary-publish-field input { width: 17px; height: 17px; margin: .08rem 0 0; accent-color: var(--teal); }
+.diary-publish-field span { display: grid; gap: .18rem; }
+.diary-publish-field strong { font-size: .74rem; }
+.diary-publish-field small { color: #5e7570; font-size: .65rem; line-height: 1.35; }
 .diary-place-row { display: grid; grid-template-columns: 1fr auto 1fr; gap: .5rem; align-items: end; }
 .diary-place-row > span { padding-bottom: .75rem; color: var(--gold); font-weight: 850; }
 .gpx-drop { min-height: 96px; padding: .9rem; border: 1px dashed rgba(13,95,90,.4); border-radius: 15px; display: flex; gap: .75rem; align-items: center; background: rgba(255,255,255,.46); cursor: pointer; }
@@ -390,6 +413,23 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .gpx-drop small, .gpx-readout { color: var(--muted); font-size: .72rem; line-height: 1.4; }
 .gpx-icon { flex: 0 0 auto; width: 40px; height: 40px; display: grid; place-items: center; border-radius: 12px; color: white; background: var(--teal); font-size: 1.4rem; }
 .gpx-readout { min-height: 1rem; margin: -.25rem 0 0; }
+.diary-weather-preview { grid-column: 1 / -1; min-height: 52px; border: 1px solid rgba(13,95,90,.16); border-radius: 15px; color: #315a54; background: rgba(255,255,255,.58); }
+.diary-weather-preview[hidden] { display: none; }
+.diary-weather-preview.loading { display: flex; align-items: center; gap: .7rem; padding: .8rem .9rem; font-size: .72rem; font-weight: 760; }
+.diary-weather-preview.error { padding: .8rem .9rem; color: #8b352b; background: #f8eae5; font-size: .72rem; line-height: 1.45; }
+.diary-weather-spinner { width: 17px; height: 17px; border: 2px solid rgba(13,95,90,.2); border-top-color: var(--teal); border-radius: 50%; animation: diary-weather-spin .8s linear infinite; }
+@keyframes diary-weather-spin { to { transform: rotate(360deg); } }
+.diary-weather-card { display: grid; gap: .85rem; margin-top: 1.25rem; padding: 1rem; border: 1px solid rgba(13,95,90,.14); border-radius: 17px; background: #eef5f2; }
+.diary-weather-card.preview { margin: 0; border: 0; background: transparent; }
+.diary-weather-head { display: flex; align-items: center; gap: .65rem; }
+.diary-weather-head > span { font-size: 1.75rem; }
+.diary-weather-head > div { display: grid; gap: .12rem; }
+.diary-weather-head small { color: var(--muted); font-size: .62rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+.diary-weather-head strong { font: 500 1.15rem Georgia,serif; }
+.diary-weather-facts { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: .55rem; }
+.diary-weather-facts div { display: grid; gap: .14rem; }
+.diary-weather-facts strong { font-size: .74rem; }
+.diary-weather-facts span, .diary-weather-source { color: var(--muted); font-size: .58rem; }
 .gpx-readout.ready { color: var(--teal); font-weight: 750; }
 .gpx-readout.error { color: #a34d3c; }
 .diary-submit { border: 0; border-radius: 12px; padding: .85rem 1rem; color: white; background: var(--teal); cursor: pointer; font-weight: 800; }
@@ -428,6 +468,8 @@ footer p { margin: 0; }
   .weather-facts { grid-template-columns: repeat(3,minmax(0,1fr)); }
   .diary-layout { grid-template-columns: 1fr; }
   .diary-form { position: static; grid-row: 1; }
+  .public-photo-admin { grid-template-columns: 1fr 1fr; }
+  .public-photo-admin-copy { grid-column: 1 / -1; }
   .guide-grid { grid-template-columns: 1fr; }
   .guide-grid h3 { margin-top: 1.2rem; }
 }
@@ -445,6 +487,9 @@ footer p { margin: 0; }
   .route-line { align-items: flex-start; flex-direction: column; border-left: 1px solid rgba(255,255,255,.25); padding-left: 1rem; gap: .6rem; }
   .route-line i { display: none; }
   .main-content { padding-left: .75rem; padding-right: .75rem; }
+  .public-photo-admin { grid-template-columns: 1fr; border-radius: 20px; }
+  .public-photo-admin-copy { grid-column: auto; }
+  .public-photo-admin-actions, #public-photo-status { width: 100%; max-width: none; }
   .overview-grid { grid-template-columns: 1fr 1fr; }
   .stat-card:last-child { grid-column: 1 / -1; min-height: 125px; }
   .checklist-section { border-radius: 22px; padding: 1rem; }
@@ -499,7 +544,7 @@ footer p { margin: 0; }
   .diary-section { margin-top: 4rem; }
   .diary-layout { margin-top: 1.3rem; }
   .diary-form { grid-template-columns: 1fr; border-radius: 20px; }
-  .diary-form-intro, .diary-field-wide, .diary-place-row, .gpx-drop, .gpx-readout, .diary-submit { grid-column: auto; }
+  .diary-form-intro, .diary-field-wide, .diary-place-row, .gpx-drop, .gpx-readout, .diary-weather-preview, .diary-submit { grid-column: auto; }
   .diary-place-row { grid-template-columns: 1fr; }
   .diary-place-row > span { display: none; }
   .diary-entry, .diary-empty { border-radius: 20px; }
@@ -512,6 +557,7 @@ footer p { margin: 0; }
   .diary-tour-menu { top: .65rem; right: .65rem; }
   .diary-map-attribution { right: .65rem; bottom: .16rem; font-size: .43rem; }
   .diary-stats { grid-template-columns: 1fr 1fr; gap: .8rem; }
+  .diary-weather-facts { grid-template-columns: 1fr 1fr; }
   .quick-guide { margin-left: -1rem; margin-right: -1rem; border-radius: 22px; }
   .camino-note { grid-template-columns: 1fr; }
   footer { flex-direction: column; }
