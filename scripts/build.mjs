@@ -464,7 +464,7 @@ export default {
           return json({ error: "Ungültiges Bildformat" }, 415);
         }
         const previous = await readPublicPhoto(env);
-        const version = Date.now();
+        const version = Math.floor(Date.now() / 1000);
         const mediaKey = "public-photo-" + version + "-" + crypto.randomUUID() + ".jpg";
         await env.MEDIA.put(mediaKey, bytes, { httpMetadata: { contentType: "image/jpeg" } });
         try {

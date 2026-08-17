@@ -62,6 +62,7 @@ test("public photo upload owns its metadata on the server", async () => {
 
   assert.equal(upload.status, 200);
   assert.match(getPhoto()?.media_key || "", /^public-photo-[a-zA-Z0-9-]+\.jpg$/);
+  assert.ok(getPhoto().updated_at <= 2_147_483_647, "photo timestamp must fit the PostgreSQL INTEGER column");
   assert.equal(files.has(getPhoto().media_key), true);
   const firstKey = getPhoto().media_key;
 
