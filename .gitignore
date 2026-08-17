@@ -3,6 +3,7 @@ dist/
 out/
 node_modules/
 .pnpm-store/
+.worktrees/
 .env
 .env.*
 !.env.example
