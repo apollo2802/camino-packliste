@@ -30,8 +30,8 @@ function chooseTileGrid(track) {
   };
   // Give the relief map real geographic context around the GPX instead of
   // cutting the terrain closely around the route.
-  const latPad = Math.max(.0112, (bounds.maxLat - bounds.minLat) * .61);
-  const lonPad = Math.max(.0112, (bounds.maxLon - bounds.minLon) * .61);
+  const latPad = Math.max(.0378, (bounds.maxLat - bounds.minLat) * 2.05875);
+  const lonPad = Math.max(.0378, (bounds.maxLon - bounds.minLon) * 2.05875);
   bounds.minLat -= latPad; bounds.maxLat += latPad;
   bounds.minLon -= lonPad; bounds.maxLon += lonPad;
 

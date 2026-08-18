@@ -67,8 +67,7 @@
   function card(entry, feature = false) {
     const places = [entry.from, entry.to].filter(Boolean).map(escape).join(" → ");
     const mapMarkup = map(entry);
-    const visual = mapMarkup ? `<div class="public-stage-visual">${mapMarkup}${elevation(entry)}</div>` : "";
-    return `<article class="${feature ? "public-feature" : "public-stage-card"}${mapMarkup ? "" : " no-map"}">${visual}<div class="public-feature-copy"><time class="public-date" datetime="${escape(entry.date)}">${escape(formatDate(entry.date))}</time><h3>${escape(entry.title)}</h3>${places ? `<p class="public-places">${places}</p>` : ""}${entry.publicNote ? `<p class="public-note">${escape(entry.publicNote)}</p>` : ""}${weather(entry)}${stats(entry)}</div></article>`;
+    return `<article class="${feature ? "public-feature" : "public-stage-card"}${mapMarkup ? "" : " no-map"}"><div class="public-feature-copy"><time class="public-date" datetime="${escape(entry.date)}">${escape(formatDate(entry.date))}</time><h3>${escape(entry.title)}</h3>${places ? `<p class="public-places">${places}</p>` : ""}${entry.publicNote ? `<p class="public-note">${escape(entry.publicNote)}</p>` : ""}${weather(entry)}${mapMarkup}${stats(entry)}${elevation(entry)}</div></article>`;
   }
   function render() {
     publicTourStops.forEach((stop) => stop());

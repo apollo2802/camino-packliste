@@ -57,3 +57,17 @@ test("public route action icons are not stretched by the map SVG rule", async ()
   assert.match(actionIcon, /min-height:0/);
   assert.match(mobileStyles, /\.public-tour-action svg\{[^}]*height:19px;[^}]*min-height:0/);
 });
+
+test("route animation follows weather and precedes elevation in both diaries", async () => {
+  const publicScript = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const publicCard = publicScript.slice(publicScript.indexOf("function card(entry"), publicScript.indexOf("function render()"));
+  const publicMarkup = publicCard.slice(publicCard.indexOf("<div class=\"public-feature-copy\">"));
+  const privateScript = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  const privateCard = privateScript.slice(privateScript.indexOf("return `<article class=\"diary-entry\">"), privateScript.indexOf("}).join(\"\");", privateScript.indexOf("return `<article class=\"diary-entry\">")));
+
+  assert.ok(publicMarkup.indexOf("weather(entry)") < publicMarkup.indexOf("mapMarkup"));
+  assert.ok(publicMarkup.indexOf("mapMarkup") < publicMarkup.indexOf("stats(entry)"));
+  assert.ok(publicMarkup.indexOf("stats(entry)") < publicMarkup.indexOf("elevation(entry)"));
+  assert.ok(privateCard.indexOf("diaryWeatherMarkup(entry.weather)") < privateCard.indexOf("<div class=\"diary-map\">"));
+  assert.ok(privateCard.indexOf("<div class=\"diary-map\">") < privateCard.indexOf("statMarkup"));
+});
