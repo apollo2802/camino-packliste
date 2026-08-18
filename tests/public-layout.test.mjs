@@ -28,3 +28,32 @@ test("public hero uses compact desktop and mobile spacing", async () => {
   assert.match(mobileStyles, /\.public-hero\{min-height:600px\}/);
   assert.match(mobileStyles, /\.public-hero-content\{[^}]*padding-top:5rem;[^}]*padding-bottom:4\.5rem/);
 });
+
+test("public route animation renders follow and fullscreen controls", async () => {
+  const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const mapRenderer = script.slice(script.indexOf("function map(entry)"), script.indexOf("function elevation(entry)"));
+
+  assert.match(mapRenderer, /data-tour-follow checked/);
+  assert.match(mapRenderer, /data-tour-fullscreen/);
+  assert.match(mapRenderer, /data-tour-fullscreen-label/);
+  assert.doesNotMatch(mapRenderer, /data-tour-export|data-tour-download/);
+});
+
+test("public route timeline stays at the top in normal and fullscreen views", async () => {
+  const css = await readFile(new URL("../public/camino.css", import.meta.url), "utf8");
+  const controls = css.match(/\.public-tour-controls\{([^}]*)\}/)?.[1] || "";
+
+  assert.match(controls, /top:\.75rem/);
+  assert.doesNotMatch(controls, /bottom:/);
+  assert.match(css, /\.public-tour:fullscreen\{[^}]*width:100vw;[^}]*min-height:100vh/);
+  assert.match(css, /\.public-tour:fullscreen \.public-route-canvas\{[^}]*height:100vh/);
+});
+
+test("public route action icons are not stretched by the map SVG rule", async () => {
+  const css = await readFile(new URL("../public/camino.css", import.meta.url), "utf8");
+  const actionIcon = css.match(/\.public-tour-action svg\{([^}]*)\}/)?.[1] || "";
+  const mobileStyles = css.slice(css.indexOf("@media(max-width:760px)"));
+
+  assert.match(actionIcon, /min-height:0/);
+  assert.match(mobileStyles, /\.public-tour-action svg\{[^}]*height:19px;[^}]*min-height:0/);
+});
