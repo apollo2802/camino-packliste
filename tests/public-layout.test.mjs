@@ -71,3 +71,14 @@ test("route animation follows weather and precedes elevation in both diaries", a
   assert.ok(privateCard.indexOf("diaryWeatherMarkup(entry.weather)") < privateCard.indexOf("<div class=\"diary-map\">"));
   assert.ok(privateCard.indexOf("<div class=\"diary-map\">") < privateCard.indexOf("statMarkup"));
 });
+
+test("elevation charts label their two measures and use a round HTML progress marker", async () => {
+  const publicScript = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const privateScript = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(publicScript, /public-elevation-legend/);
+  assert.match(publicScript, /data-elevation-marker/);
+  assert.match(publicScript, /public-elevation-marker[^>]*style="position:absolute/);
+  assert.match(privateScript, /diary-elevation-legend/);
+  assert.match(privateScript, /diary-elevation-marker[^>]*data-elevation-marker/);
+});

@@ -219,6 +219,7 @@
       "diary.ascent": "Aufstieg",
       "diary.descent": "Abstieg",
       "diary.elevation": "Höhe",
+      "diary.pace": "Tempo",
       "diary.delete": "Tagebucheintrag löschen",
       "diary.deleteConfirm": "Diesen Tagebucheintrag wirklich löschen?",
       "film.label": "Animierte Packanleitung",
@@ -478,6 +479,7 @@
       "diary.ascent": "Ascent",
       "diary.descent": "Descent",
       "diary.elevation": "Elevation",
+      "diary.pace": "Speed",
       "diary.delete": "Delete diary entry",
       "diary.deleteConfirm": "Delete this diary entry?",
       "film.label": "Animated packing guide",
@@ -737,6 +739,7 @@
       "diary.ascent": "Набор",
       "diary.descent": "Спуск",
       "diary.elevation": "Высота",
+      "diary.pace": "Темп",
       "diary.delete": "Удалить запись дневника",
       "diary.deleteConfirm": "Удалить эту запись дневника?",
       "film.label": "Анимированная инструкция",
@@ -1718,13 +1721,15 @@
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
       const speedProfile = Array.isArray(stats?.speedProfile) && stats.speedProfile.length === entry.track.length ? stats.speedProfile : [];
       const speedLine = stats?.averageSpeed > 0 && speedProfile.length > 1 ? `<path class="diary-speed-line" d="${speedPath(speedProfile)}"></path>` : "";
-      const speedSummary = speedLine ? `<span class="diary-speed-summary">Ø ${stats.averageSpeed.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })} km/h</span>` : "";
+      const speedRange = speedLine ? `${Math.min(...speedProfile).toLocaleString(languageLocale(), { maximumFractionDigits: 1 })}–${Math.max(...speedProfile).toLocaleString(languageLocale(), { maximumFractionDigits: 1 })} km/h` : "";
+      const elevationLegend = `<div class="diary-elevation-legend"><span class="diary-elevation-key"><i></i>${escapeHTML(t("diary.elevation"))} <b>${Math.round(stats?.min || 0)}–${Math.round(stats?.max || 0)} m</b></span>${speedLine ? `<span class="diary-speed-key"><i></i>${escapeHTML(t("diary.pace"))} <b>${speedRange}</b> · Ø ${stats.averageSpeed.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })} km/h</span>` : ""}</div>`;
+      const elevationMarker = `<span class="diary-elevation-marker-halo" data-elevation-marker aria-hidden="true"></span><span class="diary-elevation-marker" data-elevation-marker aria-hidden="true"></span>`;
       const statMarkup = stats ? `<div class="diary-stats">
         <div class="diary-stat"><strong>${stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })}</strong><span>${escapeHTML(t("diary.distance"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.ascent)} m</strong><span>${escapeHTML(t("diary.ascent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.descent)} m</strong><span>${escapeHTML(t("diary.descent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.min)}–${Math.round(stats.max)} m</strong><span>${escapeHTML(t("diary.elevation"))}</span></div>
-      </div>${entry.track.length > 1 ? `<div class="diary-elevation-wrap"><svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path>${speedLine}<circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>${speedSummary}</div>` : ""}` : "";
+      </div>${entry.track.length > 1 ? `<div class="diary-elevation-wrap">${elevationLegend}<div class="diary-elevation-plot"><svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path>${speedLine}</svg>${elevationMarker}</div></div>` : ""}` : "";
       return `<article class="diary-entry">
         <div class="diary-entry-body">
           <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button>${entry.published ? `<button class="diary-edit-public" type="button" data-diary-public-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button>` : ""}<button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>

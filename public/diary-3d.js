@@ -405,8 +405,8 @@ export function mountDiaryTour(root, entry, translations) {
     const x = clamped * 640;
     const y = 6 + (profileMax - elevation) / profileSpan * 58;
     elevationMarkers.forEach((marker) => {
-      marker.setAttribute("cx", x.toFixed(1));
-      marker.setAttribute("cy", y.toFixed(1));
+      marker.style.left = `${(x / 640 * 100).toFixed(3)}%`;
+      marker.style.top = `${(y / 72 * 100).toFixed(3)}%`;
     });
     elevationProfile?.setAttribute("aria-valuenow", String(Math.round(clamped * 100)));
     elevationProfile?.setAttribute("aria-valuetext", `${Math.round(clamped * 100)}%`);
