@@ -22,3 +22,9 @@ test("terrain grid loads the three-times-expanded geographic context around a ro
     { zoom:13, minX:4264, maxX:4266, minY:2731, maxY:2734, columns:3, rows:4 }
   );
 });
+
+test("terrain view keeps only a minimal distance fog", async () => {
+  const source = await readFile(new URL("../public/diary-3d.js", import.meta.url), "utf8");
+
+  assert.match(source, /scene\.fog = new THREE\.Fog\(0xdcebf2, 45, 60\)/);
+});

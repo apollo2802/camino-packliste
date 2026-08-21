@@ -82,3 +82,11 @@ test("elevation charts label their two measures and use a round HTML progress ma
   assert.match(privateScript, /diary-elevation-legend/);
   assert.match(privateScript, /diary-elevation-marker[^>]*data-elevation-marker/);
 });
+
+test("both diary views load the marker-aware animation module revision", async () => {
+  const publicScript = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const privateScript = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(publicScript, /diary-3d\.js\?v=36/);
+  assert.match(privateScript, /diary-3d\.js\?v=36/);
+});

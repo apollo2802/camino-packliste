@@ -103,7 +103,7 @@
   function mountPublicTours() {
     const tours = [...document.querySelectorAll("[data-public-tour]")];
     if (!tours.length) return;
-    import("/diary-3d.js?v=34").then(({ mountDiaryTour }) => {
+    import("/diary-3d.js?v=36").then(({ mountDiaryTour }) => {
       const mounted = new Map();
       const mount = (tour) => {
         if (mounted.has(tour) || !tour.isConnected) return;

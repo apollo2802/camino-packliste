@@ -435,7 +435,7 @@ export function mountDiaryTour(root, entry, translations) {
 
       const scene = new THREE.Scene();
       scene.background = new THREE.Color(0xdcebf2);
-      scene.fog = new THREE.Fog(0xdcebf2, 17, 28);
+      scene.fog = new THREE.Fog(0xdcebf2, 45, 60);
       const camera = new THREE.PerspectiveCamera(35, 1, .1, 80);
       scene.add(camera);
       camera.position.set(9.7, 9.1, 11.2);

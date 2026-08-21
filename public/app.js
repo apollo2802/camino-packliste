@@ -1656,7 +1656,7 @@
     const generation = ++diaryAnimationGeneration;
     const tours = [...els.diaryFeed.querySelectorAll("[data-diary-tour]")];
     if (!tours.length) return;
-    import("/diary-3d.js?v=32").then(({ mountDiaryTour }) => {
+    import("/diary-3d.js?v=36").then(({ mountDiaryTour }) => {
       if (generation !== diaryAnimationGeneration) return;
       tours.forEach((tour) => {
         const entry = state.diary.find((item) => item.id === tour.dataset.diaryTour);
