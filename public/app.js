@@ -1228,7 +1228,9 @@
           ascent: Number(entry.stats.ascent) || 0,
           descent: Number(entry.stats.descent) || 0,
           min: Number(entry.stats.min) || 0,
-          max: Number(entry.stats.max) || 0
+          max: Number(entry.stats.max) || 0,
+          averageSpeed: Number(entry.stats.averageSpeed) || 0,
+          speedProfile: Array.isArray(entry.stats.speedProfile) ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value > 0) : []
         } : null,
         track: Array.isArray(entry.track) ? entry.track.slice(0, 100).filter((point) => Array.isArray(point) && point.length >= 3).map((point) => [Number(point[0]), Number(point[1]), Number(point[2])]) : []
       }));
@@ -1399,6 +1401,16 @@
     const span = Math.max(1, max - min);
     const points = elevations.map((elevation, index) => `${(index / (elevations.length - 1) * width).toFixed(1)},${(6 + (max - elevation) / span * (height - 14)).toFixed(1)}`);
     return `M0,${height} L${points.join(" L")} L${width},${height} Z`;
+  }
+
+  function speedPath(profile, width = 640, height = 72) {
+    if (!Array.isArray(profile) || profile.length < 2) return "";
+    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed > 0);
+    if (speeds.length !== profile.length) return "";
+    const min = Math.min(...speeds);
+    const max = Math.max(...speeds);
+    const span = Math.max(1, max - min);
+    return speeds.map((speed, index) => `${index ? "L" : "M"}${(index / (speeds.length - 1) * width).toFixed(1)},${(8 + (max - speed) / span * (height - 24)).toFixed(1)}`).join(" ");
   }
 
   function initDiaryCanvasAnimations() {
@@ -1704,12 +1716,15 @@
           </div>`
         : `<div class="diary-map-empty">${escapeHTML(t("diary.noRoute"))}</div>`;
       const places = [entry.from, entry.to].filter(Boolean).map(escapeHTML).join(" → ");
+      const speedProfile = Array.isArray(stats?.speedProfile) && stats.speedProfile.length === entry.track.length ? stats.speedProfile : [];
+      const speedLine = stats?.averageSpeed > 0 && speedProfile.length > 1 ? `<path class="diary-speed-line" d="${speedPath(speedProfile)}"></path>` : "";
+      const speedSummary = speedLine ? `<span class="diary-speed-summary">Ø ${stats.averageSpeed.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })} km/h</span>` : "";
       const statMarkup = stats ? `<div class="diary-stats">
         <div class="diary-stat"><strong>${stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 })}</strong><span>${escapeHTML(t("diary.distance"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.ascent)} m</strong><span>${escapeHTML(t("diary.ascent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.descent)} m</strong><span>${escapeHTML(t("diary.descent"))}</span></div>
         <div class="diary-stat"><strong>${Math.round(stats.min)}–${Math.round(stats.max)} m</strong><span>${escapeHTML(t("diary.elevation"))}</span></div>
-      </div>${entry.track.length > 1 ? `<svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path><circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>` : ""}` : "";
+      </div>${entry.track.length > 1 ? `<div class="diary-elevation-wrap"><svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path>${speedLine}<circle class="diary-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="diary-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>${speedSummary}</div>` : ""}` : "";
       return `<article class="diary-entry">
         <div class="diary-entry-body">
           <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button>${entry.published ? `<button class="diary-edit-public" type="button" data-diary-public-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button>` : ""}<button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
@@ -1750,25 +1765,42 @@
       .replace(/^\d{4}-\d{2}-\d{2}_\d+_/, "")
       .replace(/[_-]+/g, " ")
       .trim();
-    const pointTimes = nodes.map((node) => node.getElementsByTagNameNS("*", "time")[0]?.textContent?.trim() || "");
-    const validTimes = pointTimes.filter((value) => Number.isFinite(Date.parse(value)));
-    const points = nodes.map((node) => {
+    const recordedPoints = nodes.map((node) => {
       const elevationNode = node.getElementsByTagNameNS("*", "ele")[0];
-      return [Number(node.getAttribute("lat")), Number(node.getAttribute("lon")), Number(elevationNode?.textContent || 0)];
-    }).filter((point) => point.every(Number.isFinite));
+      return {
+        point: [Number(node.getAttribute("lat")), Number(node.getAttribute("lon")), Number(elevationNode?.textContent || 0)],
+        time: node.getElementsByTagNameNS("*", "time")[0]?.textContent?.trim() || ""
+      };
+    }).filter((item) => item.point.every(Number.isFinite));
+    const points = recordedPoints.map((item) => item.point);
+    const validTimes = recordedPoints.map((item) => item.time).filter((value) => Number.isFinite(Date.parse(value)));
+    const timestamps = recordedPoints.map((item) => Date.parse(item.time));
+    const hasCompleteTiming = timestamps.length === recordedPoints.length && timestamps.every(Number.isFinite);
     if (points.length < 2) throw new Error("No points");
     let distance = 0;
     let ascent = 0;
     let descent = 0;
+    const segmentSpeeds = [];
     for (let index = 1; index < points.length; index += 1) {
-      distance += haversine(points[index - 1], points[index]);
+      const segmentDistance = haversine(points[index - 1], points[index]);
+      distance += segmentDistance;
       const difference = points[index][2] - points[index - 1][2];
       if (difference > 0) ascent += difference;
       else descent += Math.abs(difference);
+      const elapsedHours = hasCompleteTiming ? (timestamps[index] - timestamps[index - 1]) / 3_600_000 : 0;
+      segmentSpeeds.push(Number.isFinite(elapsedHours) && elapsedHours > 0 ? segmentDistance / elapsedHours : 0);
     }
+    const durationHours = hasCompleteTiming ? (timestamps.at(-1) - timestamps[0]) / 3_600_000 : 0;
+    const averageSpeed = Number.isFinite(durationHours) && durationHours > 0 ? distance / durationHours : 0;
+    const hasTimedSegments = hasCompleteTiming && segmentSpeeds.some((speed) => Number.isFinite(speed) && speed > 0);
+    const pointSpeeds = points.map((_, index) => {
+      const nearby = segmentSpeeds.slice(Math.max(0, index - 3), Math.min(segmentSpeeds.length, index + 2)).filter((speed) => Number.isFinite(speed) && speed > 0);
+      return nearby.length ? nearby.reduce((sum, speed) => sum + speed, 0) / nearby.length : averageSpeed;
+    });
     const stride = Math.max(1, Math.ceil(points.length / 90));
-    const sampled = points.filter((_, index) => index % stride === 0);
-    if (sampled.at(-1) !== points.at(-1)) sampled.push(points.at(-1));
+    const sampledIndexes = points.map((_, index) => index).filter((index) => index % stride === 0);
+    if (sampledIndexes.at(-1) !== points.length - 1) sampledIndexes.push(points.length - 1);
+    const sampled = sampledIndexes.map((index) => points[index]);
     const elevations = points.map((point) => point[2]);
     return {
       gpxName: name.slice(0, 140),
@@ -1776,7 +1808,7 @@
       date: timestampDate || filenameDate || "",
       startTime: validTimes[0] || gpxTimestamp || "",
       endTime: validTimes.length > 1 ? validTimes.at(-1) : "",
-      stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)) },
+      stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)), averageSpeed: hasTimedSegments ? Number(averageSpeed.toFixed(3)) : 0, speedProfile: hasTimedSegments ? sampledIndexes.map((index) => Number((pointSpeeds[index] || averageSpeed).toFixed(2))) : [] },
       track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
     };
   }

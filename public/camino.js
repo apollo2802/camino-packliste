@@ -36,13 +36,23 @@
     const points = elevations.map((elevation,index) => `${(index / (elevations.length - 1) * 640).toFixed(1)},${(6 + (max - elevation) / span * 58).toFixed(1)}`);
     return `M0,72 L${points.join(" L")} L640,72 Z`;
   }
+  function speedPath(profile) {
+    if (!Array.isArray(profile) || profile.length < 2) return "";
+    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed > 0);
+    if (speeds.length !== profile.length) return "";
+    const min = Math.min(...speeds), max = Math.max(...speeds), span = Math.max(1, max - min);
+    return speeds.map((speed, index) => `${index ? "L" : "M"}${(index / (speeds.length - 1) * 640).toFixed(1)},${(8 + (max - speed) / span * 48).toFixed(1)}`).join(" ");
+  }
   function map(entry) {
     const path = routePath(entry.track); if (!path) return "";
     return `<div class="public-route-panel"><div class="public-tour" data-public-tour="true" data-public-tour-id="${escape(entry.id)}"><canvas class="public-route-canvas" role="img" aria-label="${escape(entry.title)}"></canvas><div class="public-map-loading" data-tour-loading role="status">${escape(t("mapLoading"))}</div><small class="public-map-attribution">${escape(t("attribution"))}</small><div class="public-tour-controls"><button class="public-tour-play" type="button" data-tour-play aria-label="${escape(t("play"))}" title="${escape(t("play"))}"></button><input class="public-tour-progress" type="range" min="0" max="1000" value="0" step="1" data-tour-progress aria-label="${escape(t("play"))}"><label class="public-tour-action public-tour-follow" title="${escape(t("follow"))}"><input type="checkbox" data-tour-follow checked aria-label="${escape(t("follow"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.5 6 10 4h4l1.5 2H19a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H5a3 3 0 0 1-3-3V9a3 3 0 0 1 3-3h3.5ZM12 9a4 4 0 1 0 0 8 4 4 0 0 0 0-8Zm0 2a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z"/></svg></label><button class="public-tour-action public-tour-fullscreen" type="button" data-tour-fullscreen aria-label="${escape(t("fullscreen"))}" title="${escape(t("fullscreen"))}"><svg viewBox="0 0 24 24" aria-hidden="true"><path class="fullscreen-enter" d="M4 9V4h5v2H6v3H4Zm11-5h5v5h-2V6h-3V4ZM4 15h2v3h3v2H4v-5Zm14 0h2v5h-5v-2h3v-3Z"/><path class="fullscreen-exit" d="M9 4v5H4V7h3V4h2Zm6 0h2v3h3v2h-5V4ZM4 15h5v5H7v-3H4v-2Zm11 0h5v2h-3v3h-2v-5Z"/></svg><span class="public-visually-hidden" data-tour-fullscreen-label>${escape(t("fullscreen"))}</span></button></div></div></div>`;
   }
   function elevation(entry) {
     if (!Array.isArray(entry.track) || entry.track.length < 2) return "";
-    return `<div class="public-elevation-wrap"><svg class="public-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escape(t("elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><path d="${elevationPath(entry.track)}"></path><circle class="public-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="public-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg></div>`;
+    const profile = Array.isArray(entry.stats?.speedProfile) && entry.stats.speedProfile.length === entry.track.length ? entry.stats.speedProfile : [];
+    const speedLine = entry.stats?.averageSpeed > 0 && profile.length > 1 ? `<path class="public-speed-line" d="${speedPath(profile)}" style="fill:none;stroke:#287ca0;stroke-width:2.4"></path>` : "";
+    const speedSummary = speedLine ? `<span class="public-speed-summary" style="position:absolute;top:.95rem;right:1.65rem;padding:.14rem .38rem;border-radius:999px;color:#15556f;background:rgba(240,250,253,.92);box-shadow:0 1px 4px rgba(21,85,111,.14);font-size:.58rem;font-weight:850;pointer-events:none">Ø ${format(entry.stats.averageSpeed,1)} km/h</span>` : "";
+    return `<div class="public-elevation-wrap"><svg class="public-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escape(t("elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><path d="${elevationPath(entry.track)}"></path>${speedLine}<circle class="public-elevation-marker-halo" data-elevation-marker cx="0" cy="66" r="9"></circle><circle class="public-elevation-marker" data-elevation-marker cx="0" cy="66" r="4.5"></circle></svg>${speedSummary}</div>`;
   }
   function stats(entry) {
     if (!entry.stats) return "";

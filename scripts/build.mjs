@@ -351,7 +351,11 @@ function publishedEntries(value) {
       ascent: Number(entry.stats.ascent) || 0,
       descent: Number(entry.stats.descent) || 0,
       min: Number(entry.stats.min) || 0,
-      max: Number(entry.stats.max) || 0
+      max: Number(entry.stats.max) || 0,
+      averageSpeed: Number(entry.stats.averageSpeed) || 0,
+      speedProfile: Array.isArray(entry.stats.speedProfile)
+        ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value > 0)
+        : []
     } : null,
     weather: entry.weather && typeof entry.weather === "object" ? {
       date: String(entry.weather.date || "").slice(0, 10),

@@ -50,6 +50,22 @@ test("public diary preserves an explicit public description", async () => {
   assert.doesNotMatch(JSON.stringify(body), /PRIVATE NOTE/);
 });
 
+test("public diary exposes the average speed and profile for the elevation chart", async () => {
+  const env = environment({
+    diary: [{
+      id: "stage-1", published: true, title: "Stage", publicNote: "Public summary", track: [[41, -8, 20], [41.01, -8.01, 40]],
+      stats: { distance: 2.5, ascent: 20, descent: 0, min: 20, max: 40, averageSpeed: 4.3, speedProfile: [3.8, 4.8] }
+    }]
+  });
+
+  const response = await app.fetch(new Request("https://example.test/api/public-diary"), env);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.entries[0].stats.averageSpeed, 4.3);
+  assert.deepEqual(body.entries[0].stats.speedProfile, [3.8, 4.8]);
+});
+
 test("legacy diary image objects are not publicly served", async () => {
   const env = environment({ diary: [] });
   env.MEDIA = {
