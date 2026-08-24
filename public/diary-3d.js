@@ -21,19 +21,39 @@ function tilePoint(lon, lat, zoom) {
   };
 }
 
-function chooseTileGrid(track) {
+function terrainContextForTrack(track) {
   const lats = track.map((point) => point[0]);
   const lons = track.map((point) => point[1]);
-  const bounds = {
+  const routeBounds = {
     minLat: Math.min(...lats), maxLat: Math.max(...lats),
     minLon: Math.min(...lons), maxLon: Math.max(...lons)
   };
-  // Give the relief map real geographic context around the GPX instead of
-  // cutting the terrain closely around the route.
-  const latPad = Math.max(.0378, (bounds.maxLat - bounds.minLat) * 2.05875);
-  const lonPad = Math.max(.0378, (bounds.maxLon - bounds.minLon) * 2.05875);
-  bounds.minLat -= latPad; bounds.maxLat += latPad;
-  bounds.minLon -= lonPad; bounds.maxLon += lonPad;
+  const latSpan = routeBounds.maxLat - routeBounds.minLat;
+  const lonSpan = routeBounds.maxLon - routeBounds.minLon;
+  const averageLat = (routeBounds.minLat + routeBounds.maxLat) * .5;
+  const averageLon = (routeBounds.minLon + routeBounds.maxLon) * .5;
+  // On the Portuguese Atlantic coast the land is east of the route. Keep a
+  // small strip of ocean for orientation, while giving useful land context
+  // most of the available map area. Inland stages stay symmetrically framed.
+  const coastal = averageLat >= 36 && averageLat <= 44.5 && averageLon >= -9.4 && averageLon <= -8.55 && latSpan >= lonSpan * .9;
+  const landDirection = coastal ? 1 : 0;
+  const latPad = Math.max(.012, latSpan * .45);
+  const lonPad = Math.max(.012, lonSpan * .45);
+  const westPad = coastal ? lonPad * .25 : lonPad;
+  const eastPad = coastal ? Math.max(lonPad * 1.25, latSpan * .9) : lonPad;
+  const round = (value) => Number(value.toFixed(6));
+  return {
+    minLat: round(routeBounds.minLat - latPad),
+    maxLat: round(routeBounds.maxLat + latPad),
+    minLon: round(routeBounds.minLon - westPad),
+    maxLon: round(routeBounds.maxLon + eastPad),
+    coastal,
+    landDirection
+  };
+}
+
+function chooseTileGrid(track) {
+  const bounds = terrainContextForTrack(track);
 
   for (let zoom = 15; zoom >= 9; zoom -= 1) {
     const northWest = tilePoint(bounds.minLon, bounds.maxLat, zoom);
@@ -45,7 +65,7 @@ function chooseTileGrid(track) {
     const columns = maxX - minX + 1;
     const rows = maxY - minY + 1;
     if (columns * rows <= MAX_TILES && columns <= 6 && rows <= 6) {
-      return { zoom, minX, maxX, minY, maxY, columns, rows };
+      return { zoom, minX, maxX, minY, maxY, columns, rows, coastal:bounds.coastal, landDirection:bounds.landDirection };
     }
   }
   throw new Error("Route extent is too large");
@@ -477,16 +497,20 @@ export function mountDiaryTour(root, entry, translations) {
       const routeBounds = new THREE.Box3().setFromPoints(curve.getPoints(160));
       const routeCenter = routeBounds.getCenter(new THREE.Vector3());
       const routeSize = routeBounds.getSize(new THREE.Vector3());
-      const routeSpan = Math.max(terrainSpan * .86, routeSize.x * 1.12, routeSize.z * 1.12);
-      controls.target.copy(routeCenter);
+      const mapAspect = Math.max(.46, canvas.clientWidth / Math.max(1, canvas.clientHeight));
+      const portrait = mapAspect < .8;
+      const routeSpan = Math.max(1.8, terrainSpan * .42, routeSize.z * 1.22, routeSize.x / mapAspect * 1.08);
+      const landShift = grid.landDirection * routeSpan * (portrait ? .14 : .1);
+      const overviewTarget = routeCenter.clone();
+      overviewTarget.x += landShift;
+      controls.target.copy(overviewTarget);
       camera.position.set(
-        routeCenter.x + routeSpan * .43,
-        routeCenter.y + routeSpan * .76,
-        routeCenter.z + routeSpan * .52
+        overviewTarget.x + routeSpan * (portrait ? .18 : .16),
+        overviewTarget.y + routeSpan * (portrait ? 1.85 : 1.68),
+        overviewTarget.z + routeSpan * (portrait ? .34 : .48)
       );
       controls.update();
       const overviewCameraPosition = camera.position.clone();
-      const overviewTarget = controls.target.clone();
       const segments = Math.max(280, entry.track.length * 4);
       const trail = new THREE.Mesh(
         makeTrailGeometry(curve, segments, .14),
@@ -540,6 +564,7 @@ export function mountDiaryTour(root, entry, translations) {
             padding: compact
               ? { top: 64, right: 28, bottom: 88, left: 28 }
               : { top: 72, right: 56, bottom: 100, left: 56 },
+            offset: grid.coastal ? [-cityMapContainer.clientWidth * .08, 0] : [0, 0],
             bearing: -20,
             pitch: 48,
             maxZoom: 15.4,

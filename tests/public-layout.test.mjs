@@ -39,6 +39,18 @@ test("public route animation renders follow and fullscreen controls", async () =
   assert.doesNotMatch(mapRenderer, /data-tour-export|data-tour-download/);
 });
 
+test("public route offers terrain and city views", async () => {
+  const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const mapRenderer = script.slice(script.indexOf("function map(entry)"), script.indexOf("function elevation(entry)"));
+  const mountStart = script.indexOf("function mountPublicTours()");
+  const tourMount = script.slice(mountStart, script.indexOf("document.querySelectorAll(\"[data-language]\")", mountStart));
+
+  assert.match(mapRenderer, /data-tour-city-map/);
+  assert.match(mapRenderer, /data-tour-view="terrain"/);
+  assert.match(mapRenderer, /data-tour-view="city"/);
+  assert.match(tourMount, /cityError:t\("cityError"\)/);
+});
+
 test("public route timeline stays at the top in normal and fullscreen views", async () => {
   const css = await readFile(new URL("../public/camino.css", import.meta.url), "utf8");
   const controls = css.match(/\.public-tour-controls\{([^}]*)\}/)?.[1] || "";
@@ -87,6 +99,6 @@ test("both diary views load the marker-aware animation module revision", async (
   const publicScript = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
   const privateScript = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
 
-  assert.match(publicScript, /diary-3d\.js\?v=36/);
-  assert.match(privateScript, /diary-3d\.js\?v=36/);
+  assert.match(publicScript, /diary-3d\.js\?v=42/);
+  assert.match(privateScript, /diary-3d\.js\?v=42/);
 });
