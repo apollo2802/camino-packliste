@@ -153,14 +153,21 @@
       "diary.note": "Tagesnotiz",
       "diary.notePlaceholder": "Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …",
       "diary.publicNote": "Öffentliche Beschreibung",
+      "diary.publicNotes": "Öffentliche Beschreibungen",
+      "diary.publicNoteDe": "Deutsch",
+      "diary.publicNoteEn": "Englisch",
+      "diary.publicNoteRu": "Russisch",
       "diary.publicNotePlaceholder": "Das möchten wir über diese Etappe teilen …",
-      "diary.publicNoteHint": "Nur dieser Text erscheint im öffentlichen Reisetagebuch.",
+      "diary.publicNoteHint": "Manuell eintragen. Fehlt Englisch oder Russisch, wird dort der deutsche Text gezeigt.",
       "diary.publish": "Etappe veröffentlichen",
       "diary.publishHint": "Route, Kennzahlen und öffentliche Beschreibung erscheinen auf der öffentlichen Seite.",
       "diary.published": "Öffentlich",
       "diary.private": "Privat",
-      "diary.editPublic": "Öffentlichen Text bearbeiten",
-      "diary.publicNotePrompt": "Öffentliche Beschreibung für diese Etappe:",
+      "diary.editPublic": "Etappe bearbeiten",
+      "diary.editLabel": "Etappe",
+      "diary.editTitle": "Etappe bearbeiten",
+      "diary.cancel": "Abbrechen",
+      "diary.saveChanges": "Änderungen speichern",
       "diary.gpxTitle": "Komoot-GPX auswählen",
       "diary.gpxCopy": "Die Route wird im Browser ausgewertet und mit dem Eintrag gespeichert.",
       "diary.gpxEmpty": "Noch keine GPX ausgewählt.",
@@ -413,14 +420,21 @@
       "diary.note": "Day note",
       "diary.notePlaceholder": "Weather, encounters, thoughts and the small moments of the day …",
       "diary.publicNote": "Public description",
+      "diary.publicNotes": "Public descriptions",
+      "diary.publicNoteDe": "German",
+      "diary.publicNoteEn": "English",
+      "diary.publicNoteRu": "Russian",
       "diary.publicNotePlaceholder": "What would you like to share about this stage?",
-      "diary.publicNoteHint": "Only this text appears in the public travel journal.",
+      "diary.publicNoteHint": "Enter manually. If English or Russian is empty, the German text is shown there.",
       "diary.publish": "Publish stage",
       "diary.publishHint": "Route, stats and public description appear on the public page.",
       "diary.published": "Public",
       "diary.private": "Private",
-      "diary.editPublic": "Edit public text",
-      "diary.publicNotePrompt": "Public description for this stage:",
+      "diary.editPublic": "Edit stage",
+      "diary.editLabel": "Stage",
+      "diary.editTitle": "Edit stage",
+      "diary.cancel": "Cancel",
+      "diary.saveChanges": "Save changes",
       "diary.gpxTitle": "Choose Komoot GPX",
       "diary.gpxCopy": "The route is analysed in your browser and saved with the entry.",
       "diary.gpxEmpty": "No GPX selected yet.",
@@ -673,14 +687,21 @@
       "diary.note": "Заметка дня",
       "diary.notePlaceholder": "Погода, встречи, мысли и маленькие моменты дня …",
       "diary.publicNote": "Публичное описание",
+      "diary.publicNotes": "Публичные описания",
+      "diary.publicNoteDe": "Немецкий",
+      "diary.publicNoteEn": "Английский",
+      "diary.publicNoteRu": "Русский",
       "diary.publicNotePlaceholder": "Что вы хотите рассказать об этом этапе?",
-      "diary.publicNoteHint": "Только этот текст будет виден в публичном дневнике.",
+      "diary.publicNoteHint": "Заполняется вручную. Если английский или русский текст пуст, будет показан немецкий.",
       "diary.publish": "Опубликовать этап",
       "diary.publishHint": "Маршрут, показатели и публичное описание появятся на общей странице.",
       "diary.published": "Опубликовано",
       "diary.private": "Приватно",
-      "diary.editPublic": "Изменить публичный текст",
-      "diary.publicNotePrompt": "Публичное описание этого этапа:",
+      "diary.editPublic": "Изменить этап",
+      "diary.editLabel": "Этап",
+      "diary.editTitle": "Изменить этап",
+      "diary.cancel": "Отмена",
+      "diary.saveChanges": "Сохранить изменения",
       "diary.gpxTitle": "Выбрать GPX из Komoot",
       "diary.gpxCopy": "Маршрут будет обработан в браузере и сохранён вместе с записью.",
       "diary.gpxEmpty": "GPX ещё не выбран.",
@@ -1044,6 +1065,7 @@
   let serverReady = false;
   let syncTimer = null;
   let pendingGpx = null;
+  let editingDiaryId = null;
   let publicPhoto = null;
   let diaryAnimationStops = [];
   let diaryAnimationGeneration = 0;
@@ -1072,7 +1094,9 @@
     diaryFrom: document.getElementById("diary-from"),
     diaryTo: document.getElementById("diary-to"),
     diaryNote: document.getElementById("diary-note"),
-    diaryPublicNote: document.getElementById("diary-public-note"),
+    diaryPublicNoteDe: document.getElementById("diary-public-note-de"),
+    diaryPublicNoteEn: document.getElementById("diary-public-note-en"),
+    diaryPublicNoteRu: document.getElementById("diary-public-note-ru"),
     diaryPublish: document.getElementById("diary-publish"),
     diaryGpx: document.getElementById("diary-gpx"),
     gpxReadout: document.getElementById("gpx-readout"),
@@ -1082,7 +1106,15 @@
     publicPhotoEmpty: document.getElementById("public-photo-admin-empty"),
     publicPhotoRemove: document.getElementById("public-photo-remove"),
     publicPhotoUploadLabel: document.getElementById("public-photo-upload-label"),
-    publicPhotoStatus: document.getElementById("public-photo-status")
+    publicPhotoStatus: document.getElementById("public-photo-status"),
+    diaryEditDialog: document.getElementById("diary-edit-dialog"),
+    diaryEditForm: document.getElementById("diary-edit-form"),
+    diaryEditTitle: document.getElementById("diary-edit-title"),
+    diaryEditPublicNoteDe: document.getElementById("diary-edit-public-note-de"),
+    diaryEditPublicNoteEn: document.getElementById("diary-edit-public-note-en"),
+    diaryEditPublicNoteRu: document.getElementById("diary-edit-public-note-ru"),
+    diaryEditClose: document.getElementById("diary-edit-close"),
+    diaryEditCancel: document.getElementById("diary-edit-cancel")
   };
 
   function loadLanguage() {
@@ -1191,6 +1223,14 @@
     return weather.date && numeric.every(Number.isFinite) ? weather : null;
   }
 
+  function normalizePublicNotes(entry) {
+    return {
+      de: String(entry?.publicNotes?.de || entry?.publicNote || "").slice(0, 1200),
+      en: String(entry?.publicNotes?.en || "").slice(0, 1200),
+      ru: String(entry?.publicNotes?.ru || "").slice(0, 1200)
+    };
+  }
+
   function normalizeState(value) {
     const normalized = freshState();
     if (!value || typeof value !== "object") return normalized;
@@ -1222,7 +1262,7 @@
         from: String(entry.from || "").slice(0, 60),
         to: String(entry.to || "").slice(0, 60),
         note: String(entry.note || "").slice(0, 2400),
-        publicNote: String(entry.publicNote || "").slice(0, 1200),
+        publicNotes: normalizePublicNotes(entry),
         published: entry.published === true,
         weather: normalizeDiaryWeather(entry.weather),
         gpxName: String(entry.gpxName || "").slice(0, 140),
@@ -1732,7 +1772,7 @@
       </div>${entry.track.length > 1 ? `<div class="diary-elevation-wrap">${elevationLegend}<div class="diary-elevation-plot"><svg class="diary-elevation" data-elevation-profile viewBox="0 0 640 72" preserveAspectRatio="none" role="slider" tabindex="0" aria-label="${escapeHTML(t("diary.elevation"))}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" aria-valuetext="0%"><path d="${elevationPath(entry.track)}"></path>${speedLine}</svg>${elevationMarker}</div></div>` : ""}` : "";
       return `<article class="diary-entry">
         <div class="diary-entry-body">
-          <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button>${entry.published ? `<button class="diary-edit-public" type="button" data-diary-public-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button>` : ""}<button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
+          <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button><button class="diary-edit-public" type="button" data-diary-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
           ${places ? `<p class="diary-places">${places}</p>` : ""}
           ${entry.note ? `<p class="diary-note">${escapeHTML(entry.note)}</p>` : ""}
           ${diaryWeatherMarkup(entry.weather)}
@@ -2279,7 +2319,11 @@
       from: els.diaryFrom.value.trim().slice(0, 60),
       to: els.diaryTo.value.trim().slice(0, 60),
       note: els.diaryNote.value.trim().slice(0, 2400),
-      publicNote: els.diaryPublicNote.value.trim().slice(0, 1200),
+      publicNotes: {
+        de: els.diaryPublicNoteDe.value.trim().slice(0, 1200),
+        en: els.diaryPublicNoteEn.value.trim().slice(0, 1200),
+        ru: els.diaryPublicNoteRu.value.trim().slice(0, 1200)
+      },
       published: els.diaryPublish.checked,
       weather: pendingGpx?.weather || null,
       gpxName: pendingGpx?.gpxName || "",
@@ -2306,15 +2350,18 @@
       renderDiary();
       return;
     }
-    const editButton = event.target.closest?.("[data-diary-public-edit]");
+    const editButton = event.target.closest?.("[data-diary-edit]");
     if (editButton) {
-      const entry = state.diary.find((item) => item.id === editButton.dataset.diaryPublicEdit);
+      const entry = state.diary.find((item) => item.id === editButton.dataset.diaryEdit);
       if (!entry) return;
-      const publicNote = window.prompt(t("diary.publicNotePrompt"), entry.publicNote || "");
-      if (publicNote === null) return;
-      entry.publicNote = publicNote.trim().slice(0, 1200);
-      saveState();
-      renderDiary();
+      editingDiaryId = entry.id;
+      const publicNotes = normalizePublicNotes(entry);
+      els.diaryEditTitle.value = entry.title;
+      els.diaryEditPublicNoteDe.value = publicNotes.de;
+      els.diaryEditPublicNoteEn.value = publicNotes.en;
+      els.diaryEditPublicNoteRu.value = publicNotes.ru;
+      if (typeof els.diaryEditDialog.showModal === "function") els.diaryEditDialog.showModal();
+      else els.diaryEditDialog.setAttribute("open", "");
       return;
     }
     const deleteButton = event.target.closest?.("[data-diary-delete]");
@@ -2322,6 +2369,32 @@
     if (!id || !window.confirm(t("diary.deleteConfirm"))) return;
     state.diary = state.diary.filter((entry) => entry.id !== id);
     saveState();
+    renderDiary();
+  });
+
+  function closeDiaryEditor() {
+    editingDiaryId = null;
+    if (typeof els.diaryEditDialog?.close === "function") els.diaryEditDialog.close();
+    else els.diaryEditDialog?.removeAttribute("open");
+  }
+
+  els.diaryEditClose?.addEventListener("click", closeDiaryEditor);
+  els.diaryEditCancel?.addEventListener("click", closeDiaryEditor);
+  els.diaryEditDialog?.addEventListener("cancel", () => { editingDiaryId = null; });
+  els.diaryEditForm?.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const entry = state.diary.find((item) => item.id === editingDiaryId);
+    const title = els.diaryEditTitle.value.trim();
+    if (!entry || !title) return;
+    entry.title = title.slice(0, 80);
+    entry.publicNotes = {
+      de: els.diaryEditPublicNoteDe.value.trim().slice(0, 1200),
+      en: els.diaryEditPublicNoteEn.value.trim().slice(0, 1200),
+      ru: els.diaryEditPublicNoteRu.value.trim().slice(0, 1200)
+    };
+    delete entry.publicNote;
+    saveState();
+    closeDiaryEditor();
     renderDiary();
   });
 

@@ -327,7 +327,13 @@ const pageMarkup = `
               <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-to" maxlength="60" placeholder="Vila do Conde" data-i18n-placeholder="diary.toPlaceholder"></label>
             </div>
             <label class="diary-field diary-field-wide"><span data-i18n="diary.note">Tagesnotiz</span><textarea id="diary-note" rows="5" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
-            <label class="diary-field diary-field-wide"><span data-i18n="diary.publicNote">Öffentliche Beschreibung</span><textarea id="diary-public-note" rows="3" maxlength="1200" placeholder="Das möchten wir über diese Etappe teilen …" data-i18n-placeholder="diary.publicNotePlaceholder"></textarea><small data-i18n="diary.publicNoteHint">Nur dieser Text erscheint im öffentlichen Reisetagebuch.</small></label>
+            <fieldset class="diary-public-notes diary-field-wide">
+              <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
+              <p data-i18n="diary.publicNoteHint">Manuell eintragen. Fehlt Englisch oder Russisch, wird dort der deutsche Text gezeigt.</p>
+              <label class="diary-field"><span data-i18n="diary.publicNoteDe">Deutsch</span><textarea id="diary-public-note-de" rows="3" maxlength="1200" placeholder="Das möchten wir über diese Etappe teilen …" data-i18n-placeholder="diary.publicNotePlaceholder"></textarea></label>
+              <label class="diary-field"><span data-i18n="diary.publicNoteEn">Englisch</span><textarea id="diary-public-note-en" rows="3" maxlength="1200" placeholder="Optional: English description"></textarea></label>
+              <label class="diary-field"><span data-i18n="diary.publicNoteRu">Russisch</span><textarea id="diary-public-note-ru" rows="3" maxlength="1200" placeholder="Необязательно: описание на русском"></textarea></label>
+            </fieldset>
             <label class="diary-publish-field diary-field-wide"><input id="diary-publish" type="checkbox"><span><strong data-i18n="diary.publish">Etappe veröffentlichen</strong><small data-i18n="diary.publishHint">Die Route, Kennzahlen und öffentliche Beschreibung werden auf der öffentlichen Seite gezeigt.</small></span></label>
             <label class="gpx-drop" for="diary-gpx">
               <span class="gpx-icon" aria-hidden="true">⌁</span>
@@ -367,6 +373,20 @@ const pageMarkup = `
       <div><strong>Bom Caminho!</strong><span data-i18n="footer.route">Porto · Küste · Zentralroute · Santiago</span></div>
       <p data-i18n="footer.copy">Für eure Pilgerwanderung im Spätsommer 2026.</p>
     </footer>
+    <dialog class="diary-edit-dialog" id="diary-edit-dialog">
+      <form id="diary-edit-form" method="dialog">
+        <div class="diary-edit-head"><div><p class="section-label" data-i18n="diary.editLabel">Etappe</p><h2 data-i18n="diary.editTitle">Etappe bearbeiten</h2></div><button id="diary-edit-close" type="button" aria-label="Schließen">×</button></div>
+        <label class="diary-field"><span data-i18n="diary.entryTitle">Überschrift</span><input id="diary-edit-title" maxlength="80" required></label>
+        <fieldset class="diary-public-notes">
+          <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
+          <p data-i18n="diary.publicNoteHint">Manuell eintragen. Fehlt Englisch oder Russisch, wird dort der deutsche Text gezeigt.</p>
+          <label class="diary-field"><span data-i18n="diary.publicNoteDe">Deutsch</span><textarea id="diary-edit-public-note-de" rows="4" maxlength="1200"></textarea></label>
+          <label class="diary-field"><span data-i18n="diary.publicNoteEn">Englisch</span><textarea id="diary-edit-public-note-en" rows="4" maxlength="1200"></textarea></label>
+          <label class="diary-field"><span data-i18n="diary.publicNoteRu">Russisch</span><textarea id="diary-edit-public-note-ru" rows="4" maxlength="1200"></textarea></label>
+        </fieldset>
+        <div class="diary-edit-actions"><button id="diary-edit-cancel" type="button" data-i18n="diary.cancel">Abbrechen</button><button class="diary-submit" type="submit" data-i18n="diary.saveChanges">Änderungen speichern</button></div>
+      </form>
+    </dialog>
   </div>
 `;
 

@@ -76,10 +76,14 @@
     const [icon, condition] = weatherCondition(Number(entry.weather.code));
     return `<section class="public-weather"><div class="public-weather-head"><span aria-hidden="true">${icon}</span><div><small>${t("weather")}</small><strong>${t(condition)}</strong></div></div><div class="public-weather-grid"><div><strong>${format(entry.weather.temperatureMin)}–${format(entry.weather.temperatureMax)} °C</strong><span>${t("temperature")}</span></div><div><strong>${format(entry.weather.precipitation,1)} mm</strong><span>${t("rain")}</span></div><div><strong>${format(entry.weather.windMax)} · ${format(entry.weather.gustMax)} km/h</strong><span>${t("wind")}</span></div><div><strong>${format(entry.weather.humidityAverage)} %</strong><span>${t("humidity")}</span></div></div><small class="public-weather-source">${t("weatherSource")}</small></section>`;
   }
+  function publicDescription(entry) {
+    return entry.publicNotes?.[language] || entry.publicNotes?.de || entry.publicNote || "";
+  }
   function card(entry, feature = false) {
     const places = [entry.from, entry.to].filter(Boolean).map(escape).join(" → ");
     const mapMarkup = map(entry);
-    return `<article class="${feature ? "public-feature" : "public-stage-card"}${mapMarkup ? "" : " no-map"}"><div class="public-feature-copy"><time class="public-date" datetime="${escape(entry.date)}">${escape(formatDate(entry.date))}</time><h3>${escape(entry.title)}</h3>${places ? `<p class="public-places">${places}</p>` : ""}${entry.publicNote ? `<p class="public-note">${escape(entry.publicNote)}</p>` : ""}${weather(entry)}${mapMarkup}${stats(entry)}${elevation(entry)}</div></article>`;
+    const description = publicDescription(entry);
+    return `<article class="${feature ? "public-feature" : "public-stage-card"}${mapMarkup ? "" : " no-map"}"><div class="public-feature-copy"><time class="public-date" datetime="${escape(entry.date)}">${escape(formatDate(entry.date))}</time><h3>${escape(entry.title)}</h3>${places ? `<p class="public-places">${places}</p>` : ""}${description ? `<p class="public-note">${escape(description)}</p>` : ""}${weather(entry)}${mapMarkup}${stats(entry)}${elevation(entry)}</div></article>`;
   }
   function render() {
     publicTourStops.forEach((stop) => stop());

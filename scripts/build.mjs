@@ -339,13 +339,20 @@ function validState(value) {
 
 function publishedEntries(value) {
   if (!value || !Array.isArray(value.diary)) return [];
-  return value.diary.filter((entry) => entry && entry.published === true).slice(0, 40).map((entry) => ({
+  return value.diary.filter((entry) => entry && entry.published === true).slice(0, 40).map((entry) => {
+    const publicNotes = {
+      de: String(entry.publicNotes?.de || entry.publicNote || "").slice(0, 1200),
+      en: String(entry.publicNotes?.en || "").slice(0, 1200),
+      ru: String(entry.publicNotes?.ru || "").slice(0, 1200)
+    };
+    return ({
     id: String(entry.id || ""),
     date: String(entry.date || "").slice(0, 10),
     title: String(entry.title || "").slice(0, 80),
     from: String(entry.from || "").slice(0, 60),
     to: String(entry.to || "").slice(0, 60),
-    publicNote: String(entry.publicNote || "").slice(0, 1200),
+    publicNote: publicNotes.de,
+    publicNotes,
     stats: entry.stats && typeof entry.stats === "object" ? {
       distance: Number(entry.stats.distance) || 0,
       ascent: Number(entry.stats.ascent) || 0,
@@ -368,7 +375,8 @@ function publishedEntries(value) {
       humidityAverage: Number(entry.weather.humidityAverage) || 0
     } : null,
     track: Array.isArray(entry.track) ? entry.track.slice(0, 100).filter((point) => Array.isArray(point) && point.length >= 3).map((point) => [Number(point[0]), Number(point[1]), Number(point[2])]) : []
-  }));
+  });
+  });
 }
 
 export default {

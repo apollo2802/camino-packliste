@@ -50,6 +50,38 @@ test("public diary preserves an explicit public description", async () => {
   assert.doesNotMatch(JSON.stringify(body), /PRIVATE NOTE/);
 });
 
+test("public diary exposes all three manually written descriptions", async () => {
+  const env = environment({
+    diary: [{
+      id: "stage-1",
+      published: true,
+      title: "Stage",
+      note: "PRIVATE NOTE",
+      publicNotes: { de: "Deutsch", en: "English", ru: "Русский" },
+      track: []
+    }]
+  });
+
+  const response = await app.fetch(new Request("https://example.test/api/public-diary"), env);
+  const body = await response.json();
+
+  assert.deepEqual(body.entries[0].publicNotes, { de: "Deutsch", en: "English", ru: "Русский" });
+  assert.equal(body.entries[0].publicNote, "Deutsch");
+  assert.doesNotMatch(JSON.stringify(body), /PRIVATE NOTE/);
+});
+
+test("legacy public descriptions migrate to the German field", async () => {
+  const env = environment({
+    diary: [{ id: "stage-1", published: true, title: "Stage", publicNote: "Alter Text", track: [] }]
+  });
+
+  const response = await app.fetch(new Request("https://example.test/api/public-diary"), env);
+  const body = await response.json();
+
+  assert.deepEqual(body.entries[0].publicNotes, { de: "Alter Text", en: "", ru: "" });
+  assert.equal(body.entries[0].publicNote, "Alter Text");
+});
+
 test("public diary exposes the average speed and profile for the elevation chart", async () => {
   const env = environment({
     diary: [{

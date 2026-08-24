@@ -409,6 +409,19 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-field input, .diary-field textarea { width: 100%; border: 1px solid rgba(13,95,90,.18); border-radius: 11px; padding: .72rem .78rem; color: var(--ink); background: rgba(255,255,255,.88); outline: none; resize: vertical; }
 .diary-field input:focus, .diary-field textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(13,95,90,.1); }
 .diary-field small { color: #5e7570; font-size: .65rem; line-height: 1.35; }
+.diary-public-notes { display: grid; gap: .75rem; min-width: 0; margin: 0; padding: .9rem; border: 1px solid rgba(13,95,90,.18); border-radius: 15px; background: rgba(255,255,255,.42); }
+.diary-public-notes legend { padding: 0 .35rem; color: #315a54; font-size: .75rem; font-weight: 850; }
+.diary-public-notes > p { margin: -.15rem 0 .1rem; color: #5e7570; font-size: .65rem; line-height: 1.4; }
+.diary-edit-dialog { width: min(680px,calc(100vw - 2rem)); max-height: calc(100vh - 2rem); padding: 0; overflow: auto; border: 0; border-radius: 24px; color: var(--ink); background: #f7faf8; box-shadow: 0 28px 80px rgba(18,47,44,.3); }
+.diary-edit-dialog::backdrop { background: rgba(15,39,37,.62); backdrop-filter: blur(4px); }
+.diary-edit-dialog form { display: grid; gap: 1rem; padding: clamp(1.15rem,4vw,1.8rem); }
+.diary-edit-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+.diary-edit-head .section-label { margin: 0 0 .3rem; }
+.diary-edit-head h2 { margin: 0; font: 500 clamp(1.6rem,4vw,2.2rem)/1.1 Georgia,serif; }
+#diary-edit-close { width: 38px; height: 38px; border: 0; border-radius: 50%; color: var(--teal-dark); background: #e1ece8; font-size: 1.5rem; cursor: pointer; }
+.diary-edit-actions { display: flex; justify-content: flex-end; gap: .65rem; }
+.diary-edit-actions button { border: 0; border-radius: 12px; padding: .8rem 1rem; cursor: pointer; font-weight: 800; }
+#diary-edit-cancel { color: var(--teal-dark); background: #e1ece8; }
 .diary-publish-field { display: flex; align-items: flex-start; gap: .65rem; padding: .78rem .82rem; border: 1px solid rgba(13,95,90,.2); border-radius: 12px; color: #315a54; background: rgba(255,255,255,.52); cursor: pointer; }
 .diary-publish-field input { width: 17px; height: 17px; margin: .08rem 0 0; accent-color: var(--teal); }
 .diary-publish-field span { display: grid; gap: .18rem; }

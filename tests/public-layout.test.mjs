@@ -102,3 +102,33 @@ test("both diary views load the marker-aware animation module revision", async (
   assert.match(publicScript, /diary-3d\.js\?v=42/);
   assert.match(privateScript, /diary-3d\.js\?v=42/);
 });
+
+test("private diary offers three manual public descriptions and stage editing", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  for (const language of ["de", "en", "ru"]) {
+    assert.match(html, new RegExp(`id="diary-public-note-${language}"`));
+    assert.match(html, new RegExp(`id="diary-edit-public-note-${language}"`));
+  }
+  assert.match(html, /id="diary-edit-title"/);
+  assert.match(script, /data-diary-edit=/);
+  assert.doesNotMatch(script, /window\.prompt\(t\("diary\.publicNotePrompt"/);
+});
+
+test("public diary selects its language and falls back to German", async () => {
+  const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  const selector = script.slice(script.indexOf("function publicDescription"), script.indexOf("function card(entry"));
+
+  assert.match(selector, /publicNotes\?\.\[language\]/);
+  assert.match(selector, /publicNotes\?\.de/);
+  assert.match(selector, /entry\.publicNote/);
+});
+
+test("public language switch remains available on mobile", async () => {
+  const css = await readFile(new URL("../public/camino.css", import.meta.url), "utf8");
+  const mobileStyles = css.slice(css.indexOf("@media(max-width:760px)"));
+
+  assert.match(mobileStyles, /\.public-languages\{display:inline-flex\}/);
+  assert.match(mobileStyles, /\.public-private-link\{display:none\}/);
+});
