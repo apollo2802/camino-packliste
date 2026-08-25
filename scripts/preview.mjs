@@ -8,6 +8,7 @@ const sequenceRoot = resolve("dist/client/packing-sequence");
 const state = { value: null, updatedAt: null };
 const attempts = new Map();
 const mediaFiles = new Map();
+const visitRows = new Map();
 let publicPhoto = null;
 
 function createStatement(sql) {
@@ -27,6 +28,11 @@ function createStatement(sql) {
       if (sql.includes("FROM camino_public_photo")) {
         return publicPhoto;
       }
+      if (sql.includes("FROM camino_visit_daily")) {
+        const cutoff = values[0] || "";
+        const selected = [...visitRows.values()].filter((row) => !cutoff || row.day >= cutoff);
+        return { visitors: new Set(selected.map((row) => row.visitor_hash)).size, page_views: selected.reduce((sum, row) => sum + row.page_views, 0) };
+      }
       return null;
     },
     async run() {
@@ -45,6 +51,10 @@ function createStatement(sql) {
         publicPhoto = { media_key: values[0], updated_at: values[1] };
       } else if (sql.startsWith("DELETE FROM camino_public_photo")) {
         publicPhoto = null;
+      } else if (sql.startsWith("INSERT INTO camino_visit_daily")) {
+        const key = `${values[0]}:${values[1]}`;
+        const previous = visitRows.get(key);
+        visitRows.set(key, { day: values[0], visitor_hash: values[1], page_views: (previous?.page_views || 0) + 1 });
       }
       return { success: true };
     },

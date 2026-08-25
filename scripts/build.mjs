@@ -174,6 +174,12 @@ const publicPhotoSchemaSql = `CREATE TABLE IF NOT EXISTS camino_public_photo (
   media_key TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 )`;
+const visitorSchemaSql = `CREATE TABLE IF NOT EXISTS camino_visit_daily (
+  day TEXT NOT NULL,
+  visitor_hash TEXT NOT NULL,
+  page_views INTEGER NOT NULL,
+  PRIMARY KEY (day, visitor_hash)
+)`;
 
 const worker = `const INDEX_HTML = ${JSON.stringify(html)};
 const LOGIN_HTML = ${JSON.stringify(loginHtml)};
@@ -182,6 +188,7 @@ const DIARY_3D_JS = ${JSON.stringify(diary3dScript)};
 const STATE_SCHEMA_SQL = ${JSON.stringify(stateSchemaSql)};
 const ATTEMPTS_SCHEMA_SQL = ${JSON.stringify(attemptsSchemaSql)};
 const PUBLIC_PHOTO_SCHEMA_SQL = ${JSON.stringify(publicPhotoSchemaSql)};
+const VISITOR_SCHEMA_SQL = ${JSON.stringify(visitorSchemaSql)};
 const SESSION_COOKIE = "camino_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
 const encoder = new TextEncoder();
@@ -283,7 +290,29 @@ async function ensureSchema(env) {
     env.DB.prepare(STATE_SCHEMA_SQL),
     env.DB.prepare(ATTEMPTS_SCHEMA_SQL),
     env.DB.prepare(PUBLIC_PHOTO_SCHEMA_SQL),
+    env.DB.prepare(VISITOR_SCHEMA_SQL),
   ]);
+}
+
+function berlinDay(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return value.year + "-" + value.month + "-" + value.day;
+}
+
+function validVisitorId(value) {
+  return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
+}
+
+function sevenDayCutoff() {
+  const anchor = new Date();
+  anchor.setUTCHours(12, 0, 0, 0);
+  anchor.setUTCDate(anchor.getUTCDate() - 6);
+  return berlinDay(anchor);
+}
+
+function visitorMetric(row) {
+  return { visitors: Number(row?.visitors) || 0, pageViews: Number(row?.page_views) || 0 };
 }
 
 async function readPublicPhoto(env) {
@@ -455,10 +484,39 @@ export default {
       });
     }
 
+    if (url.pathname === "/api/public-visit" && request.method === "POST") {
+      if (request.headers.get("origin") !== url.origin) return publicJson({ error: "Ungültige Herkunft" }, 403);
+      if (!(request.headers.get("content-type") || "").toLowerCase().startsWith("application/json")) return publicJson({ error: "Ungültiges Format" }, 415);
+      const declaredLength = Number(request.headers.get("content-length") || 0);
+      if (declaredLength > 1024) return publicJson({ error: "Daten zu groß" }, 413);
+      let body;
+      try {
+        const text = await request.text();
+        if (new TextEncoder().encode(text).byteLength >= 1024) return publicJson({ error: "Daten zu groß" }, 413);
+        body = JSON.parse(text);
+      } catch (_) { return publicJson({ error: "Ungültige Daten" }, 400); }
+      if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).length !== 1 || !validVisitorId(body.visitorId)) return publicJson({ error: "Ungültige Besucher-ID" }, 400);
+      const visitorHash = await hmac("visitor:" + body.visitorId, sessionSecret);
+      await env.DB.prepare("INSERT INTO camino_visit_daily (day, visitor_hash, page_views) VALUES (?, ?, 1) ON CONFLICT(day, visitor_hash) DO UPDATE SET page_views = camino_visit_daily.page_views + 1")
+        .bind(berlinDay(), visitorHash).run();
+      return publicJson({ ok: true });
+    }
+
     const authenticated = await hasValidSession(request, sessionSecret);
     if (!authenticated) {
       if (url.pathname === "/intern" || url.pathname === "/intern/") return loginPage();
       return json({ error: "Nicht angemeldet" }, 401);
+    }
+
+    if (url.pathname === "/api/visitor-stats" && request.method === "GET") {
+      const today = berlinDay();
+      const cutoff = sevenDayCutoff();
+      const [todayRow, sevenDaysRow, totalRow] = await Promise.all([
+        env.DB.prepare("SELECT COUNT(DISTINCT visitor_hash) AS visitors, COALESCE(SUM(page_views), 0) AS page_views FROM camino_visit_daily WHERE day = ?").bind(today).first(),
+        env.DB.prepare("SELECT COUNT(DISTINCT visitor_hash) AS visitors, COALESCE(SUM(page_views), 0) AS page_views FROM camino_visit_daily WHERE day >= ?").bind(cutoff).first(),
+        env.DB.prepare("SELECT COUNT(DISTINCT visitor_hash) AS visitors, COALESCE(SUM(page_views), 0) AS page_views FROM camino_visit_daily").first(),
+      ]);
+      return json({ today: visitorMetric(todayRow), sevenDays: visitorMetric(sevenDaysRow), total: visitorMetric(totalRow) });
     }
 
     if (url.pathname === "/api/public-photo") {
