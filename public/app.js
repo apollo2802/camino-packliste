@@ -1231,6 +1231,13 @@
     };
   }
 
+  function normalizePrivateNotes(entry) {
+    return {
+      de: String(entry?.privateNotes?.de || entry?.note || "").slice(0, 2400),
+      ru: String(entry?.privateNotes?.ru || "").slice(0, 2400)
+    };
+  }
+
   function normalizeState(value) {
     const normalized = freshState();
     if (!value || typeof value !== "object") return normalized;
@@ -1261,7 +1268,7 @@
         title: String(entry.title || "").slice(0, 80),
         from: String(entry.from || "").slice(0, 60),
         to: String(entry.to || "").slice(0, 60),
-        note: String(entry.note || "").slice(0, 2400),
+        privateNotes: normalizePrivateNotes(entry),
         publicNotes: normalizePublicNotes(entry),
         published: entry.published === true,
         weather: normalizeDiaryWeather(entry.weather),
@@ -1774,7 +1781,7 @@
         <div class="diary-entry-body">
           <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button><button class="diary-edit-public" type="button" data-diary-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
           ${places ? `<p class="diary-places">${places}</p>` : ""}
-          ${entry.note ? `<p class="diary-note">${escapeHTML(entry.note)}</p>` : ""}
+          ${entry.privateNotes?.de ? `<p class="diary-note">${escapeHTML(entry.privateNotes.de)}</p>` : ""}
           ${diaryWeatherMarkup(entry.weather)}
           <div class="diary-map">${map}</div>
           ${statMarkup}
@@ -2318,7 +2325,7 @@
       title: title.slice(0, 80),
       from: els.diaryFrom.value.trim().slice(0, 60),
       to: els.diaryTo.value.trim().slice(0, 60),
-      note: els.diaryNote.value.trim().slice(0, 2400),
+      privateNotes: { de: els.diaryNote.value.trim().slice(0, 2400), ru: "" },
       publicNotes: {
         de: els.diaryPublicNoteDe.value.trim().slice(0, 1200),
         en: els.diaryPublicNoteEn.value.trim().slice(0, 1200),

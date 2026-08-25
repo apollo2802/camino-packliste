@@ -116,6 +116,17 @@ test("private diary offers three manual public descriptions and stage editing", 
   assert.doesNotMatch(script, /window\.prompt\(t\("diary\.publicNotePrompt"/);
 });
 
+test("private diary normalizes canonical multilingual private notes", async () => {
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(script, /function normalizePrivateNotes\(entry\)/);
+  assert.match(script, /entry\?\.privateNotes\?\.de/);
+  assert.match(script, /entry\?\.privateNotes\?\.ru/);
+  assert.match(script, /entry\?\.note/);
+  assert.match(script, /privateNotes:\s*normalizePrivateNotes\(entry\)/);
+  assert.doesNotMatch(script, /\n\s*note:\s*String\(entry\.note/);
+});
+
 test("public diary selects its language and falls back to German", async () => {
   const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
   const selector = script.slice(script.indexOf("function publicDescription"), script.indexOf("function card(entry"));

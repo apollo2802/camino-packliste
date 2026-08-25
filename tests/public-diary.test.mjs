@@ -38,6 +38,17 @@ test("public diary never falls back to the private note", async () => {
   assert.doesNotMatch(JSON.stringify(body), /PRIVATE NOTE/);
 });
 
+test("public diary excludes German and Russian private notes", async () => {
+  const env = environment({ diary: [{
+    id: "stage-1", published: true, title: "Stage",
+    privateNotes: { de: "GEHEIM DE", ru: "СЕКРЕТ RU" },
+    publicNotes: { de: "Öffentlich", en: "", ru: "" }, track: []
+  }] });
+  const response = await app.fetch(new Request("https://example.test/api/public-diary"), env);
+
+  assert.doesNotMatch(JSON.stringify(await response.json()), /GEHEIM DE|СЕКРЕТ RU|privateNotes/);
+});
+
 test("public diary preserves an explicit public description", async () => {
   const env = environment({
     diary: [{ id: "stage-1", published: true, title: "Stage", note: "PRIVATE NOTE", publicNote: "Public summary", track: [] }]
