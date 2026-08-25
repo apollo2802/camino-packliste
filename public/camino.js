@@ -79,6 +79,22 @@
   function publicDescription(entry) {
     return entry.publicNotes?.[language] || entry.publicNotes?.de || entry.publicNote || "";
   }
+  const publicVisitorIdKey = "camino-visitor-id-v1";
+  const publicVisitorIdPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+  function recordPublicVisit() {
+    let visitorId = "";
+    try { visitorId = localStorage.getItem(publicVisitorIdKey) || ""; } catch (_) {}
+    if (!publicVisitorIdPattern.test(visitorId)) {
+      try { visitorId = crypto.randomUUID(); } catch (_) { return; }
+      try { localStorage.setItem(publicVisitorIdKey, visitorId); } catch (_) {}
+    }
+    fetch("/api/public-visit", {
+      method: "POST",
+      credentials:"omit",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ visitorId })
+    }).catch(() => {});
+  }
   function card(entry, feature = false) {
     const places = [entry.from, entry.to].filter(Boolean).map(escape).join(" → ");
     const mapMarkup = map(entry);
@@ -140,4 +156,5 @@
   }));
   fetch("/api/public-diary", { credentials:"omit" }).then((response) => response.ok ? response.json() : Promise.reject()).then((data) => { entries = Array.isArray(data.entries) ? data.entries : []; publicPhoto = data.photo || null; render(); }).catch(() => { entries = []; publicPhoto = null; render(); });
   render();
+  recordPublicVisit();
 })();

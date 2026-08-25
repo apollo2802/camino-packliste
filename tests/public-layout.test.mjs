@@ -153,3 +153,11 @@ test("public language switch remains available on mobile", async () => {
   assert.match(mobileStyles, /\.public-languages\{display:inline-flex\}/);
   assert.match(mobileStyles, /\.public-private-link\{display:none\}/);
 });
+
+test("public page records an anonymous same-origin visit", async () => {
+  const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+  assert.match(script, /camino-visitor-id-v1/);
+  assert.match(script, /crypto\.randomUUID\(\)/);
+  assert.match(script, /fetch\("\/api\/public-visit"/);
+  assert.match(script, /credentials:"omit"/);
+});
