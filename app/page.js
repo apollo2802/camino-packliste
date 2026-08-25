@@ -326,7 +326,11 @@ const pageMarkup = `
               <span aria-hidden="true">→</span>
               <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-to" maxlength="60" placeholder="Vila do Conde" data-i18n-placeholder="diary.toPlaceholder"></label>
             </div>
-            <label class="diary-field diary-field-wide"><span data-i18n="diary.note">Tagesnotiz</span><textarea id="diary-note" rows="5" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
+            <fieldset class="diary-private-notes diary-field-wide">
+              <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
+              <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-note-de" rows="3" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
+              <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-note-ru" rows="3" maxlength="2400" placeholder="Погода, встречи, мысли и маленькие моменты дня …"></textarea></label>
+            </fieldset>
             <fieldset class="diary-public-notes diary-field-wide">
               <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
               <p data-i18n="diary.publicNoteHint">Manuell eintragen. Fehlt Englisch oder Russisch, wird dort der deutsche Text gezeigt.</p>
@@ -377,6 +381,11 @@ const pageMarkup = `
       <form id="diary-edit-form" method="dialog">
         <div class="diary-edit-head"><div><p class="section-label" data-i18n="diary.editLabel">Etappe</p><h2 data-i18n="diary.editTitle">Etappe bearbeiten</h2></div><button id="diary-edit-close" type="button" aria-label="Schließen">×</button></div>
         <label class="diary-field"><span data-i18n="diary.entryTitle">Überschrift</span><input id="diary-edit-title" maxlength="80" required></label>
+        <fieldset class="diary-private-notes">
+          <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
+          <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-edit-note-de" rows="4" maxlength="2400"></textarea></label>
+          <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-edit-note-ru" rows="4" maxlength="2400"></textarea></label>
+        </fieldset>
         <fieldset class="diary-public-notes">
           <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
           <p data-i18n="diary.publicNoteHint">Manuell eintragen. Fehlt Englisch oder Russisch, wird dort der deutsche Text gezeigt.</p>

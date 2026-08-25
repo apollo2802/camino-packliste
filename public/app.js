@@ -152,6 +152,9 @@
       "diary.toPlaceholder": "Vila do Conde",
       "diary.note": "Tagesnotiz",
       "diary.notePlaceholder": "Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …",
+      "diary.privateNotes": "Private Tagesnotizen",
+      "diary.privateNoteDe": "Deutsch",
+      "diary.privateNoteRu": "Russisch",
       "diary.publicNote": "Öffentliche Beschreibung",
       "diary.publicNotes": "Öffentliche Beschreibungen",
       "diary.publicNoteDe": "Deutsch",
@@ -419,6 +422,9 @@
       "diary.toPlaceholder": "Vila do Conde",
       "diary.note": "Day note",
       "diary.notePlaceholder": "Weather, encounters, thoughts and the small moments of the day …",
+      "diary.privateNotes": "Private day notes",
+      "diary.privateNoteDe": "German",
+      "diary.privateNoteRu": "Russian",
       "diary.publicNote": "Public description",
       "diary.publicNotes": "Public descriptions",
       "diary.publicNoteDe": "German",
@@ -686,6 +692,9 @@
       "diary.toPlaceholder": "Вила-ду-Конди",
       "diary.note": "Заметка дня",
       "diary.notePlaceholder": "Погода, встречи, мысли и маленькие моменты дня …",
+      "diary.privateNotes": "Личные заметки дня",
+      "diary.privateNoteDe": "Немецкий",
+      "diary.privateNoteRu": "Русский",
       "diary.publicNote": "Публичное описание",
       "diary.publicNotes": "Публичные описания",
       "diary.publicNoteDe": "Немецкий",
@@ -1093,7 +1102,8 @@
     diaryTitle: document.getElementById("diary-entry-title"),
     diaryFrom: document.getElementById("diary-from"),
     diaryTo: document.getElementById("diary-to"),
-    diaryNote: document.getElementById("diary-note"),
+    diaryNoteDe: document.getElementById("diary-note-de"),
+    diaryNoteRu: document.getElementById("diary-note-ru"),
     diaryPublicNoteDe: document.getElementById("diary-public-note-de"),
     diaryPublicNoteEn: document.getElementById("diary-public-note-en"),
     diaryPublicNoteRu: document.getElementById("diary-public-note-ru"),
@@ -1110,6 +1120,8 @@
     diaryEditDialog: document.getElementById("diary-edit-dialog"),
     diaryEditForm: document.getElementById("diary-edit-form"),
     diaryEditTitle: document.getElementById("diary-edit-title"),
+    diaryEditNoteDe: document.getElementById("diary-edit-note-de"),
+    diaryEditNoteRu: document.getElementById("diary-edit-note-ru"),
     diaryEditPublicNoteDe: document.getElementById("diary-edit-public-note-de"),
     diaryEditPublicNoteEn: document.getElementById("diary-edit-public-note-en"),
     diaryEditPublicNoteRu: document.getElementById("diary-edit-public-note-ru"),
@@ -1781,7 +1793,8 @@
         <div class="diary-entry-body">
           <div class="diary-entry-top"><div><time class="diary-date" datetime="${escapeHTML(entry.date)}">${escapeHTML(formatDiaryDate(entry.date))}</time><h3>${escapeHTML(entry.title)}</h3></div><div class="diary-entry-actions"><button class="diary-publish${entry.published ? " published" : ""}" type="button" data-diary-publish="${escapeHTML(entry.id)}" aria-pressed="${entry.published ? "true" : "false"}">${escapeHTML(entry.published ? t("diary.published") : t("diary.private"))}</button><button class="diary-edit-public" type="button" data-diary-edit="${escapeHTML(entry.id)}">${escapeHTML(t("diary.editPublic"))}</button><button class="diary-delete" type="button" data-diary-delete="${escapeHTML(entry.id)}" aria-label="${escapeHTML(t("diary.delete"))}">×</button></div></div>
           ${places ? `<p class="diary-places">${places}</p>` : ""}
-          ${entry.privateNotes?.de ? `<p class="diary-note">${escapeHTML(entry.privateNotes.de)}</p>` : ""}
+          ${entry.privateNotes?.de ? `<p class="diary-note"><strong>${escapeHTML(t("diary.privateNoteDe"))}</strong><br>${escapeHTML(entry.privateNotes.de)}</p>` : ""}
+          ${entry.privateNotes?.ru ? `<p class="diary-note"><strong>${escapeHTML(t("diary.privateNoteRu"))}</strong><br>${escapeHTML(entry.privateNotes.ru)}</p>` : ""}
           ${diaryWeatherMarkup(entry.weather)}
           <div class="diary-map">${map}</div>
           ${statMarkup}
@@ -2325,7 +2338,10 @@
       title: title.slice(0, 80),
       from: els.diaryFrom.value.trim().slice(0, 60),
       to: els.diaryTo.value.trim().slice(0, 60),
-      privateNotes: { de: els.diaryNote.value.trim().slice(0, 2400), ru: "" },
+      privateNotes: {
+        de: els.diaryNoteDe.value.trim().slice(0, 2400),
+        ru: els.diaryNoteRu.value.trim().slice(0, 2400)
+      },
       publicNotes: {
         de: els.diaryPublicNoteDe.value.trim().slice(0, 1200),
         en: els.diaryPublicNoteEn.value.trim().slice(0, 1200),
@@ -2362,8 +2378,11 @@
       const entry = state.diary.find((item) => item.id === editButton.dataset.diaryEdit);
       if (!entry) return;
       editingDiaryId = entry.id;
+      const privateNotes = normalizePrivateNotes(entry);
       const publicNotes = normalizePublicNotes(entry);
       els.diaryEditTitle.value = entry.title;
+      els.diaryEditNoteDe.value = privateNotes.de;
+      els.diaryEditNoteRu.value = privateNotes.ru;
       els.diaryEditPublicNoteDe.value = publicNotes.de;
       els.diaryEditPublicNoteEn.value = publicNotes.en;
       els.diaryEditPublicNoteRu.value = publicNotes.ru;
@@ -2394,6 +2413,11 @@
     const title = els.diaryEditTitle.value.trim();
     if (!entry || !title) return;
     entry.title = title.slice(0, 80);
+    entry.privateNotes = {
+      de: els.diaryEditNoteDe.value.trim().slice(0, 2400),
+      ru: els.diaryEditNoteRu.value.trim().slice(0, 2400)
+    };
+    delete entry.note;
     entry.publicNotes = {
       de: els.diaryEditPublicNoteDe.value.trim().slice(0, 1200),
       en: els.diaryEditPublicNoteEn.value.trim().slice(0, 1200),
