@@ -30,7 +30,7 @@ function createStatement(sql) {
       }
       if (sql.includes("FROM camino_visit_daily")) {
         const cutoff = values[0] || "";
-        const selected = [...visitRows.values()].filter((row) => !cutoff || row.day >= cutoff);
+        const selected = [...visitRows.values()].filter((row) => !cutoff || (sql.includes("day = ?") ? row.day === cutoff : row.day >= cutoff));
         return { visitors: new Set(selected.map((row) => row.visitor_hash)).size, page_views: selected.reduce((sum, row) => sum + row.page_views, 0) };
       }
       return null;

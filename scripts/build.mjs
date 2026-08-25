@@ -304,9 +304,10 @@ function validVisitorId(value) {
   return typeof value === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value);
 }
 
-function sevenDayCutoff() {
-  const anchor = new Date();
-  anchor.setUTCHours(12, 0, 0, 0);
+function sevenDayCutoff(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Berlin", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(date);
+  const value = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  const anchor = new Date(value.year + "-" + value.month + "-" + value.day + "T12:00:00Z");
   anchor.setUTCDate(anchor.getUTCDate() - 6);
   return berlinDay(anchor);
 }
@@ -509,8 +510,9 @@ export default {
     }
 
     if (url.pathname === "/api/visitor-stats" && request.method === "GET") {
-      const today = berlinDay();
-      const cutoff = sevenDayCutoff();
+      const now = new Date();
+      const today = berlinDay(now);
+      const cutoff = sevenDayCutoff(now);
       const [todayRow, sevenDaysRow, totalRow] = await Promise.all([
         env.DB.prepare("SELECT COUNT(DISTINCT visitor_hash) AS visitors, COALESCE(SUM(page_views), 0) AS page_views FROM camino_visit_daily WHERE day = ?").bind(today).first(),
         env.DB.prepare("SELECT COUNT(DISTINCT visitor_hash) AS visitors, COALESCE(SUM(page_views), 0) AS page_views FROM camino_visit_daily WHERE day >= ?").bind(cutoff).first(),

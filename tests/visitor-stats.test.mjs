@@ -28,7 +28,7 @@ function createEnvironment() {
             if (sql.includes("FROM camino_state")) return state.value === null ? null : { payload: state.value, updated_at: state.updatedAt };
             if (sql.includes("FROM camino_visit_daily")) {
               const [cutoff] = values;
-              const selected = [...rows.values()].filter((row) => !cutoff || row.day >= cutoff);
+              const selected = [...rows.values()].filter((row) => !cutoff || (sql.includes("day = ?") ? row.day === cutoff : row.day >= cutoff));
               return { visitors: new Set(selected.map((row) => row.visitor_hash)).size, page_views: selected.reduce((sum, row) => sum + row.page_views, 0) };
             }
             return null;
@@ -57,6 +57,12 @@ async function recordVisit(env, visitorId, origin = "https://example.test") {
     headers: { origin, "content-type": "application/json" },
     body: JSON.stringify({ visitorId })
   }), env);
+}
+
+async function expectedVisitorHash(visitorId) {
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(SESSION_SECRET), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+  const signature = await crypto.subtle.sign("HMAC", key, new TextEncoder().encode("visitor:" + visitorId));
+  return Array.from(new Uint8Array(signature), (byte) => byte.toString(16).padStart(2, "0")).join("");
 }
 
 async function authenticatedStats(env) {
@@ -101,6 +107,38 @@ test("rows older than the seven-day cutoff affect only total", async () => {
   const stats = await authenticatedStats(env);
   assert.deepEqual(stats.sevenDays, { visitors: 1, pageViews: 1 });
   assert.deepEqual(stats.total, { visitors: 2, pageViews: 4 });
+});
+
+test("seven-day boundary follows the Berlin calendar across CEST midnight", async () => {
+  const { env, rows } = createEnvironment();
+  const realDate = Date;
+  const fixedNow = new realDate("2026-03-29T22:30:00.000Z");
+  globalThis.Date = class extends realDate {
+    constructor(...args) { super(...(args.length ? args : [fixedNow])); }
+    static now() { return fixedNow.getTime(); }
+  };
+  try {
+    rows.set("2026-03-23:old", { day: "2026-03-23", visitor_hash: "old", page_views: 5 });
+    rows.set("2026-03-24:boundary", { day: "2026-03-24", visitor_hash: "boundary", page_views: 2 });
+    const stats = await authenticatedStats(env);
+    assert.deepEqual(stats.sevenDays, { visitors: 1, pageViews: 2 });
+    assert.deepEqual(stats.total, { visitors: 2, pageViews: 7 });
+  } finally {
+    globalThis.Date = realDate;
+  }
+});
+
+test("raw visitor ids are neither persisted nor returned", async () => {
+  const { env, rows } = createEnvironment();
+  const visitorId = "33333333-3333-4333-8333-333333333333";
+  const response = await recordVisit(env, visitorId);
+  assert.equal(response.status, 200);
+  const stored = [...rows.values()][0];
+  assert.ok(stored);
+  assert.equal(stored.visitor_hash, await expectedVisitorHash(visitorId));
+  assert.notEqual(stored.visitor_hash, visitorId);
+  assert.doesNotMatch(JSON.stringify(stored), new RegExp(visitorId));
+  assert.deepEqual(await response.json(), { ok: true });
 });
 
 test("visitor stats require authentication", async () => {
