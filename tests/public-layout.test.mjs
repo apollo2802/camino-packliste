@@ -161,3 +161,15 @@ test("public page records an anonymous same-origin visit", async () => {
   assert.match(script, /fetch\("\/api\/public-visit"/);
   assert.match(script, /credentials:"omit"/);
 });
+
+test("protected diary includes visitor statistics dashboard", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  assert.match(html, /id="visitor-stats"/);
+  for (const period of ["today", "sevenDays", "total"]) {
+    assert.match(html, new RegExp(`data-visitor-period="${period}"`));
+  }
+  assert.match(script, /fetch\("\/api\/visitor-stats"/);
+  assert.match(script, /credentials:\s*["']same-origin["']/);
+  assert.match(script, /function loadVisitorStats\(\)/);
+});

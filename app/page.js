@@ -312,6 +312,39 @@ const pageMarkup = `
           </div>
         </section>
 
+        <section class="visitor-stats" id="visitor-stats" aria-labelledby="visitor-stats-title">
+          <div class="visitor-stats-heading">
+            <div>
+              <p class="section-label" data-i18n="diary.visitorStatsLabel">Besucher</p>
+              <h3 id="visitor-stats-title" data-i18n="diary.visitorStatsTitle">Besucher auf der öffentlichen Seite</h3>
+            </div>
+            <p class="visitor-stats-status" data-visitor-stats-status role="status" data-i18n="diary.visitorStatsLoading">Wird geladen …</p>
+          </div>
+          <div class="visitor-stats-grid">
+            <article class="visitor-stat-period" data-visitor-period="today">
+              <h4 data-i18n="diary.visitorStatsToday">Heute</h4>
+              <div class="visitor-stat-values">
+                <div><strong data-visitor-value="today.visitors">–</strong><span data-i18n="diary.visitorStatsVisitors">Besucher</span></div>
+                <div><strong data-visitor-value="today.pageViews">–</strong><span data-i18n="diary.visitorStatsPageViews">Seitenaufrufe</span></div>
+              </div>
+            </article>
+            <article class="visitor-stat-period" data-visitor-period="sevenDays">
+              <h4 data-i18n="diary.visitorStatsSevenDays">Letzte 7 Tage</h4>
+              <div class="visitor-stat-values">
+                <div><strong data-visitor-value="sevenDays.visitors">–</strong><span data-i18n="diary.visitorStatsVisitors">Besucher</span></div>
+                <div><strong data-visitor-value="sevenDays.pageViews">–</strong><span data-i18n="diary.visitorStatsPageViews">Seitenaufrufe</span></div>
+              </div>
+            </article>
+            <article class="visitor-stat-period" data-visitor-period="total">
+              <h4 data-i18n="diary.visitorStatsTotal">Gesamt</h4>
+              <div class="visitor-stat-values">
+                <div><strong data-visitor-value="total.visitors">–</strong><span data-i18n="diary.visitorStatsVisitors">Besucher</span></div>
+                <div><strong data-visitor-value="total.pageViews">–</strong><span data-i18n="diary.visitorStatsPageViews">Seitenaufrufe</span></div>
+              </div>
+            </article>
+          </div>
+        </section>
+
         <div class="diary-layout">
           <div class="diary-feed" id="diary-feed" aria-live="polite"></div>
           <form class="diary-form" id="diary-form">

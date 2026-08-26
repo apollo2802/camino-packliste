@@ -400,6 +400,18 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 #public-photo-remove { color: #8b352b; background: #f8eae5; }
 #public-photo-status { max-width: 170px; margin: 0; color: var(--muted); font-size: .64rem; line-height: 1.35; }
 #public-photo-status.error { color: #8b352b; }
+.visitor-stats { margin-bottom: 2rem; padding: clamp(1rem,3vw,1.5rem); border: 1px solid rgba(13,95,90,.15); border-radius: 24px; background: #f0f5f2; }
+.visitor-stats-heading { display: flex; justify-content: space-between; align-items: end; gap: 1rem; margin-bottom: 1rem; }
+.visitor-stats-heading h3 { margin: .35rem 0 0; font: 500 clamp(1.35rem,3vw,2rem)/1.1 Georgia,serif; }
+.visitor-stats-status { margin: 0; color: var(--muted); font-size: .7rem; }
+.visitor-stats-status.error { color: #8b352b; }
+.visitor-stats-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .75rem; }
+.visitor-stat-period { min-width: 0; padding: 1rem; border: 1px solid rgba(13,95,90,.12); border-radius: 16px; background: rgba(255,255,255,.7); }
+.visitor-stat-period h4 { margin: 0 0 .8rem; color: var(--teal); font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; }
+.visitor-stat-values { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .75rem; }
+.visitor-stat-values div { display: grid; gap: .2rem; }
+.visitor-stat-values strong { color: var(--ink); font: 600 clamp(1.35rem,3vw,2rem)/1 Georgia,serif; }
+.visitor-stat-values span { color: var(--muted); font-size: .65rem; }
 .diary-form-intro, .diary-field-wide, .diary-place-row, .gpx-drop, .gpx-readout, .diary-submit { grid-column: 1 / -1; }
 .diary-form-intro { display: flex; align-items: center; gap: .8rem; padding-bottom: .35rem; }
 .diary-form-intro .section-label { margin: 0 0 .3rem; }
@@ -515,6 +527,9 @@ footer p { margin: 0; }
   .public-photo-admin { grid-template-columns: 1fr; border-radius: 20px; }
   .public-photo-admin-copy { grid-column: auto; }
   .public-photo-admin-actions, #public-photo-status { width: 100%; max-width: none; }
+  .visitor-stats { border-radius: 20px; }
+  .visitor-stats-heading { align-items: start; flex-direction: column; }
+  .visitor-stats-grid { grid-template-columns: 1fr; }
   .overview-grid { grid-template-columns: 1fr 1fr; }
   .stat-card:last-child { grid-column: 1 / -1; min-height: 125px; }
   .checklist-section { border-radius: 22px; padding: 1rem; }

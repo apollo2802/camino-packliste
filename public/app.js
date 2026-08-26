@@ -190,6 +190,15 @@
       "diary.publicPhotoTitle": "Unser aktuelles Camino-Foto",
       "diary.publicPhotoCopy": "Dieses Bild ist unabhängig von Etappen, GPX-Dateien und Tagebucheinträgen. Es kann jederzeit ausgetauscht werden.",
       "diary.publicPhotoEmpty": "Noch kein öffentliches Foto hochgeladen.",
+      "diary.visitorStatsLabel": "Besucher",
+      "diary.visitorStatsTitle": "Besucher auf der öffentlichen Seite",
+      "diary.visitorStatsToday": "Heute",
+      "diary.visitorStatsSevenDays": "Letzte 7 Tage",
+      "diary.visitorStatsTotal": "Gesamt",
+      "diary.visitorStatsVisitors": "Besucher",
+      "diary.visitorStatsPageViews": "Seitenaufrufe",
+      "diary.visitorStatsLoading": "Wird geladen …",
+      "diary.visitorStatsUnavailable": "Statistik momentan nicht verfügbar.",
       "diary.weatherLoading": "Wetter der Etappe wird ermittelt …",
       "diary.weatherUnavailable": "Für diese Etappe konnten keine historischen Wetterdaten geladen werden.",
       "diary.weatherFuture": "Wetterdaten werden erst nach der Etappe ergänzt.",
@@ -460,6 +469,15 @@
       "diary.publicPhotoTitle": "Our current Camino photo",
       "diary.publicPhotoCopy": "This image is independent of stages, GPX files and diary entries. It can be replaced at any time.",
       "diary.publicPhotoEmpty": "No public photo uploaded yet.",
+      "diary.visitorStatsLabel": "Visitors",
+      "diary.visitorStatsTitle": "Visitors on the public page",
+      "diary.visitorStatsToday": "Today",
+      "diary.visitorStatsSevenDays": "Last 7 days",
+      "diary.visitorStatsTotal": "All time",
+      "diary.visitorStatsVisitors": "Visitors",
+      "diary.visitorStatsPageViews": "Page views",
+      "diary.visitorStatsLoading": "Loading …",
+      "diary.visitorStatsUnavailable": "Statistics are currently unavailable.",
       "diary.weatherLoading": "Loading weather for this stage …",
       "diary.weatherUnavailable": "Historical weather could not be loaded for this stage.",
       "diary.weatherFuture": "Weather data will be added after the stage.",
@@ -730,6 +748,15 @@
       "diary.publicPhotoTitle": "Наше актуальное фото Камино",
       "diary.publicPhotoCopy": "Это изображение не связано с этапами, GPX-файлами или записями дневника. Его можно заменить в любое время.",
       "diary.publicPhotoEmpty": "Публичное фото ещё не загружено.",
+      "diary.visitorStatsLabel": "Посетители",
+      "diary.visitorStatsTitle": "Посетители публичной страницы",
+      "diary.visitorStatsToday": "Сегодня",
+      "diary.visitorStatsSevenDays": "Последние 7 дней",
+      "diary.visitorStatsTotal": "Всего",
+      "diary.visitorStatsVisitors": "Посетители",
+      "diary.visitorStatsPageViews": "Просмотры страниц",
+      "diary.visitorStatsLoading": "Загрузка …",
+      "diary.visitorStatsUnavailable": "Статистика сейчас недоступна.",
       "diary.weatherLoading": "Загружается погода для этапа …",
       "diary.weatherUnavailable": "Не удалось загрузить историческую погоду для этого этапа.",
       "diary.weatherFuture": "Погода будет добавлена после завершения этапа.",
@@ -1117,6 +1144,8 @@
     publicPhotoRemove: document.getElementById("public-photo-remove"),
     publicPhotoUploadLabel: document.getElementById("public-photo-upload-label"),
     publicPhotoStatus: document.getElementById("public-photo-status"),
+    visitorStats: document.getElementById("visitor-stats"),
+    visitorStatsStatus: document.querySelector("[data-visitor-stats-status]"),
     diaryEditDialog: document.getElementById("diary-edit-dialog"),
     diaryEditForm: document.getElementById("diary-edit-form"),
     diaryEditTitle: document.getElementById("diary-edit-title"),
@@ -1363,6 +1392,33 @@
       }
     } catch (_) {
       setSyncStatus("sync.offline", true);
+    }
+  }
+
+  async function loadVisitorStats() {
+    if (!els.visitorStats) return;
+    const status = els.visitorStatsStatus;
+    try {
+      const response = await fetch("/api/visitor-stats", { credentials: "same-origin" });
+      if (!response.ok) throw new Error(`Visitor stats ${response.status}`);
+      const data = await response.json();
+      for (const period of ["today", "sevenDays", "total"]) {
+        for (const metric of ["visitors", "pageViews"]) {
+          const value = Number(data?.[period]?.[metric]) || 0;
+          const element = els.visitorStats.querySelector(`[data-visitor-value="${period}.${metric}"]`);
+          if (element) element.textContent = value.toLocaleString(languageLocale());
+        }
+      }
+      if (status) {
+        status.textContent = "";
+        status.classList.remove("error");
+      }
+    } catch (_) {
+      els.visitorStats.querySelectorAll("[data-visitor-value]").forEach((element) => { element.textContent = "–"; });
+      if (status) {
+        status.textContent = t("diary.visitorStatsUnavailable");
+        status.classList.add("error");
+      }
     }
   }
 
@@ -2953,4 +3009,5 @@
   initTrailWeather();
   initPackingFilm();
   loadSharedState();
+  loadVisitorStats();
 })();
