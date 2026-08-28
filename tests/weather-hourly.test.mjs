@@ -18,3 +18,8 @@ test("24-hour copy is translated in all interface languages", async () => {
   assert.match(script, /"weather\.tomorrow": "Tomorrow"/);
   assert.match(script, /"weather\.tomorrow": "Завтра"/);
 });
+
+test("next-day label styling overrides the generic weather icon span rule", async () => {
+  const css = await readFile(new URL("../app/globals.css", import.meta.url), "utf8");
+  assert.match(css, /\.weather-hour\s*>\s*\.weather-day-label\s*\{/);
+});
