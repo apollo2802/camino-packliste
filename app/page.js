@@ -275,7 +275,7 @@ const pageMarkup = `
             <div class="weather-alerts" data-weather-alerts></div>
 
             <details class="weather-hourly">
-              <summary><span><strong data-i18n="weather.hourly">Stündliche Vorschau</strong><small data-i18n="weather.hourlyCopy">Die nächsten 12 Stunden</small></span><span class="weather-chevron" aria-hidden="true">⌄</span></summary>
+              <summary><span><strong data-i18n="weather.hourly">Stündliche Vorschau</strong><small data-i18n="weather.hourlyCopy">Die nächsten 24 Stunden</small></span><span class="weather-chevron" aria-hidden="true">⌄</span></summary>
               <div class="weather-hourly-scroll" data-weather-hourly></div>
             </details>
 

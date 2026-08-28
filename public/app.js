@@ -97,7 +97,8 @@
       "weather.currentLocation": "Aktueller Standort",
       "weather.updated": "Aktualisiert {time}",
       "weather.hourly": "Stündliche Vorschau",
-      "weather.hourlyCopy": "Die nächsten 12 Stunden",
+      "weather.hourlyCopy": "Die nächsten 24 Stunden",
+      "weather.tomorrow": "Morgen",
       "weather.now": "Jetzt",
       "weather.source": "Wetterdaten: Open‑Meteo. Risikoangaben sind Orientierung, keine amtliche Warnung.",
       "weather.warningMap": "Amtliche Wetterwarnungen ↗",
@@ -376,7 +377,8 @@
       "weather.currentLocation": "Current location",
       "weather.updated": "Updated {time}",
       "weather.hourly": "Hourly forecast",
-      "weather.hourlyCopy": "The next 12 hours",
+      "weather.hourlyCopy": "The next 24 hours",
+      "weather.tomorrow": "Tomorrow",
       "weather.now": "Now",
       "weather.source": "Weather data: Open‑Meteo. Risk indicators are guidance, not official warnings.",
       "weather.warningMap": "Official weather warnings ↗",
@@ -655,7 +657,8 @@
       "weather.currentLocation": "Текущее местоположение",
       "weather.updated": "Обновлено в {time}",
       "weather.hourly": "Почасовой прогноз",
-      "weather.hourlyCopy": "Следующие 12 часов",
+      "weather.hourlyCopy": "Следующие 24 часа",
+      "weather.tomorrow": "Завтра",
       "weather.now": "Сейчас",
       "weather.source": "Данные о погоде: Open‑Meteo. Оценки риска не являются официальными предупреждениями.",
       "weather.warningMap": "Официальные предупреждения ↗",
@@ -2623,10 +2626,15 @@
         : `<article class="weather-alert weather-alert--good"><span aria-hidden="true">✓</span><strong>${escapeHTML(t("weather.alertNone"))}</strong></article>`;
       root.querySelector("[data-weather-alerts]").innerHTML = `${noticeMarkup}<article class="weather-alert weather-alert--fire risk-${risk.level}"><span aria-hidden="true">♨</span><div><strong>${escapeHTML(t("weather.fireRisk"))}: ${escapeHTML(risk.label)}</strong><small>${escapeHTML(t("weather.fireHint"))}</small></div></article>`;
 
-      root.querySelector("[data-weather-hourly]").innerHTML = hourly.time.slice(hourIndex, hourIndex + 12).map((value, offset) => {
+      const displayedHours = hourly.time.slice(hourIndex, hourIndex + 24);
+      let nextDayMarked = false;
+      root.querySelector("[data-weather-hourly]").innerHTML = displayedHours.map((value, offset) => {
         const index = hourIndex + offset;
         const hourCondition = weatherCode(hourly.weather_code[index]);
-        return `<article class="weather-hour${offset === 0 ? " is-now" : ""}"><time datetime="${escapeHTML(value)}">${offset === 0 ? escapeHTML(t("weather.now")) : escapeHTML(timeOnly(value))}</time><span aria-hidden="true">${hourCondition.icon}</span><strong>${number(hourly.temperature_2m[index])}°</strong><small>☂ ${number(hourly.precipitation_probability[index])}%</small><small>↝ ${number(hourly.wind_gusts_10m[index])}</small></article>`;
+        const startsNextDay = !nextDayMarked && offset > 0 && String(value).slice(0, 10) !== String(displayedHours[offset - 1]).slice(0, 10);
+        if (startsNextDay) nextDayMarked = true;
+        const dayLabel = startsNextDay ? `<span class="weather-day-label">${escapeHTML(t("weather.tomorrow"))}</span>` : "";
+        return `<article class="weather-hour${offset === 0 ? " is-now" : ""}${startsNextDay ? " starts-next-day" : ""}">${dayLabel}<time datetime="${escapeHTML(value)}">${offset === 0 ? escapeHTML(t("weather.now")) : escapeHTML(timeOnly(value))}</time><span aria-hidden="true">${hourCondition.icon}</span><strong>${number(hourly.temperature_2m[index])}°</strong><small>☂ ${number(hourly.precipitation_probability[index])}%</small><small>↝ ${number(hourly.wind_gusts_10m[index])}</small></article>`;
       }).join("");
       show("dashboard");
     }
