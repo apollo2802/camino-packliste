@@ -1103,6 +1103,8 @@
   let pendingGpx = null;
   let editingDiaryId = null;
   let publicPhoto = null;
+  let visitorStatsData = null;
+  let visitorStatsState = "loading";
   let diaryAnimationStops = [];
   let diaryAnimationGeneration = 0;
   let renderActiveWeather = () => {};
@@ -1220,6 +1222,7 @@
       button.setAttribute("aria-pressed", String(active));
     });
     setSyncStatus(currentSyncStatus.key, currentSyncStatus.isError);
+    renderVisitorStats();
   }
 
   function setLanguage(language) {
@@ -1397,27 +1400,35 @@
 
   async function loadVisitorStats() {
     if (!els.visitorStats) return;
-    const status = els.visitorStatsStatus;
+    visitorStatsState = "loading";
+    renderVisitorStats();
     try {
       const response = await fetch("/api/visitor-stats", { credentials: "same-origin" });
       if (!response.ok) throw new Error(`Visitor stats ${response.status}`);
-      const data = await response.json();
-      for (const period of ["today", "sevenDays", "total"]) {
-        for (const metric of ["visitors", "pageViews"]) {
-          const value = Number(data?.[period]?.[metric]) || 0;
-          const element = els.visitorStats.querySelector(`[data-visitor-value="${period}.${metric}"]`);
-          if (element) element.textContent = value.toLocaleString(languageLocale());
-        }
-      }
-      if (status) {
-        status.textContent = "";
-        status.classList.remove("error");
-      }
+      visitorStatsData = await response.json();
+      visitorStatsState = "ready";
     } catch (_) {
-      els.visitorStats.querySelectorAll("[data-visitor-value]").forEach((element) => { element.textContent = "–"; });
-      if (status) {
-        status.textContent = t("diary.visitorStatsUnavailable");
-        status.classList.add("error");
+      visitorStatsData = null;
+      visitorStatsState = "unavailable";
+    }
+    renderVisitorStats();
+  }
+
+  function renderVisitorStats() {
+    if (!els.visitorStats) return;
+    const status = els.visitorStatsStatus;
+    if (status) {
+      status.classList.toggle("error", visitorStatsState === "unavailable");
+      status.textContent = visitorStatsState === "loading"
+        ? t("diary.visitorStatsLoading")
+        : visitorStatsState === "unavailable" ? t("diary.visitorStatsUnavailable") : "";
+    }
+    for (const period of ["today", "sevenDays", "total"]) {
+      for (const metric of ["visitors", "pageViews"]) {
+        const element = els.visitorStats.querySelector(`[data-visitor-value="${period}.${metric}"]`);
+        if (!element) continue;
+        const value = Number(visitorStatsData?.[period]?.[metric]) || 0;
+        element.textContent = visitorStatsState === "ready" ? value.toLocaleString(languageLocale()) : "–";
       }
     }
   }

@@ -173,3 +173,14 @@ test("protected diary includes visitor statistics dashboard", async () => {
   assert.match(script, /credentials:\s*["']same-origin["']/);
   assert.match(script, /function loadVisitorStats\(\)/);
 });
+
+test("visitor statistics preserve state and reformat after language changes", async () => {
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+  assert.match(script, /let visitorStatsData = null/);
+  assert.match(script, /let visitorStatsState = "loading"/);
+  assert.match(script, /function renderVisitorStats\(\)/);
+  assert.match(script, /renderVisitorStats\(\);\s*\n\s*}\s*\n\s*\n\s*function setLanguage/);
+  assert.match(script, /value\.toLocaleString\(languageLocale\(\)\)/);
+  assert.match(script, /visitorStatsState = "ready"/);
+  assert.match(script, /visitorStatsState = "unavailable"/);
+});
