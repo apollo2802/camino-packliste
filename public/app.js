@@ -1280,8 +1280,8 @@
 
   function normalizePrivateNotes(entry) {
     return {
-      de: String(entry?.privateNotes?.de || entry?.note || "").slice(0, 2400),
-      ru: String(entry?.privateNotes?.ru || "").slice(0, 2400)
+      de: String(entry?.privateNotes?.de || entry?.note || "").slice(0, 2880),
+      ru: String(entry?.privateNotes?.ru || "").slice(0, 2880)
     };
   }
 
@@ -2409,8 +2409,8 @@
       from: els.diaryFrom.value.trim().slice(0, 60),
       to: els.diaryTo.value.trim().slice(0, 60),
       privateNotes: {
-        de: els.diaryNoteDe.value.trim().slice(0, 2400),
-        ru: els.diaryNoteRu.value.trim().slice(0, 2400)
+        de: els.diaryNoteDe.value.trim().slice(0, 2880),
+        ru: els.diaryNoteRu.value.trim().slice(0, 2880)
       },
       publicNotes: {
         de: els.diaryPublicNoteDe.value.trim().slice(0, 1200),
@@ -2484,8 +2484,8 @@
     if (!entry || !title) return;
     entry.title = title.slice(0, 80);
     entry.privateNotes = {
-      de: els.diaryEditNoteDe.value.trim().slice(0, 2400),
-      ru: els.diaryEditNoteRu.value.trim().slice(0, 2400)
+      de: els.diaryEditNoteDe.value.trim().slice(0, 2880),
+      ru: els.diaryEditNoteRu.value.trim().slice(0, 2880)
     };
     delete entry.note;
     entry.publicNotes = {

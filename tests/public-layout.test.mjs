@@ -137,6 +137,16 @@ test("private diary creates and edits German and Russian notes", async () => {
   assert.match(script, /els\.diaryEditNoteRu\.value/);
 });
 
+test("private German and Russian notes accept 2880 characters", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  for (const id of ["diary-note-de", "diary-note-ru", "diary-edit-note-de", "diary-edit-note-ru"]) {
+    assert.match(html, new RegExp(`id="${id}"[^>]*maxlength="2880"`));
+  }
+  assert.equal((script.match(/\.slice\(0, 2880\)/g) || []).length, 6);
+});
+
 test("public diary selects its language and falls back to German", async () => {
   const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
   const selector = script.slice(script.indexOf("function publicDescription"), script.indexOf("function card(entry"));

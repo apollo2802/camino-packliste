@@ -361,8 +361,8 @@ const pageMarkup = `
             </div>
             <fieldset class="diary-private-notes diary-field-wide">
               <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
-              <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-note-de" rows="3" maxlength="2400" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
-              <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-note-ru" rows="3" maxlength="2400" placeholder="Погода, встречи, мысли и маленькие моменты дня …"></textarea></label>
+              <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-note-de" rows="3" maxlength="2880" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
+              <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-note-ru" rows="3" maxlength="2880" placeholder="Погода, встречи, мысли и маленькие моменты дня …"></textarea></label>
             </fieldset>
             <fieldset class="diary-public-notes diary-field-wide">
               <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
@@ -416,8 +416,8 @@ const pageMarkup = `
         <label class="diary-field"><span data-i18n="diary.entryTitle">Überschrift</span><input id="diary-edit-title" maxlength="80" required></label>
         <fieldset class="diary-private-notes">
           <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
-          <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-edit-note-de" rows="4" maxlength="2400"></textarea></label>
-          <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-edit-note-ru" rows="4" maxlength="2400"></textarea></label>
+          <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-edit-note-de" rows="4" maxlength="2880"></textarea></label>
+          <label class="diary-field"><span data-i18n="diary.privateNoteRu">Russisch</span><textarea id="diary-edit-note-ru" rows="4" maxlength="2880"></textarea></label>
         </fieldset>
         <fieldset class="diary-public-notes">
           <legend data-i18n="diary.publicNotes">Öffentliche Beschreibungen</legend>
