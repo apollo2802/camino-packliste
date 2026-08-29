@@ -359,6 +359,7 @@ const pageMarkup = `
               <span aria-hidden="true">→</span>
               <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-to" maxlength="60" placeholder="Vila do Conde" data-i18n-placeholder="diary.toPlaceholder"></label>
             </div>
+            <p class="diary-place-suggestion" id="diary-place-suggestion" role="status" hidden></p>
             <fieldset class="diary-private-notes diary-field-wide">
               <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
               <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-note-de" rows="3" maxlength="2880" placeholder="Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …" data-i18n-placeholder="diary.notePlaceholder"></textarea></label>
@@ -414,6 +415,11 @@ const pageMarkup = `
       <form id="diary-edit-form" method="dialog">
         <div class="diary-edit-head"><div><p class="section-label" data-i18n="diary.editLabel">Etappe</p><h2 data-i18n="diary.editTitle">Etappe bearbeiten</h2></div><button id="diary-edit-close" type="button" aria-label="Schließen">×</button></div>
         <label class="diary-field"><span data-i18n="diary.entryTitle">Überschrift</span><input id="diary-edit-title" maxlength="80" required></label>
+        <div class="diary-place-row">
+          <label class="diary-field"><span data-i18n="diary.from">Von</span><input id="diary-edit-from" maxlength="60"></label>
+          <span aria-hidden="true">→</span>
+          <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-edit-to" maxlength="60"></label>
+        </div>
         <fieldset class="diary-private-notes">
           <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
           <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-edit-note-de" rows="4" maxlength="2880"></textarea></label>

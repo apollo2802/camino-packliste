@@ -151,6 +151,9 @@
       "diary.to": "Nach",
       "diary.fromPlaceholder": "Porto",
       "diary.toPlaceholder": "Vila do Conde",
+      "diary.placeLooking": "Start und Ziel werden aus der GPX-Route ermittelt …",
+      "diary.placeSuggested": "Start und Ziel vorgeschlagen · Ortsnamen © OpenStreetMap-Mitwirkende",
+      "diary.placeUnavailable": "Ortsnamen konnten nicht ermittelt werden. Bitte Start und Ziel manuell eintragen.",
       "diary.note": "Tagesnotiz",
       "diary.notePlaceholder": "Wetter, Begegnungen, Gedanken und die kleinen Momente des Tages …",
       "diary.privateNotes": "Private Tagesnotizen",
@@ -431,6 +434,9 @@
       "diary.to": "To",
       "diary.fromPlaceholder": "Porto",
       "diary.toPlaceholder": "Vila do Conde",
+      "diary.placeLooking": "Finding the start and finish from the GPX route …",
+      "diary.placeSuggested": "Start and finish suggested · Place names © OpenStreetMap contributors",
+      "diary.placeUnavailable": "Place names could not be found. Please enter the start and finish manually.",
       "diary.note": "Day note",
       "diary.notePlaceholder": "Weather, encounters, thoughts and the small moments of the day …",
       "diary.privateNotes": "Private day notes",
@@ -711,6 +717,9 @@
       "diary.to": "Куда",
       "diary.fromPlaceholder": "Порту",
       "diary.toPlaceholder": "Вила-ду-Конди",
+      "diary.placeLooking": "Определяем старт и финиш по GPX-маршруту …",
+      "diary.placeSuggested": "Старт и финиш предложены · Названия мест © участники OpenStreetMap",
+      "diary.placeUnavailable": "Не удалось определить названия мест. Укажите старт и финиш вручную.",
       "diary.note": "Заметка дня",
       "diary.notePlaceholder": "Погода, встречи, мысли и маленькие моменты дня …",
       "diary.privateNotes": "Личные заметки дня",
@@ -1108,6 +1117,9 @@
   let publicPhoto = null;
   let visitorStatsData = null;
   let visitorStatsState = "loading";
+  let diaryPlaceStatus = "hidden";
+  let placeLookupQueue = Promise.resolve();
+  let lastPlaceLookupAt = 0;
   let diaryAnimationStops = [];
   let diaryAnimationGeneration = 0;
   let renderActiveWeather = () => {};
@@ -1134,6 +1146,7 @@
     diaryTitle: document.getElementById("diary-entry-title"),
     diaryFrom: document.getElementById("diary-from"),
     diaryTo: document.getElementById("diary-to"),
+    diaryPlaceSuggestion: document.getElementById("diary-place-suggestion"),
     diaryNoteDe: document.getElementById("diary-note-de"),
     diaryNoteRu: document.getElementById("diary-note-ru"),
     diaryPublicNoteDe: document.getElementById("diary-public-note-de"),
@@ -1154,6 +1167,8 @@
     diaryEditDialog: document.getElementById("diary-edit-dialog"),
     diaryEditForm: document.getElementById("diary-edit-form"),
     diaryEditTitle: document.getElementById("diary-edit-title"),
+    diaryEditFrom: document.getElementById("diary-edit-from"),
+    diaryEditTo: document.getElementById("diary-edit-to"),
     diaryEditNoteDe: document.getElementById("diary-edit-note-de"),
     diaryEditNoteRu: document.getElementById("diary-edit-note-ru"),
     diaryEditPublicNoteDe: document.getElementById("diary-edit-public-note-de"),
@@ -1207,6 +1222,23 @@
       : localized;
   }
 
+  function renderDiaryPlaceStatus() {
+    if (!els.diaryPlaceSuggestion) return;
+    const keys = {
+      loading: "diary.placeLooking",
+      ready: "diary.placeSuggested",
+      error: "diary.placeUnavailable"
+    };
+    els.diaryPlaceSuggestion.hidden = !keys[diaryPlaceStatus];
+    els.diaryPlaceSuggestion.classList.toggle("error", diaryPlaceStatus === "error");
+    els.diaryPlaceSuggestion.textContent = keys[diaryPlaceStatus] ? t(keys[diaryPlaceStatus]) : "";
+  }
+
+  function setDiaryPlaceStatus(status) {
+    diaryPlaceStatus = status;
+    renderDiaryPlaceStatus();
+  }
+
   function applyStaticTranslations() {
     document.documentElement.lang = activeLanguage;
     document.title = t("page.title");
@@ -1225,6 +1257,7 @@
       button.setAttribute("aria-pressed", String(active));
     });
     setSyncStatus(currentSyncStatus.key, currentSyncStatus.isError);
+    renderDiaryPlaceStatus();
     renderVisitorStats();
   }
 
@@ -1948,6 +1981,51 @@
     };
   }
 
+  function placeNameFromReverse(result) {
+    const address = result?.address || {};
+    const value = address.city || address.town || address.village || address.municipality
+      || address.borough || address.hamlet || address.suburb || address.county
+      || String(result?.display_name || "").split(",")[0];
+    return String(value || "").trim().slice(0, 60);
+  }
+
+  function reverseGeocodePlace(point) {
+    const request = placeLookupQueue.then(async () => {
+      const delay = Math.max(0, 1000 - (Date.now() - lastPlaceLookupAt));
+      if (delay) await new Promise((resolve) => setTimeout(resolve, delay));
+      lastPlaceLookupAt = Date.now();
+      const url = new URL("https://nominatim.openstreetmap.org/reverse");
+      url.search = new URLSearchParams({
+        format: "jsonv2",
+        lat: String(point[0]),
+        lon: String(point[1]),
+        zoom: "13",
+        addressdetails: "1",
+        layer: "address",
+        "accept-language": languageLocale()
+      });
+      const response = await fetch(url, { credentials: "omit", headers: { accept: "application/json" } });
+      if (!response.ok) throw new Error(`Nominatim ${response.status}`);
+      return placeNameFromReverse(await response.json());
+    });
+    placeLookupQueue = request.catch(() => {});
+    return request;
+  }
+
+  async function suggestGpxPlaces(importedGpx) {
+    setDiaryPlaceStatus("loading");
+    const [startResult, finishResult] = await Promise.allSettled([
+      reverseGeocodePlace(importedGpx.track[0]),
+      reverseGeocodePlace(importedGpx.track.at(-1))
+    ]);
+    if (pendingGpx !== importedGpx) return;
+    const start = startResult.status === "fulfilled" ? startResult.value : "";
+    const finish = finishResult.status === "fulfilled" ? finishResult.value : "";
+    if (start && !els.diaryFrom.value.trim()) els.diaryFrom.value = start;
+    if (finish && !els.diaryTo.value.trim()) els.diaryTo.value = finish;
+    setDiaryPlaceStatus(start || finish ? "ready" : "error");
+  }
+
   function diaryWeatherCondition(code) {
     if (code === 0) return { icon: "☀️", key: "weather.codeClear" };
     if (code <= 2) return { icon: "🌤️", key: "weather.codeCloudy" };
@@ -2312,12 +2390,14 @@
     pendingGpx = null;
     els.gpxReadout.classList.remove("ready", "error");
     setDiaryWeatherPreview("hidden");
+    setDiaryPlaceStatus("hidden");
     if (!file) {
       els.gpxReadout.textContent = t("diary.gpxEmpty");
       return;
     }
     try {
       pendingGpx = parseGpx(await file.text(), file.name);
+      const importedGpx = pendingGpx;
       if (!els.diaryTitle.value.trim() && pendingGpx.routeName) els.diaryTitle.value = pendingGpx.routeName;
       if (pendingGpx.date) els.diaryDate.value = pendingGpx.date;
       els.gpxReadout.textContent = t("diary.gpxReady", {
@@ -2326,7 +2406,9 @@
         ascent: pendingGpx.stats.ascent
       });
       els.gpxReadout.classList.add("ready");
-      const importedGpx = pendingGpx;
+      suggestGpxPlaces(importedGpx).catch(() => {
+        if (pendingGpx === importedGpx) setDiaryPlaceStatus("error");
+      });
       setDiaryWeatherPreview("loading");
       try {
         const weather = await fetchDiaryWeather(importedGpx);
@@ -2430,6 +2512,7 @@
     els.gpxReadout.textContent = t("diary.gpxEmpty");
     els.gpxReadout.classList.remove("ready", "error");
     setDiaryWeatherPreview("hidden");
+    setDiaryPlaceStatus("hidden");
     renderDiary();
   });
 
@@ -2451,6 +2534,8 @@
       const privateNotes = normalizePrivateNotes(entry);
       const publicNotes = normalizePublicNotes(entry);
       els.diaryEditTitle.value = entry.title;
+      els.diaryEditFrom.value = entry.from || "";
+      els.diaryEditTo.value = entry.to || "";
       els.diaryEditNoteDe.value = privateNotes.de;
       els.diaryEditNoteRu.value = privateNotes.ru;
       els.diaryEditPublicNoteDe.value = publicNotes.de;
@@ -2483,6 +2568,8 @@
     const title = els.diaryEditTitle.value.trim();
     if (!entry || !title) return;
     entry.title = title.slice(0, 80);
+    entry.from = els.diaryEditFrom.value.trim().slice(0, 60);
+    entry.to = els.diaryEditTo.value.trim().slice(0, 60);
     entry.privateNotes = {
       de: els.diaryEditNoteDe.value.trim().slice(0, 2880),
       ru: els.diaryEditNoteRu.value.trim().slice(0, 2880)

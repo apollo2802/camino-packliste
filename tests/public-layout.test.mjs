@@ -116,6 +116,44 @@ test("private diary offers three manual public descriptions and stage editing", 
   assert.doesNotMatch(script, /window\.prompt\(t\("diary\.publicNotePrompt"/);
 });
 
+test("stage places can be edited after GPX import", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(html, /id="diary-edit-from"[^>]*maxlength="60"/);
+  assert.match(html, /id="diary-edit-to"[^>]*maxlength="60"/);
+  assert.match(script, /els\.diaryEditFrom\.value\s*=\s*entry\.from\s*\|\|\s*""/);
+  assert.match(script, /els\.diaryEditTo\.value\s*=\s*entry\.to\s*\|\|\s*""/);
+  assert.match(script, /entry\.from\s*=\s*els\.diaryEditFrom\.value\.trim\(\)\.slice\(0, 60\)/);
+  assert.match(script, /entry\.to\s*=\s*els\.diaryEditTo\.value\.trim\(\)\.slice\(0, 60\)/);
+});
+
+test("GPX import suggests editable start and finish places from its endpoints", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(html, /id="diary-place-suggestion"/);
+  assert.match(script, /nominatim\.openstreetmap\.org\/reverse/);
+  assert.match(script, /importedGpx\.track\[0\]/);
+  assert.match(script, /importedGpx\.track\.at\(-1\)/);
+  assert.match(script, /Math\.max\(0,\s*1000\s*-/);
+  assert.match(script, /if \(start && !els\.diaryFrom\.value\.trim\(\)\)/);
+  assert.match(script, /if \(finish && !els\.diaryTo\.value\.trim\(\)\)/);
+});
+
+test("public hero shows the cumulative distance of published stages", async () => {
+  const html = await readFile(new URL("../public/camino.html", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/camino.js", import.meta.url), "utf8");
+
+  assert.match(html, /id="public-total-distance"/);
+  assert.match(script, /totalDistance:\s*"Bereits gegangen: \{distance\} km"/);
+  assert.match(script, /totalDistance:\s*"Already walked: \{distance\} km"/);
+  assert.match(script, /totalDistance:\s*"Уже пройдено: \{distance\} км"/);
+  assert.match(script, /ordered\.reduce\(\(sum, entry\)/);
+  assert.match(script, /entry\.stats\?\.distance/);
+  assert.match(script, /t\("totalDistance",\s*\{\s*distance:/);
+});
+
 test("private diary normalizes canonical multilingual private notes", async () => {
   const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
 

@@ -2,6 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import app from "../dist/server/index.js";
 
+test("content security policy permits the GPX place lookup", async () => {
+  const response = await app.fetch(new Request("https://example.test/intern"), environment({ diary: [] }));
+  assert.match(response.headers.get("content-security-policy") || "", /connect-src[^;]*https:\/\/nominatim\.openstreetmap\.org/);
+});
+
 function environment(payload) {
   return {
     ACCESS_CODE: "test-access-code",
