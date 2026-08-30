@@ -449,6 +449,7 @@ h2 { margin: 0; font-family: Georgia, "Times New Roman", serif; font-weight: 500
 .diary-place-suggestion.error { color: #8b352b; }
 .gpx-drop { min-height: 96px; padding: .9rem; border: 1px dashed rgba(13,95,90,.4); border-radius: 15px; display: flex; gap: .75rem; align-items: center; background: rgba(255,255,255,.46); cursor: pointer; }
 .gpx-drop:hover { background: rgba(255,255,255,.72); }
+.gpx-drop.compact { min-height: 78px; }
 .gpx-drop input { position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0; }
 .gpx-drop > span:not(.gpx-icon) { display: flex; flex-direction: column; gap: .25rem; }
 .gpx-drop small, .gpx-readout { color: var(--muted); font-size: .72rem; line-height: 1.4; }

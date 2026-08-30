@@ -180,6 +180,10 @@
       "diary.gpxEmpty": "Noch keine GPX ausgewählt.",
       "diary.gpxReady": "{name} · {distance} km · {ascent} m Aufstieg",
       "diary.gpxError": "Die GPX-Datei konnte nicht gelesen werden.",
+      "diary.gpxReplaceTitle": "GPX-Route ersetzen",
+      "diary.gpxReplaceCopy": "Berechnet Route, Geschwindigkeit und Wetter neu. Texte und Orte bleiben erhalten.",
+      "diary.gpxCurrent": "Aktuelle Route: {name}",
+      "diary.gpxNoCurrent": "Diese Etappe hat noch keine GPX-Route.",
       "diary.photoTitle": "Etappenfoto",
       "diary.photoCopy": "Das Foto wird getrennt von der GPX verwaltet.",
       "diary.photoAdd": "Foto hinzufügen",
@@ -463,6 +467,10 @@
       "diary.gpxEmpty": "No GPX selected yet.",
       "diary.gpxReady": "{name} · {distance} km · {ascent} m ascent",
       "diary.gpxError": "The GPX file could not be read.",
+      "diary.gpxReplaceTitle": "Replace GPX route",
+      "diary.gpxReplaceCopy": "Recalculates the route, speed and weather. Text and places stay unchanged.",
+      "diary.gpxCurrent": "Current route: {name}",
+      "diary.gpxNoCurrent": "This stage does not have a GPX route yet.",
       "diary.photoTitle": "Stage photo",
       "diary.photoCopy": "The photo is managed separately from the GPX.",
       "diary.photoAdd": "Add photo",
@@ -746,6 +754,10 @@
       "diary.gpxEmpty": "GPX ещё не выбран.",
       "diary.gpxReady": "{name} · {distance} км · набор {ascent} м",
       "diary.gpxError": "Не удалось прочитать GPX-файл.",
+      "diary.gpxReplaceTitle": "Заменить GPX-маршрут",
+      "diary.gpxReplaceCopy": "Маршрут, скорость и погода будут рассчитаны заново. Тексты и места сохранятся.",
+      "diary.gpxCurrent": "Текущий маршрут: {name}",
+      "diary.gpxNoCurrent": "У этого этапа пока нет GPX-маршрута.",
       "diary.photoTitle": "Фото этапа",
       "diary.photoCopy": "Фото загружается отдельно от GPX.",
       "diary.photoAdd": "Добавить фото",
@@ -1113,6 +1125,7 @@
   let serverReady = false;
   let syncTimer = null;
   let pendingGpx = null;
+  let pendingEditGpx = null;
   let editingDiaryId = null;
   let publicPhoto = null;
   let visitorStatsData = null;
@@ -1169,6 +1182,9 @@
     diaryEditTitle: document.getElementById("diary-edit-title"),
     diaryEditFrom: document.getElementById("diary-edit-from"),
     diaryEditTo: document.getElementById("diary-edit-to"),
+    diaryEditGpx: document.getElementById("diary-edit-gpx"),
+    diaryEditGpxReadout: document.getElementById("diary-edit-gpx-readout"),
+    diaryEditWeatherPreview: document.getElementById("diary-edit-weather-preview"),
     diaryEditNoteDe: document.getElementById("diary-edit-note-de"),
     diaryEditNoteRu: document.getElementById("diary-edit-note-ru"),
     diaryEditPublicNoteDe: document.getElementById("diary-edit-public-note-de"),
@@ -1360,7 +1376,7 @@
           min: Number(entry.stats.min) || 0,
           max: Number(entry.stats.max) || 0,
           averageSpeed: Number(entry.stats.averageSpeed) || 0,
-          speedProfile: Array.isArray(entry.stats.speedProfile) ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value > 0) : []
+          speedProfile: Array.isArray(entry.stats.speedProfile) ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value >= 0) : []
         } : null,
         track: Array.isArray(entry.track) ? entry.track.slice(0, 100).filter((point) => Array.isArray(point) && point.length >= 3).map((point) => [Number(point[0]), Number(point[1]), Number(point[2])]) : []
       }));
@@ -1570,7 +1586,7 @@
 
   function speedPath(profile, width = 640, height = 72) {
     if (!Array.isArray(profile) || profile.length < 2) return "";
-    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed > 0);
+    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed >= 0);
     if (speeds.length !== profile.length) return "";
     const min = Math.min(...speeds);
     const max = Math.max(...speeds);
@@ -1907,15 +1923,6 @@
     initDiaryAnimations();
   }
 
-  function haversine(left, right) {
-    const radius = 6371;
-    const radians = (value) => value * Math.PI / 180;
-    const lat = radians(right[0] - left[0]);
-    const lon = radians(right[1] - left[1]);
-    const a = Math.sin(lat / 2) ** 2 + Math.cos(radians(left[0])) * Math.cos(radians(right[0])) * Math.sin(lon / 2) ** 2;
-    return radius * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-  }
-
   function parseGpx(text, name) {
     const documentNode = new DOMParser().parseFromString(text, "application/xml");
     if (documentNode.querySelector("parsererror")) throw new Error("Invalid GPX");
@@ -1942,29 +1949,15 @@
     }).filter((item) => item.point.every(Number.isFinite));
     const points = recordedPoints.map((item) => item.point);
     const validTimes = recordedPoints.map((item) => item.time).filter((value) => Number.isFinite(Date.parse(value)));
-    const timestamps = recordedPoints.map((item) => Date.parse(item.time));
-    const hasCompleteTiming = timestamps.length === recordedPoints.length && timestamps.every(Number.isFinite);
     if (points.length < 2) throw new Error("No points");
-    let distance = 0;
+    const motion = globalThis.CaminoGpxMotion.analyze(recordedPoints);
     let ascent = 0;
     let descent = 0;
-    const segmentSpeeds = [];
     for (let index = 1; index < points.length; index += 1) {
-      const segmentDistance = haversine(points[index - 1], points[index]);
-      distance += segmentDistance;
       const difference = points[index][2] - points[index - 1][2];
       if (difference > 0) ascent += difference;
       else descent += Math.abs(difference);
-      const elapsedHours = hasCompleteTiming ? (timestamps[index] - timestamps[index - 1]) / 3_600_000 : 0;
-      segmentSpeeds.push(Number.isFinite(elapsedHours) && elapsedHours > 0 ? segmentDistance / elapsedHours : 0);
     }
-    const durationHours = hasCompleteTiming ? (timestamps.at(-1) - timestamps[0]) / 3_600_000 : 0;
-    const averageSpeed = Number.isFinite(durationHours) && durationHours > 0 ? distance / durationHours : 0;
-    const hasTimedSegments = hasCompleteTiming && segmentSpeeds.some((speed) => Number.isFinite(speed) && speed > 0);
-    const pointSpeeds = points.map((_, index) => {
-      const nearby = segmentSpeeds.slice(Math.max(0, index - 3), Math.min(segmentSpeeds.length, index + 2)).filter((speed) => Number.isFinite(speed) && speed > 0);
-      return nearby.length ? nearby.reduce((sum, speed) => sum + speed, 0) / nearby.length : averageSpeed;
-    });
     const stride = Math.max(1, Math.ceil(points.length / 90));
     const sampledIndexes = points.map((_, index) => index).filter((index) => index % stride === 0);
     if (sampledIndexes.at(-1) !== points.length - 1) sampledIndexes.push(points.length - 1);
@@ -1976,7 +1969,7 @@
       date: timestampDate || filenameDate || "",
       startTime: validTimes[0] || gpxTimestamp || "",
       endTime: validTimes.length > 1 ? validTimes.at(-1) : "",
-      stats: { distance: Number(distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)), averageSpeed: hasTimedSegments ? Number(averageSpeed.toFixed(3)) : 0, speedProfile: hasTimedSegments ? sampledIndexes.map((index) => Number((pointSpeeds[index] || averageSpeed).toFixed(2))) : [] },
+      stats: { distance: Number(motion.distance.toFixed(2)), ascent: Math.round(ascent), descent: Math.round(descent), min: Math.round(Math.min(...elevations)), max: Math.round(Math.max(...elevations)), averageSpeed: Number(motion.averageSpeed.toFixed(3)), speedProfile: motion.speedProfile.length ? sampledIndexes.map((index) => Number(motion.speedProfile[index].toFixed(2))) : [] },
       track: sampled.map((point) => [Number(point[0].toFixed(5)), Number(point[1].toFixed(5)), Number(point[2].toFixed(1))])
     };
   }
@@ -2123,16 +2116,16 @@
     </section>`;
   }
 
-  function setDiaryWeatherPreview(view, weather = null) {
-    if (!els.diaryWeatherPreview) return;
-    els.diaryWeatherPreview.hidden = view === "hidden";
-    els.diaryWeatherPreview.classList.toggle("loading", view === "loading");
-    els.diaryWeatherPreview.classList.toggle("error", view === "error" || view === "future");
-    if (view === "loading") els.diaryWeatherPreview.innerHTML = `<span class="diary-weather-spinner" aria-hidden="true"></span><span>${escapeHTML(t("diary.weatherLoading"))}</span>`;
-    else if (view === "ready") els.diaryWeatherPreview.innerHTML = diaryWeatherMarkup(weather, true);
-    else if (view === "future") els.diaryWeatherPreview.textContent = t("diary.weatherFuture");
-    else if (view === "error") els.diaryWeatherPreview.textContent = t("diary.weatherUnavailable");
-    else els.diaryWeatherPreview.innerHTML = "";
+  function setDiaryWeatherPreview(view, weather = null, target = els.diaryWeatherPreview) {
+    if (!target) return;
+    target.hidden = view === "hidden";
+    target.classList.toggle("loading", view === "loading");
+    target.classList.toggle("error", view === "error" || view === "future");
+    if (view === "loading") target.innerHTML = `<span class="diary-weather-spinner" aria-hidden="true"></span><span>${escapeHTML(t("diary.weatherLoading"))}</span>`;
+    else if (view === "ready") target.innerHTML = diaryWeatherMarkup(weather, true);
+    else if (view === "future") target.textContent = t("diary.weatherFuture");
+    else if (view === "error") target.textContent = t("diary.weatherUnavailable");
+    else target.innerHTML = "";
   }
 
   function renderPublicPhotoAdmin() {
@@ -2425,6 +2418,43 @@
     }
   });
 
+  els.diaryEditGpx?.addEventListener("change", async () => {
+    const file = els.diaryEditGpx.files?.[0];
+    pendingEditGpx = null;
+    els.diaryEditGpxReadout.classList.remove("ready", "error");
+    setDiaryWeatherPreview("hidden", null, els.diaryEditWeatherPreview);
+    if (!file) {
+      const entry = state.diary.find((item) => item.id === editingDiaryId);
+      els.diaryEditGpxReadout.textContent = entry?.gpxName
+        ? t("diary.gpxCurrent", { name: entry.gpxName })
+        : t("diary.gpxNoCurrent");
+      return;
+    }
+    try {
+      const importedGpx = parseGpx(await file.text(), file.name);
+      pendingEditGpx = importedGpx;
+      els.diaryEditGpxReadout.textContent = t("diary.gpxReady", {
+        name: importedGpx.gpxName,
+        distance: importedGpx.stats.distance.toLocaleString(languageLocale(), { maximumFractionDigits: 1 }),
+        ascent: importedGpx.stats.ascent
+      });
+      els.diaryEditGpxReadout.classList.add("ready");
+      setDiaryWeatherPreview("loading", null, els.diaryEditWeatherPreview);
+      try {
+        const weather = await fetchDiaryWeather(importedGpx);
+        if (pendingEditGpx !== importedGpx) return;
+        importedGpx.weather = weather;
+        setDiaryWeatherPreview("ready", weather, els.diaryEditWeatherPreview);
+      } catch (error) {
+        if (pendingEditGpx !== importedGpx) return;
+        setDiaryWeatherPreview(error?.code === "FUTURE" ? "future" : "error", null, els.diaryEditWeatherPreview);
+      }
+    } catch (_) {
+      els.diaryEditGpxReadout.textContent = t("diary.gpxError");
+      els.diaryEditGpxReadout.classList.add("error");
+    }
+  });
+
   els.publicPhotoInput?.addEventListener("change", async () => {
     const file = els.publicPhotoInput.files?.[0];
     if (!file) return;
@@ -2541,6 +2571,13 @@
       els.diaryEditPublicNoteDe.value = publicNotes.de;
       els.diaryEditPublicNoteEn.value = publicNotes.en;
       els.diaryEditPublicNoteRu.value = publicNotes.ru;
+      pendingEditGpx = null;
+      els.diaryEditGpx.value = "";
+      els.diaryEditGpxReadout.textContent = entry.gpxName
+        ? t("diary.gpxCurrent", { name: entry.gpxName })
+        : t("diary.gpxNoCurrent");
+      els.diaryEditGpxReadout.classList.remove("ready", "error");
+      setDiaryWeatherPreview("hidden", null, els.diaryEditWeatherPreview);
       if (typeof els.diaryEditDialog.showModal === "function") els.diaryEditDialog.showModal();
       else els.diaryEditDialog.setAttribute("open", "");
       return;
@@ -2555,6 +2592,7 @@
 
   function closeDiaryEditor() {
     editingDiaryId = null;
+    pendingEditGpx = null;
     if (typeof els.diaryEditDialog?.close === "function") els.diaryEditDialog.close();
     else els.diaryEditDialog?.removeAttribute("open");
   }
@@ -2570,6 +2608,7 @@
     entry.title = title.slice(0, 80);
     entry.from = els.diaryEditFrom.value.trim().slice(0, 60);
     entry.to = els.diaryEditTo.value.trim().slice(0, 60);
+    if (pendingEditGpx) globalThis.CaminoGpxMotion.replaceEntryRoute(entry, pendingEditGpx);
     entry.privateNotes = {
       de: els.diaryEditNoteDe.value.trim().slice(0, 2880),
       ru: els.diaryEditNoteRu.value.trim().slice(0, 2880)

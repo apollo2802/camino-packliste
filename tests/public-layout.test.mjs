@@ -128,6 +128,16 @@ test("stage places can be edited after GPX import", async () => {
   assert.match(script, /entry\.to\s*=\s*els\.diaryEditTo\.value\.trim\(\)\.slice\(0, 60\)/);
 });
 
+test("an existing stage can replace its GPX without recreating the entry", async () => {
+  const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
+  const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");
+
+  assert.match(html, /id="diary-edit-gpx"/);
+  assert.match(html, /id="diary-edit-gpx-readout"/);
+  assert.match(script, /els\.diaryEditGpx\?\.addEventListener\("change"/);
+  assert.match(script, /CaminoGpxMotion\.replaceEntryRoute\(entry, pendingEditGpx\)/);
+});
+
 test("GPX import suggests editable start and finish places from its endpoints", async () => {
   const html = await readFile(new URL("../app/page.js", import.meta.url), "utf8");
   const script = await readFile(new URL("../public/app.js", import.meta.url), "utf8");

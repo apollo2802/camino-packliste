@@ -420,6 +420,13 @@ const pageMarkup = `
           <span aria-hidden="true">→</span>
           <label class="diary-field"><span data-i18n="diary.to">Nach</span><input id="diary-edit-to" maxlength="60"></label>
         </div>
+        <label class="gpx-drop compact" for="diary-edit-gpx">
+          <span class="gpx-icon" aria-hidden="true">↻</span>
+          <span><strong data-i18n="diary.gpxReplaceTitle">GPX-Route ersetzen</strong><small data-i18n="diary.gpxReplaceCopy">Berechnet Route, Geschwindigkeit und Wetter neu. Texte und Orte bleiben erhalten.</small></span>
+          <input id="diary-edit-gpx" type="file" accept=".gpx,application/gpx+xml,application/xml,text/xml">
+        </label>
+        <p class="gpx-readout" id="diary-edit-gpx-readout" role="status"></p>
+        <div class="diary-weather-preview" id="diary-edit-weather-preview" role="status" hidden></div>
         <fieldset class="diary-private-notes">
           <legend data-i18n="diary.privateNotes">Private Tagesnotizen</legend>
           <label class="diary-field"><span data-i18n="diary.privateNoteDe">Deutsch</span><textarea id="diary-edit-note-de" rows="4" maxlength="2880"></textarea></label>

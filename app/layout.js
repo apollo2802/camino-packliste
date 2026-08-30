@@ -32,6 +32,7 @@ export default function RootLayout({ children }) {
       "body",
       null,
       children,
+      React.createElement("script", { src: "/gpx-motion.js", defer: true }),
       React.createElement("script", { src: "/app.js", defer: true })
     )
   );

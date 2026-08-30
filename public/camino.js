@@ -38,7 +38,7 @@
   }
   function speedPath(profile) {
     if (!Array.isArray(profile) || profile.length < 2) return "";
-    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed > 0);
+    const speeds = profile.map(Number).filter((speed) => Number.isFinite(speed) && speed >= 0);
     if (speeds.length !== profile.length) return "";
     const min = Math.min(...speeds), max = Math.max(...speeds), span = Math.max(1, max - min);
     return speeds.map((speed, index) => `${index ? "L" : "M"}${(index / (speeds.length - 1) * 640).toFixed(1)},${(8 + (max - speed) / span * 48).toFixed(1)}`).join(" ");

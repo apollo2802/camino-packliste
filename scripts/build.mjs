@@ -38,6 +38,10 @@ const appScript = readFileSync("public/app.js", "utf8").replace(
   /<\/script/gi,
   "<\\/script",
 );
+const gpxMotionScript = readFileSync("public/gpx-motion.js", "utf8").replace(
+  /<\/script/gi,
+  "<\\/script",
+);
 const diary3dScript = readFileSync("public/diary-3d.js", "utf8");
 const publicCss = readFileSync("public/camino.css", "utf8").replace(/<\/style/gi, "<\\/style");
 const publicScript = readFileSync("public/camino.js", "utf8").replace(/<\/script/gi, "<\\/script");
@@ -49,7 +53,7 @@ html = html
   .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, "")
   .replace(/<link\b[^>]*href=["']\/_next\/[^>]*>/gi, "")
   .replace("</head>", `<style>${css}</style></head>`)
-  .replace("</body>", `<script>${appScript}</script></body>`);
+  .replace("</body>", `<script>${gpxMotionScript}\n${appScript}</script></body>`);
 
 const loginHtml = `<!doctype html>
 <html lang="de">
@@ -391,7 +395,7 @@ function publishedEntries(value) {
       max: Number(entry.stats.max) || 0,
       averageSpeed: Number(entry.stats.averageSpeed) || 0,
       speedProfile: Array.isArray(entry.stats.speedProfile)
-        ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value > 0)
+        ? entry.stats.speedProfile.slice(0, 100).map(Number).filter((value) => Number.isFinite(value) && value >= 0)
         : []
     } : null,
     weather: entry.weather && typeof entry.weather === "object" ? {
