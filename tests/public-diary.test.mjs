@@ -132,6 +132,22 @@ test("content security policy permits archived weather requests", async () => {
   assert.match(policy, /https:\/\/archive-api\.open-meteo\.com/);
 });
 
+test("public page shows a read-only example packing list before the diary", async () => {
+  const response = await app.fetch(new Request("https://example.test/"), environment({ diary: [] }));
+  const html = await response.text();
+  const previewStart = html.indexOf('id="packliste-vorschau"');
+  const diaryStart = html.indexOf('class="public-latest"');
+
+  assert.ok(previewStart >= 0, "expected the public packing-list preview");
+  assert.ok(previewStart < diaryStart, "expected the preview before the travel diary");
+
+  const preview = html.slice(previewStart, diaryStart);
+  assert.equal((preview.match(/class="public-pack-item"/g) || []).length, 12);
+  assert.match(preview, /data-i18n="packWeightLabel"/);
+  assert.match(preview, /2,0 kg/);
+  assert.doesNotMatch(preview, /<(?:button|input|form|select|textarea)\b|contenteditable/i);
+});
+
 test("content security policy permits local blob images for photo conversion", async () => {
   const response = await app.fetch(new Request("https://example.test/intern"), environment({ diary: [] }));
   const policy = response.headers.get("content-security-policy") || "";
