@@ -55,6 +55,17 @@ html = html
   .replace("</head>", `<style>${css}</style></head>`)
   .replace("</body>", `<script>${gpxMotionScript}\n${appScript}</script></body>`);
 
+// Reuse the packing-list UI with fixed example data and no private sections.
+const demoHtml = html
+  .replace("<body", '<body data-pack-demo="true"')
+  .replace(/<form class="add-item"[\s\S]*?<\/form>/, "")
+  .replace(/<button class="rename-button rename-profile"[^>]*>[\s\S]*?<\/button>/g, "")
+  .replace(/<button[^>]*id="reset-button"[^>]*>[\s\S]*?<\/button>/, "")
+  .replace(/<a[^>]*href="\/logout"[^>]*>[\s\S]*?<\/a>/, "")
+  .replace(/<a[^>]*class="ghost-button diary-link"[^>]*>[\s\S]*?<\/a>/, "")
+  .replace(/<section class="trail-weather-section"[\s\S]*?(?=<section class="quick-guide")/, "")
+  .replace(/<dialog class="diary-edit-dialog"[\s\S]*?<\/dialog>/, "");
+
 const loginHtml = `<!doctype html>
 <html lang="de">
 <head>
@@ -184,15 +195,23 @@ const visitorSchemaSql = `CREATE TABLE IF NOT EXISTS camino_visit_daily (
   page_views INTEGER NOT NULL,
   PRIMARY KEY (day, visitor_hash)
 )`;
+const visitorBudgetSchemaSql = `CREATE TABLE IF NOT EXISTS camino_visit_budget (
+  id INTEGER PRIMARY KEY CHECK (id = 1),
+  window_started INTEGER NOT NULL,
+  requests INTEGER NOT NULL,
+  token TEXT NOT NULL
+)`;
 
 const worker = `const INDEX_HTML = ${JSON.stringify(html)};
 const LOGIN_HTML = ${JSON.stringify(loginHtml)};
 const PUBLIC_HTML = ${JSON.stringify(publicHtml)};
+const DEMO_HTML = ${JSON.stringify(demoHtml)};
 const DIARY_3D_JS = ${JSON.stringify(diary3dScript)};
 const STATE_SCHEMA_SQL = ${JSON.stringify(stateSchemaSql)};
 const ATTEMPTS_SCHEMA_SQL = ${JSON.stringify(attemptsSchemaSql)};
 const PUBLIC_PHOTO_SCHEMA_SQL = ${JSON.stringify(publicPhotoSchemaSql)};
 const VISITOR_SCHEMA_SQL = ${JSON.stringify(visitorSchemaSql)};
+const VISITOR_BUDGET_SCHEMA_SQL = ${JSON.stringify(visitorBudgetSchemaSql)};
 const SESSION_COOKIE = "camino_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
 const encoder = new TextEncoder();
@@ -295,6 +314,8 @@ async function ensureSchema(env) {
     env.DB.prepare(ATTEMPTS_SCHEMA_SQL),
     env.DB.prepare(PUBLIC_PHOTO_SCHEMA_SQL),
     env.DB.prepare(VISITOR_SCHEMA_SQL),
+    env.DB.prepare(VISITOR_BUDGET_SCHEMA_SQL),
+    env.DB.prepare("INSERT INTO camino_visit_budget (id, window_started, requests, token) VALUES (1, 0, 0, '') ON CONFLICT(id) DO NOTHING"),
   ]);
 }
 
@@ -330,31 +351,18 @@ function publicPhotoPayload(row) {
   return { active: true, version, url: "/media/public-photo.jpg?v=" + version };
 }
 
-function clientAddress(request) {
-  const forwarded = request.headers.get("x-forwarded-for") || "";
-  return request.headers.get("cf-connecting-ip") ||
-    forwarded.split(",")[0].trim() ||
-    request.headers.get("x-real-ip") ||
-    "unknown";
-}
-
-async function failedTooOften(request, env) {
-  const key = await sha256(clientAddress(request));
+async function reserveLoginAttempt(env) {
+  // One persistent shared-account bucket, never an identity supplied by HTTP headers.
+  // Reserve atomically BEFORE checking the code, including concurrent/malformed guesses.
+  const key = "shared-login-v2";
   const now = Math.floor(Date.now() / 1000);
-  const row = await env.DB.prepare("SELECT failures, window_started FROM login_attempts WHERE key = ?").bind(key).first();
-  return row && now - Number(row.window_started) < 900 && Number(row.failures) >= 5;
+  const result = await env.DB.prepare("INSERT INTO login_attempts (key, failures, window_started) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET failures = CASE WHEN ? - login_attempts.window_started >= 900 THEN 1 ELSE login_attempts.failures + 1 END, window_started = CASE WHEN ? - login_attempts.window_started >= 900 THEN ? ELSE login_attempts.window_started END WHERE ? - login_attempts.window_started >= 900 OR login_attempts.failures < 20")
+    .bind(key, now, now, now, now, now).run();
+  return result.changes === 1;
 }
 
-async function recordFailedLogin(request, env) {
-  const key = await sha256(clientAddress(request));
-  const now = Math.floor(Date.now() / 1000);
-  await env.DB.prepare("INSERT INTO login_attempts (key, failures, window_started) VALUES (?, 1, ?) ON CONFLICT(key) DO UPDATE SET failures = CASE WHEN ? - window_started > 900 THEN 1 ELSE failures + 1 END, window_started = CASE WHEN ? - window_started > 900 THEN ? ELSE window_started END")
-    .bind(key, now, now, now, now).run();
-}
-
-async function clearFailedLogins(request, env) {
-  const key = await sha256(clientAddress(request));
-  await env.DB.prepare("DELETE FROM login_attempts WHERE key = ?").bind(key).run();
+async function clearFailedLogins(env) {
+  await env.DB.prepare("DELETE FROM login_attempts WHERE key = ?").bind("shared-login-v2").run();
 }
 
 function validState(value) {
@@ -427,14 +435,15 @@ export default {
     }
 
     if (url.pathname === "/login" && request.method === "POST") {
-      if (await failedTooOften(request, env)) return loginPage("attempts", 429);
-      const form = await request.formData();
+      if (!(await reserveLoginAttempt(env))) return loginPage("attempts", 429);
+      let form;
+      try { form = await request.formData(); }
+      catch (_) { return loginPage("code", 400); }
       const submitted = String(form.get("code") || "");
       if (!(await secureEqual(submitted, accessCode))) {
-        await recordFailedLogin(request, env);
         return loginPage("code", 401);
       }
-      await clearFailedLogins(request, env);
+      await clearFailedLogins(env);
       const session = await createSession(sessionSecret);
       const secure = url.protocol === "https:" ? "; Secure" : "";
       return response(null, {
@@ -466,6 +475,10 @@ export default {
 
     if ((url.pathname === "/" || url.pathname === "/index.html") && request.method === "GET") {
       return publicResponse(PUBLIC_HTML);
+    }
+
+    if ((url.pathname === "/packliste" || url.pathname === "/packliste/") && request.method === "GET") {
+      return publicResponse(DEMO_HTML);
     }
 
     if (url.pathname === "/api/public-diary" && request.method === "GET") {
@@ -502,8 +515,18 @@ export default {
       } catch (_) { return publicJson({ error: "Ungültige Daten" }, 400); }
       if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).length !== 1 || !validVisitorId(body.visitorId)) return publicJson({ error: "Ungültige Besucher-ID" }, 400);
       const visitorHash = await hmac("visitor:" + body.visitorId, sessionSecret);
-      await env.DB.prepare("INSERT INTO camino_visit_daily (day, visitor_hash, page_views) VALUES (?, ?, 1) ON CONFLICT(day, visitor_hash) DO UPDATE SET page_views = camino_visit_daily.page_views + 1")
-        .bind(berlinDay(), visitorHash).run();
+      const day = berlinDay();
+      const now = Math.floor(Date.now() / 1000);
+      const token = crypto.randomUUID();
+      // DB.batch must be one READ COMMITTED transaction. The singleton UPDATE locks
+      // the budget until the capacity-checked INSERT finishes, including across replicas.
+      const results = await env.DB.batch([
+        env.DB.prepare("UPDATE camino_visit_budget SET requests = CASE WHEN ? - window_started >= 60 THEN 1 ELSE requests + 1 END, window_started = CASE WHEN ? - window_started >= 60 THEN ? ELSE window_started END, token = ? WHERE id = 1 AND (? - window_started >= 60 OR requests < 60)")
+          .bind(now, now, now, token, now),
+        env.DB.prepare("INSERT INTO camino_visit_daily (day, visitor_hash, page_views) SELECT ?, ?, 1 WHERE EXISTS (SELECT 1 FROM camino_visit_budget WHERE id = 1 AND token = ?) AND ((SELECT COUNT(*) FROM camino_visit_daily) < 10000 OR EXISTS (SELECT 1 FROM camino_visit_daily WHERE day = ? AND visitor_hash = ?)) ON CONFLICT(day, visitor_hash) DO UPDATE SET page_views = camino_visit_daily.page_views + 1")
+          .bind(day, visitorHash, token, day, visitorHash),
+      ]);
+      if (results[1]?.changes !== 1) return publicJson({ error: "Statistik-Limit erreicht" }, 429);
       return publicJson({ ok: true });
     }
 

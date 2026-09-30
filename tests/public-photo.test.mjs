@@ -22,7 +22,7 @@ function createEnvironment() {
           async run() {
             if (sql.startsWith("INSERT INTO camino_public_photo")) photo = { media_key: values[0], updated_at: values[1] };
             if (sql.startsWith("DELETE FROM camino_public_photo")) photo = null;
-            return { success: true };
+            return { success: true, changes: 1 };
           }
         };
       },

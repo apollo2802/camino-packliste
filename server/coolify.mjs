@@ -60,7 +60,9 @@ const database = {
   async batch(statements) {
     const client = await pool.connect();
     try {
-      await client.query("BEGIN");
+      // Budget-row locks and the following capacity check require a fresh snapshot
+      // for each statement, even if the host changed its default isolation level.
+      await client.query("BEGIN ISOLATION LEVEL READ COMMITTED");
       const results = [];
       for (const prepared of statements) results.push(await prepared.run(client));
       await client.query("COMMIT");

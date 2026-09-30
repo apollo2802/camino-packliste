@@ -9,6 +9,7 @@ const state = { value: null, updatedAt: null };
 const attempts = new Map();
 const mediaFiles = new Map();
 const visitRows = new Map();
+const visitBudget = { windowStarted: 0, requests: 0, token: "" };
 let publicPhoto = null;
 
 function createStatement(sql) {
@@ -36,13 +37,15 @@ function createStatement(sql) {
       return null;
     },
     async run() {
+      const changes = 1;
       if (sql.startsWith("INSERT INTO camino_state")) {
         state.value = values[0];
         state.updatedAt = values[1];
       } else if (sql.startsWith("INSERT INTO login_attempts")) {
         const current = attempts.get(values[0]);
         const now = values[1];
-        attempts.set(values[0], !current || now - current.window_started > 900
+        if (current && now - current.window_started < 900 && current.failures >= 20) return { success: true, changes: 0 };
+        attempts.set(values[0], !current || now - current.window_started >= 900
           ? { failures: 1, window_started: now }
           : { failures: current.failures + 1, window_started: current.window_started });
       } else if (sql.startsWith("DELETE FROM login_attempts")) {
@@ -51,12 +54,20 @@ function createStatement(sql) {
         publicPhoto = { media_key: values[0], updated_at: values[1] };
       } else if (sql.startsWith("DELETE FROM camino_public_photo")) {
         publicPhoto = null;
+      } else if (sql.startsWith("UPDATE camino_visit_budget")) {
+        const now = values[0];
+        const expired = now - visitBudget.windowStarted >= 60;
+        if (!expired && visitBudget.requests >= 60) return { success: true, changes: 0 };
+        visitBudget.requests = expired ? 1 : visitBudget.requests + 1;
+        if (expired) visitBudget.windowStarted = now;
+        visitBudget.token = values[3];
       } else if (sql.startsWith("INSERT INTO camino_visit_daily")) {
         const key = `${values[0]}:${values[1]}`;
         const previous = visitRows.get(key);
+        if (visitBudget.token !== values[2] || (!previous && visitRows.size >= 10_000)) return { success: true, changes: 0 };
         visitRows.set(key, { day: values[0], visitor_hash: values[1], page_views: (previous?.page_views || 0) + 1 });
       }
-      return { success: true };
+      return { success: true, changes };
     },
   };
 }
@@ -67,6 +78,8 @@ const env = {
   DB: {
     prepare: createStatement,
     async batch(statements) {
+      // Each in-memory run executes synchronously before returning its promise;
+      // no other request can interleave within this statement batch.
       return Promise.all(statements.map((statement) => statement.run()));
     },
   },

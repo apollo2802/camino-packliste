@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import app from "../dist/server/index.js";
+import { sqliteEnvironment } from "./helpers/sqlite-environment.mjs";
 
 const ACCESS_CODE = "test-access-code";
 const SESSION_SECRET = "test-session-secret-that-is-long-enough";
@@ -11,44 +12,10 @@ function berlinDay(date = new Date()) {
   return `${value.year}-${value.month}-${value.day}`;
 }
 
-function createEnvironment() {
-  const rows = new Map();
-  const state = { value: null, updatedAt: null };
-  const attempts = new Map();
-  const env = {
-    ACCESS_CODE,
-    SESSION_SECRET,
-    DB: {
-      prepare(sql) {
-        let values = [];
-        return {
-          bind(...nextValues) { values = nextValues; return this; },
-          async first() {
-            if (sql.includes("FROM login_attempts")) return attempts.get(values[0]) || null;
-            if (sql.includes("FROM camino_state")) return state.value === null ? null : { payload: state.value, updated_at: state.updatedAt };
-            if (sql.includes("FROM camino_visit_daily")) {
-              const [cutoff] = values;
-              const selected = [...rows.values()].filter((row) => !cutoff || (sql.includes("day = ?") ? row.day === cutoff : row.day >= cutoff));
-              return { visitors: new Set(selected.map((row) => row.visitor_hash)).size, page_views: selected.reduce((sum, row) => sum + row.page_views, 0) };
-            }
-            return null;
-          },
-          async run() {
-            if (sql.startsWith("INSERT INTO camino_state")) { state.value = values[0]; state.updatedAt = values[1]; }
-            else if (sql.startsWith("INSERT INTO login_attempts")) attempts.set(values[0], { failures: 1, window_started: values[1] });
-            else if (sql.startsWith("INSERT INTO camino_visit_daily")) {
-              const key = `${values[0]}:${values[1]}`;
-              const previous = rows.get(key);
-              rows.set(key, { day: values[0], visitor_hash: values[1], page_views: (previous?.page_views || 0) + 1 });
-            }
-            return { success: true };
-          }
-        };
-      },
-      async batch(statements) { return Promise.all(statements.map((statement) => statement.run())); }
-    }
-  };
-  return { env, rows };
+async function createEnvironment(t) {
+  const result = sqliteEnvironment(t);
+  await app.fetch(new Request("https://example.test/"), result.env);
+  return result;
 }
 
 async function recordVisit(env, visitorId, origin = "https://example.test") {
@@ -75,42 +42,42 @@ async function authenticatedStats(env) {
   return response.json();
 }
 
-test("repeat loads increment page views but keep one visitor", async () => {
-  const { env } = createEnvironment();
+test("repeat loads increment page views but keep one visitor", async (t) => {
+  const { env } = await createEnvironment(t);
   assert.equal((await recordVisit(env, "11111111-1111-4111-8111-111111111111")).status, 200);
   assert.equal((await recordVisit(env, "11111111-1111-4111-8111-111111111111")).status, 200);
   const stats = await authenticatedStats(env);
   assert.deepEqual(stats.today, { visitors: 1, pageViews: 2 });
 });
 
-test("a second UUID creates a second visitor", async () => {
-  const { env } = createEnvironment();
+test("a second UUID creates a second visitor", async (t) => {
+  const { env } = await createEnvironment(t);
   await recordVisit(env, "11111111-1111-4111-8111-111111111111");
   await recordVisit(env, "22222222-2222-4222-8222-222222222222");
   assert.deepEqual((await authenticatedStats(env)).today, { visitors: 2, pageViews: 2 });
 });
 
-test("malformed visitor ids return 400", async () => {
-  const { env } = createEnvironment();
+test("malformed visitor ids return 400", async (t) => {
+  const { env } = await createEnvironment(t);
   assert.equal((await recordVisit(env, "not-a-uuid")).status, 400);
 });
 
-test("cross-origin POST returns 403", async () => {
-  const { env } = createEnvironment();
+test("cross-origin POST returns 403", async (t) => {
+  const { env } = await createEnvironment(t);
   assert.equal((await recordVisit(env, "11111111-1111-4111-8111-111111111111", "https://evil.example")).status, 403);
 });
 
-test("rows older than the seven-day cutoff affect only total", async () => {
-  const { env, rows } = createEnvironment();
-  rows.set(`2020-01-01:old`, { day: "2020-01-01", visitor_hash: "old", page_views: 3 });
+test("rows older than the seven-day cutoff affect only total", async (t) => {
+  const { env, connection } = await createEnvironment(t);
+  connection.exec("INSERT INTO camino_visit_daily VALUES ('2020-01-01', 'old', 3)");
   await recordVisit(env, "11111111-1111-4111-8111-111111111111");
   const stats = await authenticatedStats(env);
   assert.deepEqual(stats.sevenDays, { visitors: 1, pageViews: 1 });
   assert.deepEqual(stats.total, { visitors: 2, pageViews: 4 });
 });
 
-test("seven-day boundary follows the Berlin calendar across CEST midnight", async () => {
-  const { env, rows } = createEnvironment();
+test("seven-day boundary follows the Berlin calendar across CEST midnight", async (t) => {
+  const { env, connection } = await createEnvironment(t);
   const realDate = Date;
   const fixedNow = new realDate("2026-03-29T22:30:00.000Z");
   globalThis.Date = class extends realDate {
@@ -118,8 +85,7 @@ test("seven-day boundary follows the Berlin calendar across CEST midnight", asyn
     static now() { return fixedNow.getTime(); }
   };
   try {
-    rows.set("2026-03-23:old", { day: "2026-03-23", visitor_hash: "old", page_views: 5 });
-    rows.set("2026-03-24:boundary", { day: "2026-03-24", visitor_hash: "boundary", page_views: 2 });
+    connection.exec("INSERT INTO camino_visit_daily VALUES ('2026-03-23', 'old', 5), ('2026-03-24', 'boundary', 2)");
     const stats = await authenticatedStats(env);
     assert.deepEqual(stats.sevenDays, { visitors: 1, pageViews: 2 });
     assert.deepEqual(stats.total, { visitors: 2, pageViews: 7 });
@@ -128,12 +94,12 @@ test("seven-day boundary follows the Berlin calendar across CEST midnight", asyn
   }
 });
 
-test("raw visitor ids are neither persisted nor returned", async () => {
-  const { env, rows } = createEnvironment();
+test("raw visitor ids are neither persisted nor returned", async (t) => {
+  const { env, connection } = await createEnvironment(t);
   const visitorId = "33333333-3333-4333-8333-333333333333";
   const response = await recordVisit(env, visitorId);
   assert.equal(response.status, 200);
-  const stored = [...rows.values()][0];
+  const stored = connection.prepare("SELECT * FROM camino_visit_daily").get();
   assert.ok(stored);
   assert.equal(stored.visitor_hash, await expectedVisitorHash(visitorId));
   assert.notEqual(stored.visitor_hash, visitorId);
@@ -141,8 +107,8 @@ test("raw visitor ids are neither persisted nor returned", async () => {
   assert.deepEqual(await response.json(), { ok: true });
 });
 
-test("visitor stats require authentication", async () => {
-  const { env } = createEnvironment();
+test("visitor stats require authentication", async (t) => {
+  const { env } = await createEnvironment(t);
   const response = await app.fetch(new Request("https://example.test/api/visitor-stats"), env);
   assert.equal(response.status, 401);
 });

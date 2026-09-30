@@ -15,7 +15,7 @@ function environment(payload) {
       prepare(sql) {
         return {
           bind() { return this; },
-          async run() { return { success: true }; },
+          async run() { return { success: true, changes: 1 }; },
           async first() {
             if (sql.includes("FROM camino_state")) return { payload: JSON.stringify(payload), updated_at: 1 };
             if (sql.includes("FROM camino_public_photo")) return null;
@@ -132,20 +132,24 @@ test("content security policy permits archived weather requests", async () => {
   assert.match(policy, /https:\/\/archive-api\.open-meteo\.com/);
 });
 
-test("public page shows a read-only example packing list before the diary", async () => {
+test("public page links to the separate packing-list demo", async () => {
   const response = await app.fetch(new Request("https://example.test/"), environment({ diary: [] }));
   const html = await response.text();
-  const previewStart = html.indexOf('id="packliste-vorschau"');
-  const diaryStart = html.indexOf('class="public-latest"');
+  assert.match(html, /href="\/packliste"/);
+  assert.doesNotMatch(html, /class="public-pack-item"/);
+});
 
-  assert.ok(previewStart >= 0, "expected the public packing-list preview");
-  assert.ok(previewStart < diaryStart, "expected the preview before the travel diary");
-
-  const preview = html.slice(previewStart, diaryStart);
-  assert.equal((preview.match(/class="public-pack-item"/g) || []).length, 12);
-  assert.match(preview, /data-i18n="packWeightLabel"/);
-  assert.match(preview, /2,0 kg/);
-  assert.doesNotMatch(preview, /<(?:button|input|form|select|textarea)\b|contenteditable/i);
+test("packing-list demo is public and excludes private management sections", async () => {
+  const env = environment({ diary: [{ note: "PRIVATE NOTE" }], labels: { profiles: { p1: "PRIVATE NAME" } } });
+  for (const path of ["/packliste", "/packliste/"]) {
+    const response = await app.fetch(new Request(`https://example.test${path}`), env);
+    const html = await response.text();
+    assert.equal(response.status, 200);
+    assert.match(html, /data-pack-demo="true"/);
+    assert.match(html, /id="checklist"/);
+    assert.match(html, /id="search-input"/);
+    assert.doesNotMatch(html, /PRIVATE NOTE|PRIVATE NAME|<section class="diary-section"|<section class="visitor-stats"|<form class="add-item"|href="\/logout"/);
+  }
 });
 
 test("content security policy permits local blob images for photo conversion", async () => {

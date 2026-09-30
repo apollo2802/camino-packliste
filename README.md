@@ -36,6 +36,14 @@ Die Packliste wird in PostgreSQL gespeichert. Das Docker-Volume `camino_database
 
 Beim ersten Öffnen einer noch leeren Installation wird ein bereits im Browser vorhandener Packlistenstand automatisch in den gemeinsamen Speicher übernommen.
 
+### Schutz vor automatisierten Anfragen
+
+Die Anmeldung erlaubt gemeinsam höchstens 20 erfolglose Versuche innerhalb von 15 Minuten. Manipulierbare IP-Header ändern diese Grenze nicht. Erfolgreiche Anmeldungen setzen den Zähler zurück; fehlerhafte Anmeldeformate zählen ebenfalls als Versuch. Nach Ausschöpfen der Grenze müssen beide Personen bis zum Ende des Zeitfensters warten. Bereits angemeldete Sitzungen bleiben nutzbar.
+
+Der öffentliche Besucherzähler akzeptiert höchstens 60 Statistik-Schreibzugriffe pro Minute und speichert insgesamt höchstens 10.000 Tages-Besucher-Datensätze. Wiederholte Aufrufe desselben Besuchers am selben Tag benötigen keinen weiteren Datensatz, unterliegen aber ebenfalls dem Minutenlimit. Vorhandene Daten werden nicht gelöscht. Bei ausgeschöpftem Limit werden neue Einträge mit HTTP 429 abgewiesen; die Webseite selbst bleibt verfügbar. Auch ein bekannter Besucher benötigt am nächsten Tag einen neuen Datensatz. Die Zähler können deshalb bei hoher Last oder voller Speicherung weniger Aufrufe anzeigen als tatsächlich erfolgt sind. Eine bereits größere Datenbank wird nicht automatisch verkleinert, wächst über diesen Endpunkt aber nicht weiter.
+
+Die Grenzen werden in PostgreSQL gespeichert und gelten auch nach Neustarts sowie gemeinsam für mehrere App-Instanzen. Besucherzulassung und Speicherprüfung erfolgen in einer gemeinsamen `READ COMMITTED`-Transaktion.
+
 ## Lokal entwickeln
 
 ```bash

@@ -1,6 +1,8 @@
 (() => {
   "use strict";
 
+  const isDemo = document.body.dataset.packDemo === "true";
+
   const STORAGE_KEY = "camino-packliste-2026-v1";
   const LANGUAGE_KEY = "camino-language-v1";
   const WEATHER_POSITION_KEY = "camino-weather-position-v1";
@@ -1117,6 +1119,15 @@
     }
   });
 
+  if (isDemo) {
+    const demoCopy = {
+      de: { "page.title": "Beispiel-Packliste · Camino", "hero.copy": "Entdecke unsere Packliste mit Beispieldaten. Wechsle zwischen den Listen, suche Gegenstände und filtere nach Priorität.", "checklist.copy": "Öffentliche Vorschau: Gegenstände und Gewichte sind Beispiele und können hier nicht verändert werden.", "sync.demo": "Demo · nur zum Anschauen", "profiles.p1": "Person 1", "profiles.p2": "Person 2", "footer.copy": "Beispiel-Packliste · Entdecke die Möglichkeiten.", "overview.label": "Beispiel-Fortschritt" },
+      en: { "page.title": "Example packing list · Camino", "hero.copy": "Explore our packing list with sample data. Switch lists, search for items and filter by priority.", "checklist.copy": "Public preview: items and weights are examples and cannot be changed here.", "sync.demo": "Demo · view only", "profiles.p1": "Person 1", "profiles.p2": "Person 2", "footer.copy": "Example packing list · Explore the possibilities.", "overview.label": "Example progress" },
+      ru: { "page.title": "Пример списка вещей · Камино", "hero.copy": "Познакомьтесь со списком вещей на примере. Переключайте списки, ищите вещи и фильтруйте по важности.", "checklist.copy": "Открытая демонстрация: вещи и вес приведены для примера и недоступны для изменения.", "sync.demo": "Демо · только просмотр", "profiles.p1": "Человек 1", "profiles.p2": "Человек 2", "footer.copy": "Пример списка вещей · Познакомьтесь с возможностями.", "overview.label": "Пример прогресса" }
+    };
+    Object.keys(demoCopy).forEach((language) => Object.assign(translations[language], demoCopy[language]));
+  }
+
   let activeLanguage = loadLanguage();
   let state = loadState();
   let activeProfile = "p1";
@@ -1289,6 +1300,14 @@
   }
 
   function loadState() {
+    if (isDemo) {
+      const example = freshState();
+      ["p1", "p2", "shared"].forEach((profile) => {
+        const items = profile === "shared" ? sharedItems : personalItems;
+        items.forEach((item, index) => { if (index % 3 !== 2) example.checked[profile][item.id] = true; });
+      });
+      return example;
+    }
     try {
       const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
       return normalizeState(parsed);
@@ -1385,17 +1404,20 @@
   }
 
   function writeLocalState() {
+    if (isDemo) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
   function setSyncStatus(key, isError = false) {
     if (!els.syncStatus) return;
+    if (isDemo) { key = "sync.demo"; isError = false; }
     currentSyncStatus = { key, isError };
     els.syncStatus.textContent = t(key);
     els.syncStatus.classList.toggle("error", isError);
   }
 
   async function pushState() {
+    if (isDemo) return;
     if (!serverReady) return;
     setSyncStatus("sync.saving");
     try {
@@ -1417,6 +1439,7 @@
   }
 
   function saveState() {
+    if (isDemo) return;
     writeLocalState();
     if (!serverReady) return;
     window.clearTimeout(syncTimer);
@@ -1424,6 +1447,7 @@
   }
 
   async function loadSharedState() {
+    if (isDemo) return;
     setSyncStatus("sync.loading");
     try {
       const response = await fetch("/api/state", { credentials: "same-origin" });
@@ -2190,26 +2214,26 @@
     return `
       <article class="pack-item ${checked ? "checked" : ""}">
         <label class="check-control">
-          <input type="checkbox" data-check-id="${escapeHTML(item.id)}" ${checked ? "checked" : ""}>
+          <input type="checkbox" data-check-id="${escapeHTML(item.id)}" ${checked ? "checked" : ""} ${isDemo ? "disabled" : ""}>
           <span aria-hidden="true">✓</span>
           <span class="sr-only">${escapeHTML(t(checked ? "item.uncheck" : "item.check"))}: ${escapeHTML(item.name)}</span>
         </label>
         <div class="item-copy">
           <div class="item-title-row">
             <strong>${escapeHTML(item.name)}</strong>
-            <button class="rename-button rename-item" type="button" data-rename-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("rename.itemAria", { name: item.name }))}">✎</button>
+            ${isDemo ? "" : `<button class="rename-button rename-item" type="button" data-rename-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("rename.itemAria", { name: item.name }))}">✎</button>`}
             <span class="priority ${item.priority}">${escapeHTML(t(`priority.${item.priority}`))}</span>
           </div>
           <p>${escapeHTML(item.note || t("item.custom"))}</p>
         </div>
         <div class="item-meta">
           <label class="weight-input" title="${escapeHTML(t("item.weightTitle"))}">
-            <input type="number" min="0" max="10000" step="1" value="${weightOf(activeProfile, item)}" data-weight-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.weightAria", { name: item.name }))}">
+            <input type="number" min="0" max="10000" step="1" value="${weightOf(activeProfile, item)}" data-weight-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.weightAria", { name: item.name }))}" ${isDemo ? "readonly" : ""}>
             <span>g</span>
           </label>
           <small>${escapeHTML(t(`mode.${item.mode || "pack"}`))}</small>
         </div>
-        <button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.delete", { name: item.name }))}">×</button>
+        ${isDemo ? "" : `<button class="delete-item" type="button" data-delete-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.delete", { name: item.name }))}">×</button>`}
       </article>
     `;
   }
@@ -2291,6 +2315,7 @@
   });
 
   els.list.addEventListener("change", (event) => {
+    if (isDemo) return;
     const checkId = event.target.dataset.checkId;
     if (checkId) {
       state.checked[activeProfile][checkId] = event.target.checked;
@@ -2300,6 +2325,7 @@
   });
 
   els.list.addEventListener("input", (event) => {
+    if (isDemo) return;
     const weightId = event.target.dataset.weightId;
     if (weightId) {
       const value = Math.max(0, Math.min(10000, Number(event.target.value) || 0));
@@ -2316,6 +2342,7 @@
   });
 
   els.list.addEventListener("click", (event) => {
+    if (isDemo) return;
     const renameId = event.target.dataset.renameId;
     if (renameId) {
       const item = getItems(activeProfile).find((entry) => entry.id === renameId);
@@ -2351,7 +2378,7 @@
     render();
   });
 
-  els.form.addEventListener("submit", (event) => {
+  els.form?.addEventListener("submit", (event) => {
     event.preventDefault();
     const name = els.customName.value.trim();
     if (!name) return;
@@ -2626,7 +2653,7 @@
   });
 
   document.getElementById("print-button").addEventListener("click", () => window.print());
-  document.getElementById("reset-button").addEventListener("click", () => {
+  document.getElementById("reset-button")?.addEventListener("click", () => {
     if (!window.confirm(t("reset.confirm"))) return;
     const diary = state.diary;
     state = freshState();
@@ -3151,8 +3178,10 @@
 
   applyStaticTranslations();
   render();
-  initTrailWeather();
+  if (!isDemo) initTrailWeather();
   initPackingFilm();
-  loadSharedState();
-  loadVisitorStats();
+  if (!isDemo) {
+    loadSharedState();
+    loadVisitorStats();
+  }
 })();
