@@ -11,7 +11,7 @@ test("Coolify compose persists uploaded media in a named volume", async () => {
 
 test("Coolify rejects unauthenticated photo uploads before buffering the body", async () => {
   const server = await readFile(new URL("../server/coolify.mjs", import.meta.url), "utf8");
-  const authCheck = server.indexOf("if (uploadRequest && !hasValidUploadSession");
+  const authCheck = server.indexOf("if (uploadRequest && !(await hasValidSession");
   const bodyRead = server.indexOf("await readBody(request, uploadRequest ? 2_500_000 : 220_000)");
 
   assert.notEqual(authCheck, -1);

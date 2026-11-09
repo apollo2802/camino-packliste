@@ -1364,7 +1364,17 @@
         normalized.weights[profile] = value.weights[profile];
       }
       if (Array.isArray(value.custom?.[profile])) {
-        normalized.custom[profile] = value.custom[profile];
+        normalized.custom[profile] = value.custom[profile].filter((item) => item && typeof item === "object" && !Array.isArray(item)).map((item) => ({
+          ...item,
+          id: typeof item.id === "string" ? item.id : `custom-${crypto.randomUUID()}`,
+          name: typeof item.name === "string" ? item.name : "",
+          category: typeof item.category === "string" ? item.category : "Eigene Ergänzungen",
+          note: typeof item.note === "string" ? item.note : "",
+          priority: ["must", "recommended", "optional"].includes(item.priority) ? item.priority : "recommended",
+          mode: ["pack", "worn", "consumable"].includes(item.mode) ? item.mode : "pack",
+          weight: typeof item.weight === "number" && Number.isFinite(item.weight) ? Math.max(0, Math.min(10000, item.weight)) : 0,
+          custom: true
+        }));
       }
       if (value.deleted?.[profile] && typeof value.deleted[profile] === "object") {
         normalized.deleted[profile] = value.deleted[profile];
@@ -1403,8 +1413,30 @@
     return normalized;
   }
 
+  let signedOut = false;
+  function clearPrivateState() {
+    signedOut = true;
+    serverReady = false;
+    window.clearTimeout(syncTimer);
+    for (const key of [STORAGE_KEY, WEATHER_POSITION_KEY]) {
+      try { localStorage.removeItem(key); } catch (_) {}
+    }
+  }
+  window.addEventListener("storage", (event) => {
+    if (!isDemo && event.key === "camino-signed-out") {
+      clearPrivateState();
+      window.location.replace("/intern");
+    }
+  });
+  window.addEventListener("pageshow", (event) => {
+    if (event.persisted) window.location.reload();
+  });
+  document.querySelector("[data-logout]")?.addEventListener("click", () => {
+    clearPrivateState();
+  });
+
   function writeLocalState() {
-    if (isDemo) return;
+    if (isDemo || signedOut) return;
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }
 
@@ -1428,6 +1460,7 @@
         body: JSON.stringify({ state })
       });
       if (response.status === 401) {
+        clearPrivateState();
         window.location.assign("/intern");
         return;
       }
@@ -1452,11 +1485,13 @@
     try {
       const response = await fetch("/api/state", { credentials: "same-origin" });
       if (response.status === 401) {
+        clearPrivateState();
         window.location.assign("/intern");
         return;
       }
       if (!response.ok) throw new Error("Load failed");
       const data = await response.json();
+      if (signedOut) return;
       serverReady = true;
       publicPhoto = data.publicPhoto?.active === true
         ? { active: true, version: Number(data.publicPhoto.version) || 0 }
@@ -1517,7 +1552,7 @@
 
   function weightOf(profile, item) {
     const saved = state.weights[profile][item.id];
-    return Number.isFinite(saved) ? saved : item.weight;
+    return Number.isFinite(saved) ? saved : Number.isFinite(item.weight) ? item.weight : 0;
   }
 
   function isChecked(profile, id) {
@@ -2222,13 +2257,13 @@
           <div class="item-title-row">
             <strong>${escapeHTML(item.name)}</strong>
             ${isDemo ? "" : `<button class="rename-button rename-item" type="button" data-rename-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("rename.itemAria", { name: item.name }))}">✎</button>`}
-            <span class="priority ${item.priority}">${escapeHTML(t(`priority.${item.priority}`))}</span>
+            <span class="priority ${escapeHTML(item.priority)}">${escapeHTML(t(`priority.${item.priority}`))}</span>
           </div>
           <p>${escapeHTML(item.note || t("item.custom"))}</p>
         </div>
         <div class="item-meta">
           <label class="weight-input" title="${escapeHTML(t("item.weightTitle"))}">
-            <input type="number" min="0" max="10000" step="1" value="${weightOf(activeProfile, item)}" data-weight-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.weightAria", { name: item.name }))}" ${isDemo ? "readonly" : ""}>
+            <input type="number" min="0" max="10000" step="1" value="${escapeHTML(weightOf(activeProfile, item))}" data-weight-id="${escapeHTML(item.id)}" aria-label="${escapeHTML(t("item.weightAria", { name: item.name }))}" ${isDemo ? "readonly" : ""}>
             <span>g</span>
           </label>
           <small>${escapeHTML(t(`mode.${item.mode || "pack"}`))}</small>
@@ -2798,7 +2833,7 @@
       show("loading");
       lastPosition = { latitude, longitude, savedAt: Date.now() };
       try {
-        localStorage.setItem(WEATHER_POSITION_KEY, JSON.stringify(lastPosition));
+        if (!signedOut) localStorage.setItem(WEATHER_POSITION_KEY, JSON.stringify(lastPosition));
       } catch (_) {}
       const params = new URLSearchParams({
         latitude: String(latitude),

@@ -292,24 +292,26 @@ async function secureEqual(left, right) {
   return difference === 0;
 }
 
-async function createSession(secret) {
+async function createSession(env) {
   const expires = Date.now() + SESSION_SECONDS * 1000;
-  return expires + "." + await hmac(String(expires), secret);
+  const value = expires + "." + crypto.randomUUID();
+  return value + "." + await hmac(value + ":" + env.ACCESS_CODE, env.SESSION_SECRET);
 }
 
-async function hasValidSession(request, secret) {
+export async function hasValidSession(request, env) {
   const token = cookieValue(request, SESSION_COOKIE);
-  const separator = token.indexOf(".");
-  if (separator < 1) return false;
-  const expires = Number(token.slice(0, separator));
-  const signature = token.slice(separator + 1);
+  const parts = token.split(".");
+  if (parts.length !== 3 || !/^[0-9a-f-]{36}$/.test(parts[1])) return false;
+  const expires = Number(parts[0]);
   if (!Number.isFinite(expires) || expires <= Date.now() || expires > Date.now() + (SESSION_SECONDS + 300) * 1000) return false;
-  return secureEqual(signature, await hmac(String(expires), secret));
+  if (!(await secureEqual(parts[2], await hmac(parts[0] + "." + parts[1] + ":" + env.ACCESS_CODE, env.SESSION_SECRET)))) return false;
+  return !(await env.DB.prepare("SELECT token_hash FROM camino_revoked_sessions WHERE token_hash = ?").bind(await sha256(token)).first());
 }
 
 async function ensureSchema(env) {
   if (!env.DB) throw new Error("Der gemeinsame Speicher ist nicht verfügbar.");
   await env.DB.batch([
+    env.DB.prepare("CREATE TABLE IF NOT EXISTS camino_revoked_sessions (token_hash TEXT PRIMARY KEY, expires_at BIGINT NOT NULL)"),
     env.DB.prepare(STATE_SCHEMA_SQL),
     env.DB.prepare(ATTEMPTS_SCHEMA_SQL),
     env.DB.prepare(PUBLIC_PHOTO_SCHEMA_SQL),
@@ -370,7 +372,13 @@ function validState(value) {
   const baseIsValid = ["p1", "p2", "shared"].every((profile) =>
     value.checked && value.checked[profile] && typeof value.checked[profile] === "object" &&
     value.weights && value.weights[profile] && typeof value.weights[profile] === "object" &&
-    value.custom && Array.isArray(value.custom[profile])
+    value.custom && Array.isArray(value.custom[profile]) && value.custom[profile].every((item) =>
+      item && typeof item === "object" && !Array.isArray(item) &&
+      ["id", "name", "category", "note"].every((key) => typeof item[key] === "string") &&
+      ["must", "recommended", "optional"].includes(item.priority) &&
+      ["pack", "worn", "consumable"].includes(item.mode) &&
+      typeof item.weight === "number" && Number.isFinite(item.weight) && item.weight >= 0 && item.weight <= 10000
+    )
   );
   if (!baseIsValid || value.labels === undefined) return baseIsValid;
   return value.labels && typeof value.labels.profiles === "object" &&
@@ -444,7 +452,8 @@ export default {
         return loginPage("code", 401);
       }
       await clearFailedLogins(env);
-      const session = await createSession(sessionSecret);
+      await env.DB.prepare("DELETE FROM camino_revoked_sessions WHERE expires_at <= ?").bind(Date.now()).run();
+      const session = await createSession(env);
       const secure = url.protocol === "https:" ? "; Secure" : "";
       return response(null, {
         status: 303,
@@ -456,11 +465,15 @@ export default {
     }
 
     if (url.pathname === "/logout") {
+      if (await hasValidSession(request, env)) {
+        const token = cookieValue(request, SESSION_COOKIE);
+        await env.DB.prepare("INSERT INTO camino_revoked_sessions (token_hash, expires_at) VALUES (?, ?) ON CONFLICT(token_hash) DO NOTHING")
+          .bind(await sha256(token), Number(token.split(".")[0])).run();
+      }
       const secure = url.protocol === "https:" ? "; Secure" : "";
-      return response(null, {
-        status: 303,
+      return response('<!doctype html><html lang="de"><meta charset="utf-8"><title>Abgemeldet</title><p>Abgemeldet. <a href="/">Zur Startseite</a></p><script>try { localStorage.removeItem("camino-packliste-2026-v1"); localStorage.removeItem("camino-weather-position-v1"); localStorage.setItem("camino-signed-out", String(Date.now())); } catch (_) {} location.replace("/");</script></html>', {
         headers: {
-          location: "/",
+          "clear-site-data": '\"storage\"',
           "set-cookie": SESSION_COOKIE + "=; Path=/; HttpOnly" + secure + "; SameSite=Strict; Max-Age=0",
         },
       });
@@ -530,7 +543,7 @@ export default {
       return publicJson({ ok: true });
     }
 
-    const authenticated = await hasValidSession(request, sessionSecret);
+    const authenticated = await hasValidSession(request, env);
     if (!authenticated) {
       if (url.pathname === "/intern" || url.pathname === "/intern/") return loginPage();
       return json({ error: "Nicht angemeldet" }, 401);
@@ -604,7 +617,7 @@ export default {
         if (contentLength > 200000) return json({ error: "Daten zu groß" }, 413);
         let body;
         try { body = await request.json(); } catch (_) { return json({ error: "Ungültige Daten" }, 400); }
-        if (!validState(body.state)) return json({ error: "Ungültiger Packlistenstand" }, 400);
+        if (!body || !validState(body.state)) return json({ error: "Ungültiger Packlistenstand" }, 400);
         const payload = JSON.stringify(body.state);
         if (payload.length > 200000) return json({ error: "Daten zu groß" }, 413);
         const updatedAt = Math.floor(Date.now() / 1000);

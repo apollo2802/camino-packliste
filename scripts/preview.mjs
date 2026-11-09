@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { randomBytes } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { resolve } from "node:path";
 import app from "../dist/server/index.js";
@@ -7,6 +8,7 @@ const port = Number(process.env.PORT || 3000);
 const sequenceRoot = resolve("dist/client/packing-sequence");
 const state = { value: null, updatedAt: null };
 const attempts = new Map();
+const revokedSessions = new Map();
 const mediaFiles = new Map();
 const visitRows = new Map();
 const visitBudget = { windowStarted: 0, requests: 0, token: "" };
@@ -20,6 +22,7 @@ function createStatement(sql) {
       return this;
     },
     async first() {
+      if (sql.includes("FROM camino_revoked_sessions")) return revokedSessions.has(values[0]) ? { token_hash: values[0] } : null;
       if (sql.includes("FROM camino_state")) {
         return state.value === null ? null : { payload: state.value, updated_at: state.updatedAt };
       }
@@ -38,6 +41,10 @@ function createStatement(sql) {
     },
     async run() {
       const changes = 1;
+      if (sql.startsWith("INSERT INTO camino_revoked_sessions")) revokedSessions.set(values[0], values[1]);
+      if (sql.startsWith("DELETE FROM camino_revoked_sessions")) {
+        for (const [key, expiry] of revokedSessions) if (expiry <= values[0]) revokedSessions.delete(key);
+      }
       if (sql.startsWith("INSERT INTO camino_state")) {
         state.value = values[0];
         state.updatedAt = values[1];
@@ -74,7 +81,7 @@ function createStatement(sql) {
 
 const env = {
   ACCESS_CODE: process.env.ACCESS_CODE || "camino-test",
-  SESSION_SECRET: process.env.SESSION_SECRET || "local-preview-session-secret",
+  SESSION_SECRET: randomBytes(32).toString("hex"),
   DB: {
     prepare: createStatement,
     async batch(statements) {
@@ -126,6 +133,6 @@ createServer(async (request, response) => {
 
   response.writeHead(result.status, Object.fromEntries(result.headers));
   response.end(Buffer.from(await result.arrayBuffer()));
-}).listen(port, "0.0.0.0", () => {
+}).listen(port, "127.0.0.1", () => {
   console.log(`Preview: http://localhost:${port}`);
 });

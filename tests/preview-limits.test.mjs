@@ -16,7 +16,7 @@ test("preview HTTP backend enforces both limits without disrupting an existing s
     stdio: ["ignore", "pipe", "pipe"]
   });
   t.after(async () => {
-    if (server.exitCode === null) {
+    if (server.exitCode === null && server.signalCode === null) {
       const exited = once(server, "exit");
       server.kill();
       await exited;
@@ -48,4 +48,25 @@ test("preview HTTP backend enforces both limits without disrupting an existing s
   assert.equal(stats.status, 200);
   assert.deepEqual((await stats.json()).today, { visitors: 60, pageViews: 60 });
   assert.equal((await fetch(`${origin}/packliste`)).status, 200);
+  const logout = await fetch(`${origin}/logout`, { headers: { cookie } });
+  assert.equal(logout.status, 200);
+  assert.equal((await fetch(`${origin}/api/state`, { headers: { cookie } })).status, 401);
+
+  const exited = once(server, "exit");
+  server.kill();
+  await exited;
+  const restarted = spawn(process.execPath, ["scripts/preview.mjs"], {
+    cwd: new URL("../", import.meta.url),
+    env: { ...process.env, PORT: String(port), ACCESS_CODE: "preview-test-code", SESSION_SECRET: "preview-test-session-secret-that-is-long-enough" },
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  t.after(async () => {
+    if (restarted.exitCode === null && restarted.signalCode === null) { const done = once(restarted, "exit"); restarted.kill(); await done; }
+  });
+  await Promise.race([
+    once(restarted.stdout, "data"),
+    once(restarted, "exit").then(([code]) => { throw new Error(`Restart exited: ${code}`); })
+  ]);
+  assert.equal((await fetch(`${origin}/api/state`, { headers: { cookie } })).status, 401);
+
 });

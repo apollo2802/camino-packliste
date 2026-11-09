@@ -19,7 +19,7 @@ const pageMarkup = `
           <a class="ghost-button diary-link" href="#unterwegs" data-i18n="nav.diary">Unterwegs</a>
           <a class="ghost-button public-link" href="/" data-i18n="nav.public">Öffentliche Seite</a>
           <button class="ghost-button danger-subtle" id="reset-button" type="button" data-i18n="nav.reset">Zurücksetzen</button>
-          <a class="ghost-button" href="/logout" data-i18n="nav.logout">Abmelden</a>
+          <a class="ghost-button" href="/logout" data-logout data-i18n="nav.logout">Abmelden</a>
         </div>
       </nav>
 

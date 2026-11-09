@@ -1,10 +1,9 @@
 import { createServer } from "node:http";
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { createReadStream } from "node:fs";
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { Pool } from "pg";
-import app from "../dist/server/index.js";
+import app, { hasValidSession } from "../dist/server/index.js";
 
 const port = Number(process.env.PORT || 3000);
 const accessCode = process.env.ACCESS_CODE || "";
@@ -140,22 +139,6 @@ function readBody(request, limit = 220_000) {
   });
 }
 
-function hasValidUploadSession(cookieHeader, secret) {
-  const cookie = String(cookieHeader || "").split(";").map((part) => part.trim())
-    .find((part) => part.startsWith("camino_session="));
-  const token = cookie ? cookie.slice("camino_session=".length) : "";
-  const separator = token.indexOf(".");
-  if (separator < 1) return false;
-  const expires = Number(token.slice(0, separator));
-  const signature = token.slice(separator + 1);
-  const maxLifetime = 60 * 60 * 24 * 30 + 300;
-  if (!Number.isFinite(expires) || expires <= Date.now() || expires > Date.now() + maxLifetime * 1000) return false;
-  const expected = createHmac("sha256", secret).update(String(expires)).digest("hex");
-  const suppliedBytes = Buffer.from(signature, "utf8");
-  const expectedBytes = Buffer.from(expected, "utf8");
-  return suppliedBytes.length === expectedBytes.length && timingSafeEqual(suppliedBytes, expectedBytes);
-}
-
 const server = createServer(async (request, response) => {
   try {
     if (request.url === "/healthz") {
@@ -189,7 +172,7 @@ const server = createServer(async (request, response) => {
     const uploadRequest = requestPath === "/api/public-photo";
     const init = { method: request.method, headers };
     if (!["GET", "HEAD"].includes(request.method)) {
-      if (uploadRequest && !hasValidUploadSession(request.headers.cookie, sessionSecret)) {
+      if (uploadRequest && !(await hasValidSession(new Request(requestUrl(request), { headers }), { ACCESS_CODE: accessCode, SESSION_SECRET: sessionSecret, DB: database }))) {
         request.resume();
       } else {
         init.body = await readBody(request, uploadRequest ? 2_500_000 : 220_000);

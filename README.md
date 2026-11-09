@@ -57,3 +57,11 @@ Für einen vollständigen lokalen Docker-Test:
 cp .env.example .env
 docker compose up --build
 ```
+
+## Sitzungsschutz
+
+Abmelden widerruft die aktuelle Sitzung serverseitig und entfernt private Packlisten- und Standortdaten aus dem Browser. Andere separat angemeldete Geräte bleiben angemeldet. Ein Wechsel von ACCESS_CODE oder SESSION_SECRET macht bestehende Cookies ungültig. Beim ersten Deployment der neuen Sitzungsprüfung müssen sich alle Geräte erneut anmelden; gespeicherte Packlisten und Tagebucheinträge bleiben erhalten.
+
+Alte Zugangscodes und Sitzungsschlüssel nicht erneut verwenden: Das Wiederherstellen früherer Werte kann noch nicht abgelaufene, nicht explizit abgemeldete Cookies wieder gültig machen.
+
+Die lokale Vorschau ist ausschließlich über 127.0.0.1 erreichbar und verwirft bei jedem Neustart alle Sitzungen.
